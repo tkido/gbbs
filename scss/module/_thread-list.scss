@@ -1,0 +1,17 @@
+.thread-list {
+  ol {
+    float: left;
+    background-color: $color-thread-list-background;
+    padding: 8px;
+    @include border-radius(8px);
+    li {
+      list-style: none;
+      float: left;
+      margin: 2px 8px;
+      a {
+        font-weight: bold;
+      }
+    }
+  }
+  @include clearfix;
+}

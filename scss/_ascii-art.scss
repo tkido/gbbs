@@ -1,0 +1,33 @@
+/*
+via
+あらゆる環境でアスキーアートを快適に閲覧出来るCSSはコレ！ | b4log
+http://b4t.jp/823
+*/
+.message {
+  font-size: 12pt;
+  line-height: 18px;
+  font-style: normal;
+  font-weight: normal;
+  letter-spacing: 0;
+}
+/* Opera */
+.message {
+  font-family: "IPA モナー Pゴシック","IPA mona PGothic","IPA MONAPGOTHIC",IPAMonaPGothic,Mona,"MS PGothic AA","ＭＳ Ｐゴシック","MS Pゴシック","ＭＳＰゴシック","MSPゴシック","MS Pｺﾞｼｯｸ","MS PGothic",sans-serif;
+}
+/* firefox */
+:-moz-read-only .message {
+  font-family: Mona,"MS PGothic AA","ＭＳ Ｐゴシック","MS PGothic","MS Pｺﾞｼｯｸ","MS Pゴシック","ＭＳＰゴシック","MSPゴシック","IPA モナー Pゴシック","IPA mona PGothic","IPA MONAPGOTHIC",IPAMonaPGothic,sans-serif;
+}
+/* safari */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  .message {
+    font-family: "MS PGothic AA","ＭＳ Ｐゴシック","MS PGothic","MS Pｺﾞｼｯｸ","MS Pゴシック","ＭＳＰゴシック","MSPゴシック",IPAMonaPGothic,"IPA モナー Pゴシック","IPA mona PGothic","IPA MONAPGOTHIC",Mona,sans-serif;
+  }
+}
+/* IE */
+.message {
+  _font-family: Mona,"IPA モナー Pゴシック","IPA mona PGothic","IPA MONAPGOTHIC",IPAMonaPGothic,"MS PGothic AA","ＭＳ Ｐゴシック","MS Pゴシック","MS PGothic","MS Pｺﾞｼｯｸ","ＭＳＰゴシック","MSPゴシック",sans-serif;
+}
+*:first-child+html .message {
+  font-family: Mona,"IPA モナー Pゴシック","IPA mona PGothic","IPA MONAPGOTHIC",IPAMonaPGothic,"MS PGothic AA","ＭＳ Ｐゴシック","MS Pゴシック","MS PGothic","MS Pｺﾞｼｯｸ","ＭＳＰゴシック","MSPゴシック",sans-serif;
+}

@@ -1,0 +1,104 @@
+<h1 class="thread-title">${ thread.title }</h1>
+<a name="0"></a>
+<div class="template">
+  <div class="res-header">
+    <?py if thread.next_thread_title: ?>
+      <a href="/${ namespace }/#{ thread_id }/"><span class="res-number">0</span></a>
+    <?py else: ?>
+      <a href="/${ namespace }/edit/template/#{ thread.theme_id }"><span class="res-number">0</span></a>
+    <?py #end ?>
+    <span class="char-name">テンプレート</span>
+    <span class="datetime">${ thread.datetime_str }</span>
+    <span class="hash">ID:#{ thread.hashed_id }</span>
+  </div>
+  <div class="res-content">
+    <div class="message-cell">
+      <div class="message">
+        #{ res_anchor(text2html(thread.content)) }
+        <br>
+        <?py if thread.prev_thread_title: ?>
+        <br>
+        <strong>前スレ：</strong><a href="/${ namespace }/#{ thread.prev_thread_id }/">${ thread.prev_thread_title }</a>
+        <?py #end ?>
+        <?py if thread.next_thread_title: ?>
+        <br>
+        <strong>次スレ：</strong><a href="/${ namespace }/#{ thread.next_thread_id }/">${ thread.next_thread_title }</a>
+        <?py #end ?>
+      </div>
+    </div>
+  </div>
+</div>
+
+<?py for res in reses: ?>
+<a name="#{ res.number }"></a>
+<div class="response">
+  <div class="res-header">
+    <a href="/${ namespace }/#{ thread_id }/#{ res.number }"><span class="res-number">#{ res.number }</span></a>
+    <span class="char-name">${ res.char_name }</span>
+    <span class="datetime">${ res.datetime_str }</span>
+    <span class="hash">ID:#{ res.hashed_id }</span>
+  </div>
+  <div class="res-content">
+    <div class="char-icon-cell">
+      <div class="char-icon ${ res.char_id } ${ res.char_emotion }"></div>
+    </div>
+    <div class="balloon-cell">
+      <div class="balloon-frame">
+        <div class="balloon"></div>
+      </div>
+    </div>
+    <div class="message-cell">
+      <div class="message">
+        #{ res_anchor(text2html(res.content)) }
+      </div>
+    </div>
+  </div>
+</div>
+<?py #end ?>
+
+<?py if thread.next_thread_title: ?>
+<div class="template">
+  <div class="res-content">
+    <div class="message-cell">
+      <div class="message">
+        <?py if thread.prev_thread_title: ?>
+        <strong>前スレ：</strong><a href="/${ namespace }/#{ thread.prev_thread_id }/">${ thread.prev_thread_title }</a>
+        <br>
+        <?py #end ?>
+        <strong>次スレ：</strong><a href="/${ namespace }/#{ thread.next_thread_id }/">${ thread.next_thread_title }</a>
+      </div>
+    </div>
+  </div>
+</div>
+<?py #end ?>
+
+<?py if user and thread.writable() : ?>
+  <h2>あなたのレス</h2>
+  <div id="form">
+    <div class="res-content">
+      <div class="char-icon-cell">
+        <div id="char-icon" class="char-icon"></div>
+      </div>
+      <div class="balloon-cell">
+        <div class="balloon-frame">
+          <div class="balloon"></div>
+        </div>
+      </div>
+      <div class="message-cell">
+        <div class="message">
+          <form method="post" action="/${ namespace }/write/#{ thread_id }">
+            <select name="character" class="character">
+              <option value="none">村人</option>
+            </select>
+            <select name="emotion" class="emotion"></select>
+            <input type="checkbox" name="sage" value="sage" class="sage">sage</input>
+            <!--<input type="submit" value="送信する" /><br />-->
+            <button type="submit" class="btn btn-sm">送信する</button><br />
+            <textarea name="content" rows="4" cols="40"></textarea>
+            <input type="hidden" name="char_name" value="名無しの村人" />
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<?py #end ?>

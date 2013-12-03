@@ -1,0 +1,20 @@
+<h1>${ page_title }</h1>
+<select name="stored-dropdown" onChange='document.location.href=this.options[this.selectedIndex].value;'> 
+  <option value="">月を選択</option> 
+  <option value='/toho/stored/2013/11'>2013年11月</option>
+  <option value='/toho/stored/2013/10'>2013年10月</option>
+  <option value='/toho/stored/2013/9'>2013年9月</option>
+</select>
+<div class="thread-list">
+  <ol>
+    <?py i = 0 ?>
+    <?py for thread in threads: ?>
+    <?py i += 1 ?>
+    <li>
+      <a href="/#{ namespace }/#{ thread.key.id() }/">
+        ${ i }: ${ thread.title } (${ thread.response_count })
+      </a>
+    </li>
+    <?py #end ?>
+  </ol>
+</div>

@@ -1,0 +1,70 @@
+.response,
+.template {
+  min-width: 476px;
+  max-width: 960px;
+  margin: 8px 0;
+}
+
+.res-content {
+  display: table;
+  vertical-align: middle;
+}
+.char-icon-cell,
+.balloon-cell,
+.message-cell {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.char-icon {
+  display: table-cell;
+  background-repeat: no-repeat;
+}
+
+
+.balloon-frame {
+  display: block;
+  overflow: hidden;
+  height: 48px;
+  width: 16px;
+}
+
+.balloon {
+  width: 0;
+  height: 0;
+  border: 16px solid transparent;
+  border-bottom: 16px solid $color-message-background;
+}
+
+.char-name {
+  color: #00cc00;
+  font-weight: bold;
+}
+
+.datetime,
+.hash {
+  color: black;
+}
+
+.message {
+  display: table-cell;
+  
+  min-width: 360px;
+  max-width: 960px - 100 - 16;
+  margin: 0px;
+  padding: 16px;
+  
+  @include border-radius(8px);
+  background-color: $color-message-background;
+  .res_anchor {
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.template .message {
+  min-width: 476px;
+  max-width: 960px;
+}
