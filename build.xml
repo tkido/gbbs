@@ -11,15 +11,19 @@
   <target name="production">
     <replace file="server/app.yaml"
              token="tohobbs-hrd"
-             value="${appid}">
-    </replace>
+             value="${appid}"
+             encoding="UTF-8" />
     
     <replace dir="server"
              token="debug=True"
-             value="debug=False">
+             value="debug=False"
+             encoding="UTF-8">
         <include name="main.py" />
         <include name="sysadmin.py" />
     </replace>
-  </target>
 
+    <echo message="Exec below, if you want deploy."/>
+    <echo message="appcfg.py --email=${email} update server"/>
+  </target>
+  
 </project>
