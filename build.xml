@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="gbbs" default="test">
+  
+  <property file="build.properties" />
+  
+  <target name="test">
+    <echo message="Exec below, if you want deploy."/>
+    <echo message="appcfg.py --email=${email} update server"/>
+  </target>
+  
+  <target name="production">
+    <replace file="server/app.yaml"
+             token="tohobbs-hrd"
+             value="${appid}">
+    </replace>
+    
+    <replace dir="server"
+             token="debug=True"
+             value="debug=False">
+        <include name="main.py" />
+        <include name="sysadmin.py" />
+    </replace>
+  </target>
+
+</project>
