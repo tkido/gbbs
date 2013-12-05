@@ -175,6 +175,10 @@ class CreateThreadHandler(webapp2.RequestHandler):
             error.page(self, context, error.NewThreadCouldNotCreateError()); return;
         
         self.redirect(util.namespaced('/%d/' % thread_id))
+        
+        if config.LOCAL_SDK:
+            time.sleep(0.5)
+        clean_old_threads()
 
 class WriteHandler(webapp2.RequestHandler):
     def get(self, thread_id):
@@ -438,7 +442,7 @@ def create_next_thread(thread_key):
     thread = thread_key.get()
     now = util.now()
     datetime_str = util.datetime_to_str(now)
-    myuser_id = 1
+    myuser_id = 0
     hashed_id = util.hash(myuser_id)
     
     theme = ndb.Key('Theme', thread.theme_id).get()
@@ -499,10 +503,16 @@ def store(thread_key):
     @ndb.transactional()
     def store_thread():
         thread = thread_key.get()
-        if thread.status == const.NORMAL:
-            thread.status = const.STORED
-            thread.put()
+        thread.status = const.STORED
+        thread.put()
     store_thread()
+
+def clean_old_threads():
+    query = model.Thread.query_normal()
+    keys = query.fetch(config.MAX_THREADS_IN_BOARD+3, keys_only=True)
+    needs = len(keys) - config.MAX_THREADS_IN_BOARD
+    for i in range(needs):
+        store(keys[-i-1])
     
 app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),
