@@ -23,6 +23,10 @@
     </replace>
     
     <replace file="server/config.py"
+             token="foobar"
+             value="${salt}"
+             encoding="UTF-8" />
+    <replace file="server/config.py"
              token="MAX_RESES_IN_THREAD = 3"
              value="MAX_RESES_IN_THREAD = 1000"
              encoding="UTF-8" />
