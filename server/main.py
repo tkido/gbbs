@@ -38,7 +38,6 @@ class ThreadHandler(webapp2.RequestHandler):
         thread_id = int(thread_id)
         thread_key = ndb.Key('Thread', thread_id)
         thread = thread_key.get()
-        logging.error('thread.response_count = %s' % thread.response_count)
         
         if not thread or not thread.readable():
             error.page(self, context, error.ThreadNotFoundError()); return;
@@ -53,8 +52,6 @@ class ThreadHandler(webapp2.RequestHandler):
         else:
             first = 1
             fetch_count = config.MAX_RESES_IN_THREAD
-            logging.error('fetch_count = %s' % fetch_count)
-            logging.error('first = %s' % first)
         if hyphen:
             fetch_count = config.MAX_RESES_IN_THREAD - first + 1
             if last:
@@ -66,9 +63,6 @@ class ThreadHandler(webapp2.RequestHandler):
                 return
         query = model.Response.query_normal(thread_id, first)
         reses = query.fetch(fetch_count) if fetch_count else []
-        
-        logging.error('fetch_count = %s' % fetch_count)
-        logging.error('reses = %s' % len(reses))
         
         context.update({
             'page_title': thread.title,
@@ -509,7 +503,7 @@ def store(thread_key):
             thread.status = const.STORED
             thread.put()
     store_thread()
-
+    
 app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),
                                (r'/([0-9a-z_-]{2,16})/write/(\d+)', WriteHandler),
