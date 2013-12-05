@@ -11,7 +11,7 @@ from tenjin.helpers.html import text2html
 
 tenjin.gae.init()
 #logging.basicConfig(level=logging.DEBUG)
-tenjin.logger = logging
+#tenjin.logger = logging
 tengine = tenjin.Engine(path=['template'], postfix='.html', layout=':base')
 
 pattern = re.compile('&gt;&gt;(1000|0|[1-9][0-9]{0,2})(-?)((1000|0|[1-9][0-9]{0,2})?)')
