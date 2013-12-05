@@ -66,7 +66,14 @@ class IndexHandler(webapp2.RequestHandler):
 class EnvironmentHandler(webapp2.RequestHandler):
     def get(self):
         for name in os.environ.keys():
-            self.response.out.write("%s = %s<br />\n" % (name, os.environ[name]))
+            self.response.out.write("%s = %s<br>\n" % (name, os.environ[name]))
+
+class MemcacheHandler(webapp2.RequestHandler):
+    def get(self, namespace):
+        namespace_manager.set_namespace(namespace)
+        dic = memcache.get_stats()
+        for name in dic.keys():
+            self.response.out.write("%s = %s<br>\n" % (name, dic[name]))
 
 class CreateBoardHandler(webapp2.RequestHandler):
     def get(self, namespace):
@@ -97,9 +104,10 @@ class CreateBoardHandler(webapp2.RequestHandler):
         
         ndb.put_multi([myuser_counter, thread_counter, theme_counter, myuser, board])
 
-app = webapp2.WSGIApplication([('/admin/', IndexHandler),
-                               ('/admin/env', EnvironmentHandler),
-                               (r'/admin/create/board/([0-9a-z_-]{2,16})', CreateBoardHandler),
+app = webapp2.WSGIApplication([('/s/', IndexHandler),
+                               ('/s/env', EnvironmentHandler),
+                               (r'/s/memcache/([0-9a-z_-]{2,16})', MemcacheHandler),
+                               (r'/s/create/board/([0-9a-z_-]{2,16})', CreateBoardHandler),
                                ],
                                debug=True
                               )
