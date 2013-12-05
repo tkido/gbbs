@@ -21,7 +21,16 @@
         <include name="main.py" />
         <include name="sysadmin.py" />
     </replace>
-
+    
+    <replace file="server/config.py"
+             token="MAX_RESES_IN_THREAD = 3"
+             value="MAX_RESES_IN_THREAD = 1000"
+             encoding="UTF-8" />
+    <replace file="server/config.py"
+             token="MAX_THREADS_IN_BOARD = 3"
+             value="MAX_THREADS_IN_BOARD = 1000"
+             encoding="UTF-8" />
+    
     <echo message="Exec below, if you want deploy."/>
     <echo message="appcfg.py --email=${email} update server"/>
   </target>
