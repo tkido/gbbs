@@ -1,2 +1,3 @@
 email = foobar@exsample.com
 appid = gaeapp
+salt = foobar
