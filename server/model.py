@@ -35,7 +35,7 @@ class MyUser(ndb.Model):
     ban_count = ndb.IntegerProperty(required=True, indexed=False)
     
     status = ndb.IntegerProperty(required=True)
-    updated_at = ndb.DateTimeProperty(required=True)
+    updated_at = ndb.DateTimeProperty(required=True, indexed=False)
     since = ndb.DateTimeProperty(required=True, indexed=False)
 
 class Theme(ndb.Model):
@@ -43,8 +43,8 @@ class Theme(ndb.Model):
     author_id = ndb.IntegerProperty(required=True, indexed=False)
     updater_id = ndb.IntegerProperty(required=True, indexed=False)
     
-    status = ndb.IntegerProperty(required=True)
-    updated_at = ndb.DateTimeProperty(required=True)
+    status = ndb.IntegerProperty(required=True, indexed=False)
+    updated_at = ndb.DateTimeProperty(required=True, indexed=False)
     since = ndb.DateTimeProperty(required=True, indexed=False)
     
     title_template = ndb.StringProperty(required=True, indexed=False)
@@ -131,8 +131,8 @@ class Response(ndb.Model):
     author_id = ndb.IntegerProperty(required=True, indexed=False)
     updater_id = ndb.IntegerProperty(required=True, indexed=False)
     
-    status = ndb.IntegerProperty(required=True)
-    updated_at = ndb.DateTimeProperty(required=True)
+    status = ndb.IntegerProperty(required=True, indexed=False)
+    updated_at = ndb.DateTimeProperty(required=True, indexed=False)
     since = ndb.DateTimeProperty(required=True, indexed=False)
     
     number = ndb.IntegerProperty(required=True, indexed=False)
