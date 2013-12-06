@@ -32,11 +32,10 @@ def initialize(org):
                           ban_count = 0,
                           updated_at = now,
                           since = now )
-    myuser.put()
     myuser_counter = model.Counter(id = 'MyUser', count = 1)
-    myuser_counter.put()
     board_counter = model.Counter(id = 'Board', count = 0)
-    board_counter.put()
+    
+    ndb.put_multi([myuser, myuser_counter, board_counter])
     org.redirect('/admin/')
 
 class IndexHandler(webapp2.RequestHandler):
