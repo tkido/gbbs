@@ -97,9 +97,9 @@ class NewThreadHandler(webapp2.RequestHandler):
     @util.myuser_required(const.WRITER)
     def get(self, context):
         context.update({'page_title' : '新しいスレッドの作成'})
-        self.response.out.write(tengine.render(':new_thread', context))
+        self.response.out.write(tengine.render(':new', context))
         
-class CreateThreadHandler(webapp2.RequestHandler):
+class CreateNewThreadHandler(webapp2.RequestHandler):
     def get(self):
         err = error.PostMethodRequiredError('新スレッド作成画面へ戻る', '/new/thread')
         error.page(self, context, err); return;
@@ -264,8 +264,9 @@ class RelatedThreadHandler(webapp2.RequestHandler):
             'thread': thread,
             'threads': threads,
         })
-        self.response.out.write(tengine.render(':related', context))
-
+        html = tengine.render(':related', context)
+        self.response.out.write(html)
+        return html
 
 class EditTemplateHandler(webapp2.RequestHandler):
     @util.myuser_required(const.WRITER)
@@ -279,7 +280,7 @@ class EditTemplateHandler(webapp2.RequestHandler):
             'page_title': 'テンプレート編集',
             'theme': theme,
         })
-        self.response.out.write(tengine.render(':edit_template', context))
+        self.response.out.write(tengine.render(':edit', context))
 
 class UpdateTemplateHandler(webapp2.RequestHandler):
     def get(self, thread_id):
@@ -316,7 +317,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
         except error.ThemeNotWritableError, err:
             error.page(self, context, err); return;
         else:
-            self.redirect(util.namespaced('/edit/template/%d' % theme_id))
+            self.redirect(util.namespaced('/edit/%d/' % theme_id))
 
 class LoginHandler(webapp2.RequestHandler):
     @util.namespace_required()
@@ -387,9 +388,9 @@ class AgreementHandler(webapp2.RequestHandler):
         namespace = context['namespace']
         user = users.get_current_user()
         if self.request.get('continue'):
-            login_url = '/%s/agree?continue=%s' % (namespace, self.request.get('continue'))
+            login_url = '/%s/_agree?continue=%s' % (namespace, self.request.get('continue'))
         else:
-            login_url = '/%s/agree' % namespace
+            login_url = '/%s/_agree' % namespace
         context.update({
             'page_title': '利用規約',
             'user': user,
@@ -502,6 +503,7 @@ def create_next_thread(thread_key):
 
     next_thread = get_or_insert()
     if next_thread:
+        util.delete_memcache('/related/%d/' % thread.theme_id)
         @ndb.transactional()
         def set_next_thread_title():
             thread = thread_key.get()
@@ -532,17 +534,17 @@ def clean_old_threads():
     
 app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),
-                               (r'/([0-9a-z_-]{2,16})/write/(\d+)', WriteHandler),
+                               (r'/([0-9a-z_-]{2,16})/_write/(\d+)', WriteHandler),
                                (r'/([0-9a-z_-]{2,16})/related/(\d+)/', RelatedThreadHandler),
-                               (r'/([0-9a-z_-]{2,16})/edit/template/(\d+)', EditTemplateHandler),
-                               (r'/([0-9a-z_-]{2,16})/update/template/(\d+)', UpdateTemplateHandler),
-                               (r'/([0-9a-z_-]{2,16})/agreement', AgreementHandler),     #並び順注意！
-                               (r'/([0-9a-z_-]{2,16})/agree', AgreeHandler),             #並び順注意！
-                               (r'/([0-9a-z_-]{2,16})/mypage', MyPageHandler),
+                               (r'/([0-9a-z_-]{2,16})/edit/(\d+)/', EditTemplateHandler),
+                               (r'/([0-9a-z_-]{2,16})/_edit/(\d+)', UpdateTemplateHandler),
+                               (r'/([0-9a-z_-]{2,16})/agreement/', AgreementHandler),     #並び順注意！
+                               (r'/([0-9a-z_-]{2,16})/_agree', AgreeHandler),             #並び順注意！
+                               (r'/([0-9a-z_-]{2,16})/mypage/', MyPageHandler),
                                (r'/([0-9a-z_-]{2,16})/login', LoginHandler),
                                (r'/([0-9a-z_-]{2,16})/stored/(\d{4})?/?(\d{1,2})?/?', StoredHandler),
-                               (r'/([0-9a-z_-]{2,16})/new/thread', NewThreadHandler),
-                               (r'/([0-9a-z_-]{2,16})/create/thread', CreateThreadHandler),
+                               (r'/([0-9a-z_-]{2,16})/new/', NewThreadHandler),
+                               (r'/([0-9a-z_-]{2,16})/_new', CreateNewThreadHandler),
                               ],
                               debug=True
                              )
