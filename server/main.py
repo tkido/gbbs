@@ -251,6 +251,22 @@ class WriteHandler(webapp2.RequestHandler):
             time.sleep(0.5)
         self.redirect(util.namespaced('/%d/#%d' % (thread_id, new_number)))
 
+class ThemeHandler(webapp2.RequestHandler):
+    @util.memcached_with()
+    def get(self, context, theme_id):
+        theme_id = int(theme_id)
+        theme = ndb.Key('Theme', theme_id).get()
+        if not theme:
+            error.page(self, context, error.ThemeNotFoundError()); return;
+        threads = model.Thread.query_theme(theme_id).fetch()
+        context.update({
+            'page_title': '過去スレ一覧',
+            'theme': theme,
+            'threads': threads,
+        })
+        self.response.out.write(tengine.render(':theme', context))
+
+
 class EditTemplateHandler(webapp2.RequestHandler):
     @util.myuser_required(const.WRITER)
     def get(self, context, theme_id):
@@ -517,6 +533,7 @@ def clean_old_threads():
 app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),
                                (r'/([0-9a-z_-]{2,16})/write/(\d+)', WriteHandler),
+                               (r'/([0-9a-z_-]{2,16})/theme/(\d+)/', ThemeHandler),
                                (r'/([0-9a-z_-]{2,16})/edit/template/(\d+)', EditTemplateHandler),
                                (r'/([0-9a-z_-]{2,16})/update/template/(\d+)', UpdateTemplateHandler),
                                (r'/([0-9a-z_-]{2,16})/agreement', AgreementHandler),     #並び順注意！

@@ -15,15 +15,22 @@
     <div class="message-cell">
       <div class="message">
         #{ res_anchor(text2html(thread.content)) }
-        <br>
-        <?py if thread.prev_thread_title: ?>
-        <br>
-        <strong>前スレ：</strong><a href="/${ namespace }/#{ thread.prev_thread_id }/">${ thread.prev_thread_title }</a>
-        <?py #end ?>
-        <?py if thread.next_thread_title: ?>
-        <br>
-        <strong>次スレ：</strong><a href="/${ namespace }/#{ thread.next_thread_id }/">${ thread.next_thread_title }</a>
-        <?py #end ?>
+        <div class="navigation">
+          <ul>
+            <?py if thread.prev_thread_title: ?>
+            <li><a href="/${ namespace }/#{ thread.prev_thread_id }/">前スレ</a></li>
+            <?py #end ?>
+            <?py if thread.next_thread_title: ?>
+            <li><a href="/${ namespace }/#{ thread.next_thread_id }/">次スレ</a></li>
+            <?py #end ?>
+            <?py if thread.prev_thread_title: ?>
+            <li><a href="/${ namespace }/theme/#{ thread.theme_id }/">過去スレ一覧</a></li>
+            <?py #end ?>
+            <?py if thread.writable(): ?>
+            <li><a href="/${ namespace }/edit/template/#{ thread.theme_id }">テンプレ編集</a></li>
+            <?py #end ?>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -56,49 +63,52 @@
 </div>
 <?py #end ?>
 
-<?py if thread.next_thread_title: ?>
-<div class="template">
+<?py if thread.writable(): ?>
+<h2>あなたのレス</h2>
+<div id="form">
   <div class="res-content">
+    <div class="char-icon-cell">
+      <div id="char-icon" class="char-icon"></div>
+    </div>
+    <div class="balloon-cell">
+      <div class="balloon-frame">
+        <div class="balloon"></div>
+      </div>
+    </div>
     <div class="message-cell">
       <div class="message">
-        <?py if thread.prev_thread_title: ?>
-        <strong>前スレ：</strong><a href="/${ namespace }/#{ thread.prev_thread_id }/">${ thread.prev_thread_title }</a>
-        <br>
-        <?py #end ?>
-        <strong>次スレ：</strong><a href="/${ namespace }/#{ thread.next_thread_id }/">${ thread.next_thread_title }</a>
+        <form method="post" action="/${ namespace }/write/#{ thread_id }">
+          <select name="character" class="character">
+            <option value="none">村人</option>
+          </select>
+          <select name="emotion" class="emotion"></select>
+          <input type="checkbox" name="sage" value="sage" class="sage">sage</input>
+          <input type="submit" value="送信する" /><br />
+          <textarea name="content" rows="4" cols="40"></textarea>
+          <input type="hidden" name="char_name" value="名無しの村人" />
+        </form>
       </div>
     </div>
   </div>
 </div>
-<?py #end ?>
-
-<?py if user and thread.writable() : ?>
-  <h2>あなたのレス</h2>
-  <div id="form">
-    <div class="res-content">
-      <div class="char-icon-cell">
-        <div id="char-icon" class="char-icon"></div>
-      </div>
-      <div class="balloon-cell">
-        <div class="balloon-frame">
-          <div class="balloon"></div>
-        </div>
-      </div>
-      <div class="message-cell">
-        <div class="message">
-          <form method="post" action="/${ namespace }/write/#{ thread_id }">
-            <select name="character" class="character">
-              <option value="none">村人</option>
-            </select>
-            <select name="emotion" class="emotion"></select>
-            <input type="checkbox" name="sage" value="sage" class="sage">sage</input>
-            <!--<input type="submit" value="送信する" /><br />-->
-            <button type="submit" class="btn btn-sm">送信する</button><br />
-            <textarea name="content" rows="4" cols="40"></textarea>
-            <input type="hidden" name="char_name" value="名無しの村人" />
-          </form>
+<?py else: ?>
+<div class="template">
+  <div class="res-content">
+    <div class="message-cell">
+      <div class="message">
+        このスレにはもう書きこめません。
+        <div class="navigation">
+          <ul>
+            <?py if thread.prev_thread_title: ?>
+            <li><a href="/${ namespace }/#{ thread.prev_thread_id }/">前スレ</a></li>
+            <?py #end ?>
+            <?py if thread.next_thread_title: ?>
+            <li><a href="/${ namespace }/#{ thread.next_thread_id }/">次スレ</a></li>
+            <?py #end ?>
+          </ul>
         </div>
       </div>
     </div>
   </div>
+</div>
 <?py #end ?>

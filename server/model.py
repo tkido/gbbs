@@ -125,6 +125,9 @@ class Thread(ndb.Model):
     @classmethod
     def query_stored(cls, update_from, update_to):
         return cls.query(cls.status == const.STORED).filter(cls.updated_at >= update_from).filter(cls.updated_at < update_to).order(-cls.updated_at)
+    @classmethod
+    def query_theme(cls, theme_id):
+        return cls.query(cls.theme_id == theme_id)
 
 class Response(ndb.Model):
     #id = thread.id * 10000 + id
