@@ -2,11 +2,11 @@
 <a name="0"></a>
 <div class="template">
   <div class="res-header">
-    <?py if thread.next_thread_title: ?>
+<?py if thread.next_thread_title: ?>
       <a href="/${ namespace }/#{ thread_id }/"><span class="res-number">0</span></a>
-    <?py else: ?>
+<?py else: ?>
       <a href="/${ namespace }/edit/template/#{ thread.theme_id }"><span class="res-number">0</span></a>
-    <?py #end ?>
+<?py #end ?>
     <span class="char-name">テンプレート</span>
     <span class="datetime">${ thread.datetime_str }</span>
     <span class="hash">ID:#{ thread.hashed_id }</span>
@@ -17,18 +17,18 @@
         #{ res_anchor(text2html(thread.content)) }
         <div class="navigation">
           <ul>
-            <?py if thread.prev_thread_title: ?>
+<?py if thread.prev_thread_title: ?>
             <li><a href="/${ namespace }/#{ thread.prev_thread_id }/">前スレ</a></li>
-            <?py #end ?>
-            <?py if thread.next_thread_title: ?>
+<?py #end ?>
+<?py if thread.next_thread_title: ?>
             <li><a href="/${ namespace }/#{ thread.next_thread_id }/">次スレ</a></li>
-            <?py #end ?>
-            <?py if thread.prev_thread_title: ?>
-            <li><a href="/${ namespace }/theme/#{ thread.theme_id }/">過去スレ一覧</a></li>
-            <?py #end ?>
-            <?py if thread.writable(): ?>
+<?py #end ?>
+<?py if thread.prev_thread_title: ?>
+            <li><a href="/${ namespace }/related/#{ thread_id }/">関連スレ一覧</a></li>
+<?py #end ?>
+<?py if thread.writable(): ?>
             <li><a href="/${ namespace }/edit/template/#{ thread.theme_id }">テンプレ編集</a></li>
-            <?py #end ?>
+<?py #end ?>
           </ul>
         </div>
       </div>
@@ -99,12 +99,15 @@
         このスレにはもう書きこめません。
         <div class="navigation">
           <ul>
-            <?py if thread.prev_thread_title: ?>
+<?py if thread.prev_thread_title: ?>
             <li><a href="/${ namespace }/#{ thread.prev_thread_id }/">前スレ</a></li>
-            <?py #end ?>
-            <?py if thread.next_thread_title: ?>
+<?py #end ?>
+<?py if thread.next_thread_title: ?>
             <li><a href="/${ namespace }/#{ thread.next_thread_id }/">次スレ</a></li>
-            <?py #end ?>
+<?py #end ?>
+<?py if thread.prev_thread_title: ?>
+            <li><a href="/${ namespace }/related/#{ thread_id }/">関連スレ一覧</a></li>
+<?py #end ?>
           </ul>
         </div>
       </div>
