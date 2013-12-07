@@ -27,6 +27,11 @@ class Board(ndb.Model):
     keywords = ndb.StringProperty(required=True, indexed=False)
     template = ndb.TextProperty(required=True)
 
+    def readable(self):
+        return self.status != const.DELETED
+    def writable(self):
+        return self.status == const.NORMAL
+    
 class MyUser(ndb.Model):
     #id = user.user_id()
     user = ndb.UserProperty(required=True)

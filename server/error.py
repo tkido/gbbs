@@ -9,6 +9,16 @@ from google.appengine.api import users
 
 import tengine
 
+
+def default_page(org, error):
+    org.error(500)
+    context = {
+        'page_title': 'エラー',
+        'error' : error,
+        'org' : org,
+    }
+    org.response.out.write(tengine.render(':error', context, layout=':default/base'))
+
 def page(org, context, error):
     org.error(500)
     namespace = context['namespace']
@@ -23,14 +33,17 @@ def page(org, context, error):
     })
     org.response.out.write(tengine.render(':error', context))
 
-
 class Error(Exception):
   """Base class for exceptions in this application."""
   pass
 
-class SameIdError(Exception):
+class SameIdError(Error):
   pass
 
+class BoardNotFoundError(Error):
+  def __init__(self):
+    self.title = '板が見つかりません'
+    self.message = '板が存在しないか、削除されています。'
 
 class UserNotFoundError(Error):
   def __init__(self):

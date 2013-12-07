@@ -60,17 +60,19 @@ def get_board(board_id):
     board = memcache.get(board_id)
     if not board:
         board = ndb.Key('Board', board_id).get()
-    if not board:
-        raise error.BoardNotFoundError()
+    if not board or not board.readable():
+        return None
     else:
         memcache.add(board_id, board, 3600)
-    namespace_manager.set_namespace(board_id)
-    return board
+        namespace_manager.set_namespace(board_id)
+        return board
 
 def myuser_required(required_auth = const.BANNED):
     def wrapper_func(original_func):
         def decorated_func(org, namespace, *args, **kwargs):
             board = get_board(namespace)
+            if not board:
+                error.default_page(org, error.BoardNotFoundError()); return;
             user = users.get_current_user()
             if not user:
                 org.redirect(str(users.create_login_url('/%s/login?continue=%s' % (namespace, org.request.uri))))
@@ -94,6 +96,8 @@ def memcached_with(second = const.MEMCACHE_DEFAULT_KEEP_SECONDS):
     def wrapper_func(original_func):
         def decorated_func(org, namespace, *args, **kwargs):
             board = get_board(namespace)
+            if not board:
+                error.default_page(org, error.BoardNotFoundError()); return;
             user = users.get_current_user()
             key = org.request.path + ('!login' if user else '!logout')
             html = memcache.get(key)
@@ -117,6 +121,8 @@ def board_required():
     def wrapper_func(original_func):
         def decorated_func(org, namespace, *args, **kwargs):
             board = get_board(namespace)
+            if not board:
+                error.dafault_page(org, error.BoardNotFoundError()); return;
             context = {'namespace' : namespace,
                        'board': board,
                        'login_url': '/%s/login?continue=%s' % (namespace, org.request.uri),
