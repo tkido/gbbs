@@ -14,10 +14,10 @@
         <div class="navigation">
           <ul>
 <?py if thread.prev_thread_title: ?>
-            <li><a href="/${ namespace }/#{ thread.prev_thread_id }/">前スレ</a></li>
+            <li><a href="/${ namespace }/#{ thread.prev_thread_id }/" title="${ thread.prev_thread_title }">前スレ</a></li>
 <?py #end ?>
 <?py if thread.next_thread_title: ?>
-            <li><a href="/${ namespace }/#{ thread.next_thread_id }/">次スレ</a></li>
+            <li><a href="/${ namespace }/#{ thread.next_thread_id }/" title="${ thread.next_thread_title }">次スレ</a></li>
 <?py #end ?>
 <?py if thread.prev_thread_title: ?>
             <li><a href="/${ namespace }/related/#{ thread_id }/">関連スレ一覧</a></li>
@@ -96,10 +96,10 @@
         <div class="navigation">
           <ul>
 <?py if thread.prev_thread_title: ?>
-            <li><a href="/${ namespace }/#{ thread.prev_thread_id }/">前スレ</a></li>
+            <li><a href="/${ namespace }/#{ thread.prev_thread_id }/" title="${ thread.prev_thread_title }">前スレ</a></li>
 <?py #end ?>
 <?py if thread.next_thread_title: ?>
-            <li><a href="/${ namespace }/#{ thread.next_thread_id }/">次スレ</a></li>
+            <li><a href="/${ namespace }/#{ thread.next_thread_id }/" title="${ thread.next_thread_title }">次スレ</a></li>
 <?py #end ?>
 <?py if thread.prev_thread_title: ?>
             <li><a href="/${ namespace }/related/#{ thread_id }/">関連スレ一覧</a></li>
