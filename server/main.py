@@ -545,15 +545,15 @@ def clean_old_threads():
     
 app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),
-                               (r'/([0-9a-z_-]{2,16})/_write/(\d+)', WriteHandler),
                                (r'/([0-9a-z_-]{2,16})/related/(\d+)/', RelatedThreadHandler),
-                               (r'/([0-9a-z_-]{2,16})/edit/(\d+)/', EditTemplateHandler),
-                               (r'/([0-9a-z_-]{2,16})/_edit/(\d+)', UpdateTemplateHandler),
-                               (r'/([0-9a-z_-]{2,16})/agreement/', AgreementHandler),     #並び順注意！
-                               (r'/([0-9a-z_-]{2,16})/_agree', AgreeHandler),             #並び順注意！
-                               (r'/([0-9a-z_-]{2,16})/mypage/', MyPageHandler),
                                (r'/([0-9a-z_-]{2,16})/_login', LoginHandler),
                                (r'/([0-9a-z_-]{2,16})/stored/(\d{4})?/?(\d{1,2})?/?', StoredHandler),
+                               (r'/([0-9a-z_-]{2,16})/_write/(\d+)', WriteHandler),
+                               (r'/([0-9a-z_-]{2,16})/mypage/', MyPageHandler),
+                               (r'/([0-9a-z_-]{2,16})/agreement/', AgreementHandler),
+                               (r'/([0-9a-z_-]{2,16})/_agree', AgreeHandler),
+                               (r'/([0-9a-z_-]{2,16})/edit/(\d+)/', EditTemplateHandler),
+                               (r'/([0-9a-z_-]{2,16})/_edit/(\d+)', UpdateTemplateHandler),
                                (r'/([0-9a-z_-]{2,16})/new/', NewThreadHandler),
                                (r'/([0-9a-z_-]{2,16})/_new', CreateNewThreadHandler),
                               ],
