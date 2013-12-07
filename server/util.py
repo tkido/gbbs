@@ -83,7 +83,7 @@ def myuser_required(required_auth = const.BANNED):
                        'board': board,
                        'user': myuser,
                        'login_url': '/%s/login?continue=%s' % (namespace, org.request.uri),
-                       'logout_url': users.create_logout_url(org.request.uri) } # /にリダイレクトすべき？
+                       'logout_url': users.create_logout_url(namespaced('/')) }
             if myuser.status < required_auth:
                 error.page(org, context, error.AuthorityRequiredError(required_auth, myuser.status)); return;
             original_func(org, context, *args, **kwargs)
