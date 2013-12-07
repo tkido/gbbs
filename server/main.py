@@ -7,7 +7,6 @@ import time
 import webapp2
 
 from google.appengine.api import memcache
-from google.appengine.api import namespace_manager
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
@@ -42,15 +41,14 @@ class ThreadHandler(webapp2.RequestHandler):
         thread = thread_key.get()
         
         if not thread or not thread.readable():
-            error.page(self, context, error.ThreadNotFoundError()); return;
+            error.page(self, context, error.ThreadNotFound()); return;
         
         if first:
             first = int(first)
             if 0 < first <= config.MAX_RESES_IN_THREAD:
                 fetch_count = 1
             else:
-                error.page(self, context, error.ThreadArgumentError('/%d/' % thread_id))
-                return
+                error.page(self, context, error.ThreadArgument('/%d/' % thread_id)); return;
         else:
             first = 1
             fetch_count = config.MAX_RESES_IN_THREAD
@@ -61,8 +59,7 @@ class ThreadHandler(webapp2.RequestHandler):
                 if first <= last <= config.MAX_RESES_IN_THREAD:
                     fetch_count = last - first + 1
             else:
-                error.page(self, context, error.ThreadArgumentError('/%d/' % thread_id))
-                return
+                error.page(self, context, error.ThreadArgument('/%d/' % thread_id)); return;
         query = model.Response.query_normal(thread_id, first)
         reses = query.fetch(fetch_count) if fetch_count else []
         
@@ -103,9 +100,9 @@ class NewThreadHandler(webapp2.RequestHandler):
         self.response.out.write(tengine.render(':new', context))
         
 class CreateNewThreadHandler(webapp2.RequestHandler):
-    def get(self):
-        err = error.PostMethodRequiredError('新スレッド作成画面へ戻る', '/new/thread')
-        error.page(self, context, err); return;
+    @util.board_required()
+    def get(self, context):
+        error.page(self, context, error.PostMethodRequired('新スレッド作成画面へ戻る', '/new/')); return;
     
     @util.board_required()
     @util.myuser_required(const.WRITER)
@@ -185,9 +182,9 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         clean_old_threads()
 
 class WriteHandler(webapp2.RequestHandler):
-    def get(self, thread_id):
-        err = error.PostMethodRequiredError('スレッドに戻る', '/%s/' % thread_id)
-        error.page(self, context, err); return;
+    @util.board_required()
+    def get(self, context, thread_id):
+        error.page(self, context, error.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)); return;
         
     @util.board_required()
     @util.myuser_required(const.WRITER)
@@ -263,7 +260,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
         if not thread or not thread.readable():
-            error.page(self, context, error.ThreadNotFoundError()); return;
+            error.page(self, context, error.ThreadNotFound()); return;
         threads = model.Thread.query_theme(thread.theme_id).fetch()
         context.update({
             'page_title': '関連スレ一覧',
@@ -290,11 +287,9 @@ class EditTemplateHandler(webapp2.RequestHandler):
         self.response.out.write(tengine.render(':edit', context))
 
 class UpdateTemplateHandler(webapp2.RequestHandler):
-    def get(self, thread_id):
-        self.continue_label = 'スレッドに戻る'
-        self.continue_uri = '/' + thread_id + '/'
-        error.page(self, context, error.RequiredPostMethodError())
-        return
+    @util.board_required()
+    def get(self, context, thread_id):
+        error.page(self, context, error.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)); return;
     
     @util.board_required()
     @util.myuser_required(const.WRITER)
@@ -330,15 +325,18 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
 class LoginHandler(webapp2.RequestHandler):
     @util.board_required()
     def get(self, context):
+        namespace = context['namespace']
         user = users.get_current_user()
         if not user:
             self.redirect(str(users.create_login_url(self.request.uri)))
             return
         myuser = model.MyUser.get_by_id(user.user_id())
+        # myuserが削除済みの時の考慮が必要
         if myuser:
-            redirect_to = self.request.get('continue') or '/'
+            redirect_to = self.request.get('continue') or '/%s/' % namespace
             self.redirect(str(redirect_to))
             return
+        
         uc_key = ndb.Key('Counter', 'MyUser')
         @ndb.transactional()
         def increment_uc():
@@ -348,7 +346,7 @@ class LoginHandler(webapp2.RequestHandler):
             return uc.count
         myuser_id = increment_uc()
         if not myuser_id:
-            error.page(self, context, error.NewUserIdCouldNotGetError()); return;
+            error.page(self, context, error.NewUserIdCouldNotGet()); return;
         now = util.now()
         myuser = model.MyUser(id = user.user_id(),
                               user = user,
@@ -360,9 +358,8 @@ class LoginHandler(webapp2.RequestHandler):
                               since = now,
                              )
         if not myuser.put():
-            error.page(self, context, error.NewUserCouldNotPutError()); return;
+            error.page(self, context, error.NewUserCouldNotPut()); return;
         else:
-            namespace = context['namespace']
             redirect_to = '/%s/agreement/' % namespace
             if self.request.get('continue'):
                 redirect_to += '?continue=%s' % self.request.get('continue')

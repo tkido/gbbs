@@ -16,7 +16,7 @@ def page(org, context, error):
         'error' : error,
         'org' : org,
     })
-    if isinstance(error, BoardNotFoundError):
+    if isinstance(error, BoardNotFound):
         org.response.out.write(tengine.render(':error', context, layout=':default/base'))
     else:
         namespace = context['namespace']
@@ -34,40 +34,37 @@ class Error(Exception):
 class SameIdError(Error):
   pass
 
-class BoardNotFoundError(Error):
+class BoardNotFound(Error):
   def __init__(self):
     self.title = '板が見つかりません'
-    self.message = '板が存在しないか、削除されています。'
+    self.message = '板が存在しないか、すでに削除されています。'
+
+class ThreadNotFound(Error):
+  def __init__(self):
+    self.title = 'スレッドが見つかりません'
+    self.message = 'スレッドが存在しないか、すでに削除されています。'
+
+class ThreadArgument(Error):
+  def __init__(self, continue_uri):
+    self.title = 'レス番号の範囲指定が間違っています'
+    self.message = '指定できる範囲は1-%dです。' % config.MAX_RESES_IN_THREAD
+    self.continue_label = 'スレッド全体を見る'
+    self.continue_uri = continue_uri
 
 class UserNotFoundError(Error):
   def __init__(self):
     self.title = 'ユーザーデータの取得に失敗しました'
-    self.message = '再度アクセスすれば成功する可能性が高いです。それでもうまくいかない場合は報告して下さい。'
+    self.message = '再度アクセスすれば成功するかもしれません。うまくいかない場合は報告して下さい。'
 
 class UserCouldNotUpdateError(Error):
   def __init__(self):
     self.title = 'ユーザーデータの更新に失敗しました'
     self.message = '再度アクセスすれば成功する可能性が高いです。それでもうまくいかない場合は報告して下さい。'
-
-class ThreadNotFoundError(Error):
-  def __init__(self):
-    self.title = 'スレッドが見つかりません'
-    self.message = 'もう一度試せば成功する可能性があります。2回以上試して同じであれば、それ以上繰り返すのは無意味と思われます。'
-    self.continue_label = ''
-    self.continue_uri = None
-    self.retry = True
-
-class ThreadArgumentError(Error):
-  def __init__(self, continue_uri = None):
-    self.title = 'レス番号の範囲指定が間違っています'
-    self.message = '指定できる範囲は1-%dで、先頭の数字が末尾の数字以下であることが必要です。' % config.MAX_RESES_IN_THREAD
-    self.continue_label = 'スレッド全体を見る'
-    self.continue_uri = continue_uri
     
-class PostMethodRequiredError(Error):
+class PostMethodRequired(Error):
   def __init__(self, continue_label = None, continue_uri = None):
-    self.title = 'GETメソッドではアクセスすることができません'
-    self.message = 'GETメソッドでアクセスしていますが、このURIにはPOSTメソッドでしかアクセスすることができません。フォームに入力中にGoogleアカウントのセッションが切れ、ログインし直した場合にこの状態になることがあります。フォームの入力内容はブラウザの戻るボタンで戻ることによって取り戻せる可能性があります。'
+    self.title = 'POSTメソッドでのアクセスが必要です'
+    self.message = 'GETメソッドでアクセスしています。入力中にGoogleアカウントの期限が切れ、ログインし直した場合に、この状態になることがあるようです。フォームの内容はブラウザで戻ることによって取り戻せる可能性があります。'
     self.continue_label = continue_label
     self.continue_uri = continue_uri
 
@@ -86,7 +83,7 @@ class ThemeNotWritableError(Error):
 class ThreadNotWritableError(Error):
   def __init__(self):
     self.title = 'このスレッドにはもう書き込めません'
-    self.message = '理由はレス数がすでに%dに達しているか、すでに倉庫に入ったスレであるか、書き込み禁止されたスレであるかのいずれかです。' % config.MAX_RESES_IN_THREAD
+    self.message = 'レス数がすでに%dに達しているか、すでに倉庫に入ったスレであるか、書き込み禁止されたスレであるかのいずれかです。' % config.MAX_RESES_IN_THREAD
 
 class NewUserIdCouldNotGetError(Error):
   def __init__(self):
@@ -111,7 +108,7 @@ class TitleValidationError(Error):
 class ContentValidationError(Error):
   def __init__(self):
     self.title = '内容が不正です'
-    self.message = '内容は空ではなく、%d行以内、%d字以内でなければなりません。' % (config.MAX_ROWS_IN_CONTENT, config.MAX_CHARS_IN_CONTENT)
+    self.message = '内容は空ではなく、%d行以内、かつ%d字以内でなければなりません。' % (config.MAX_ROWS_IN_CONTENT, config.MAX_CHARS_IN_CONTENT)
 
 class NewUserCouldNotPutError(Error):
   def __init__(self):

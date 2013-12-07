@@ -64,7 +64,7 @@ def board_required():
             if not board:
                 board = ndb.Key('Board', namespace).get()
             if not board or not board.readable():
-                error.page(org, context, error.BoardNotFoundError()); return;
+                error.page(org, context, error.BoardNotFound()); return;
             memcache.add(namespace, board, 3600)
             namespace_manager.set_namespace(namespace)
             context.update({
