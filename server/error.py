@@ -3,35 +3,30 @@
 
 import config
 import const
+import error
 
 from google.appengine.api import namespace_manager
 from google.appengine.api import users
 
 import tengine
 
-
-def default_page(org, error):
+def page(org, context, err):
     org.error(500)
-    context = {
-        'page_title': 'エラー',
-        'error' : error,
-        'org' : org,
-    }
-    org.response.out.write(tengine.render(':error', context, layout=':default/base'))
-
-def page(org, context, error):
-    org.error(500)
-    namespace = context['namespace']
     context.update({
-        'user' : users.get_current_user(),
-        'login_url': users.create_login_url('/%s/' % namespace),
-        'logout_url': users.create_logout_url('/%s/' % namespace),
-        
         'page_title': 'エラー',
-        'error' : error,
+        'error' : err,
         'org' : org,
     })
-    org.response.out.write(tengine.render(':error', context))
+    if isinstance(err, error.BoardNotFoundError):
+        org.response.out.write(tengine.render(':error', context, layout=':default/base'))
+    else:
+        namespace = context['namespace']
+        context.update({
+            'user' : users.get_current_user(),
+            'login_url': users.create_login_url('/%s/' % namespace),
+            'logout_url': users.create_logout_url('/%s/' % namespace),
+        })
+        org.response.out.write(tengine.render(':error', context))
 
 class Error(Exception):
   """Base class for exceptions in this application."""

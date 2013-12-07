@@ -19,6 +19,7 @@ import tengine
 import util
 
 class IndexHandler(webapp2.RequestHandler):
+    @util.board_required()
     @util.memcached_with(5)
     def get(self, context):
         query = model.Thread.query_normal()
@@ -33,6 +34,7 @@ class IndexHandler(webapp2.RequestHandler):
 
 
 class ThreadHandler(webapp2.RequestHandler):
+    @util.board_required()
     @util.memcached_with()
     def get(self, context, thread_id, first, hyphen, last):
         thread_id = int(thread_id)
@@ -94,6 +96,7 @@ class ThreadHandler(webapp2.RequestHandler):
         return html
 
 class NewThreadHandler(webapp2.RequestHandler):
+    @util.board_required()
     @util.myuser_required(const.WRITER)
     def get(self, context):
         context.update({'page_title' : '新しいスレッドの作成'})
@@ -104,6 +107,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         err = error.PostMethodRequiredError('新スレッド作成画面へ戻る', '/new/thread')
         error.page(self, context, err); return;
     
+    @util.board_required()
     @util.myuser_required(const.WRITER)
     def post(self, context):
         title_template = model.Theme.validate_title_template(self.request.get('title_template'))
@@ -185,6 +189,7 @@ class WriteHandler(webapp2.RequestHandler):
         err = error.PostMethodRequiredError('スレッドに戻る', '/%s/' % thread_id)
         error.page(self, context, err); return;
         
+    @util.board_required()
     @util.myuser_required(const.WRITER)
     def post(self, context, thread_id):
         content = model.Response.validate_content(self.request.get('content'))
@@ -252,6 +257,7 @@ class WriteHandler(webapp2.RequestHandler):
         self.redirect(util.namespaced('/%d/#%d' % (thread_id, new_number)))
 
 class RelatedThreadHandler(webapp2.RequestHandler):
+    @util.board_required()
     @util.memcached_with()
     def get(self, context, thread_id):
         thread_id = int(thread_id)
@@ -269,6 +275,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
         return html
 
 class EditTemplateHandler(webapp2.RequestHandler):
+    @util.board_required()
     @util.myuser_required(const.WRITER)
     def get(self, context, theme_id):
         theme = ndb.Key('Theme', int(theme_id)).get()
@@ -289,6 +296,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
         error.page(self, context, error.RequiredPostMethodError())
         return
     
+    @util.board_required()
     @util.myuser_required(const.WRITER)
     def post(self, context, theme_id):
         title_template = model.Theme.validate_title_template(self.request.get('title_template'))
@@ -361,6 +369,7 @@ class LoginHandler(webapp2.RequestHandler):
             self.redirect(str(redirect_to))
 
 class AgreeHandler(webapp2.RequestHandler):
+    @util.board_required()
     @util.myuser_required(const.READER)
     def get(self, context):
         namespace = context['namespace']
@@ -401,6 +410,7 @@ class AgreementHandler(webapp2.RequestHandler):
         
 
 class StoredHandler(webapp2.RequestHandler):
+    @util.board_required()
     @util.memcached_with()
     def get(self, context, year, month):
         if ((not year) and (not month)):
@@ -428,6 +438,7 @@ class StoredHandler(webapp2.RequestHandler):
         return html
         
 class MyPageHandler(webapp2.RequestHandler):
+    @util.board_required()
     @util.myuser_required(const.BANNED)
     def get(self, context):
         context.update({
