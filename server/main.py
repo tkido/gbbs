@@ -355,7 +355,7 @@ class LoginHandler(webapp2.RequestHandler):
             error.page(self, context, error.NewUserCouldNotPutError()); return;
         else:
             namespace = context['namespace']
-            redirect_to = '/%s/agreement' % namespace
+            redirect_to = '/%s/agreement/' % namespace
             if self.request.get('continue'):
                 redirect_to += '?continue=%s' % self.request.get('continue')
             self.redirect(str(redirect_to))
@@ -541,7 +541,7 @@ app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/agreement/', AgreementHandler),     #並び順注意！
                                (r'/([0-9a-z_-]{2,16})/_agree', AgreeHandler),             #並び順注意！
                                (r'/([0-9a-z_-]{2,16})/mypage/', MyPageHandler),
-                               (r'/([0-9a-z_-]{2,16})/login', LoginHandler),
+                               (r'/([0-9a-z_-]{2,16})/_login', LoginHandler),
                                (r'/([0-9a-z_-]{2,16})/stored/(\d{4})?/?(\d{1,2})?/?', StoredHandler),
                                (r'/([0-9a-z_-]{2,16})/new/', NewThreadHandler),
                                (r'/([0-9a-z_-]{2,16})/_new', CreateNewThreadHandler),

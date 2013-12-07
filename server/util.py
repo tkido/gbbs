@@ -75,16 +75,16 @@ def myuser_required(required_auth = const.BANNED):
                 error.default_page(org, error.BoardNotFoundError()); return;
             user = users.get_current_user()
             if not user:
-                org.redirect(str(users.create_login_url('/%s/login?continue=%s' % (namespace, org.request.uri))))
+                org.redirect(str(users.create_login_url('/%s/_login?continue=%s' % (namespace, org.request.uri))))
                 return
             myuser = model.MyUser.get_by_id(user.user_id())
             if not myuser:
-                org.redirect(str('/%s/login?continue=%s' % (namespace, org.request.uri)))
+                org.redirect(str('/%s/_login?continue=%s' % (namespace, org.request.uri)))
                 return
             context = {'namespace' : namespace,
                        'board': board,
                        'user': myuser,
-                       'login_url': '/%s/login?continue=%s' % (namespace, org.request.uri),
+                       'login_url': '/%s/_login?continue=%s' % (namespace, org.request.uri),
                        'logout_url': users.create_logout_url(namespaced('/')) }
             if myuser.status < required_auth:
                 error.page(org, context, error.AuthorityRequiredError(required_auth, myuser.status)); return;
@@ -108,7 +108,7 @@ def memcached_with(second = const.MEMCACHE_DEFAULT_KEEP_SECONDS):
                 context = {'namespace' : namespace,
                            'board': board,
                            'user': user,
-                           'login_url': '/%s/login?continue=%s' % (namespace, org.request.uri),
+                           'login_url': '/%s/_login?continue=%s' % (namespace, org.request.uri),
                            'logout_url': users.create_logout_url(org.request.uri) }
                 html = original_func(org, context, *args, **kwargs)
                 if html:
@@ -125,7 +125,7 @@ def board_required():
                 error.dafault_page(org, error.BoardNotFoundError()); return;
             context = {'namespace' : namespace,
                        'board': board,
-                       'login_url': '/%s/login?continue=%s' % (namespace, org.request.uri),
+                       'login_url': '/%s/_login?continue=%s' % (namespace, org.request.uri),
                        'logout_url': users.create_logout_url(org.request.uri) }
             original_func(org, context, *args, **kwargs)
         return decorated_func
