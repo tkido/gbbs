@@ -320,7 +320,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
             self.redirect(util.namespaced('/edit/%d/' % theme_id))
 
 class LoginHandler(webapp2.RequestHandler):
-    @util.namespace_required()
+    @util.board_required()
     def get(self, context):
         user = users.get_current_user()
         if not user:
@@ -383,7 +383,7 @@ class AgreeHandler(webapp2.RequestHandler):
                 self.redirect(str(redirect_to))
 
 class AgreementHandler(webapp2.RequestHandler):
-    @util.namespace_required()
+    @util.board_required()
     def get(self, context):
         namespace = context['namespace']
         user = users.get_current_user()

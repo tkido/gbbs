@@ -83,7 +83,7 @@ def myuser_required(required_auth = const.BANNED):
                        'board': board,
                        'user': myuser,
                        'login_url': '/%s/login?continue=%s' % (namespace, org.request.uri),
-                       'logout_url': users.create_logout_url(org.request.uri) }
+                       'logout_url': users.create_logout_url(org.request.uri) } # /にリダイレクトすべき？
             if myuser.status < required_auth:
                 error.page(org, context, error.AuthorityRequiredError(required_auth, myuser.status)); return;
             original_func(org, context, *args, **kwargs)
@@ -113,7 +113,7 @@ def memcached_with(second = const.MEMCACHE_DEFAULT_KEEP_SECONDS):
         return decorated_func
     return wrapper_func
 
-def namespace_required():
+def board_required():
     def wrapper_func(original_func):
         def decorated_func(org, namespace, *args, **kwargs):
             board = get_board(namespace)
