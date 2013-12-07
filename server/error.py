@@ -3,21 +3,20 @@
 
 import config
 import const
-import error
 
 from google.appengine.api import namespace_manager
 from google.appengine.api import users
 
 import tengine
 
-def page(org, context, err):
+def page(org, context, error):
     org.error(500)
     context.update({
         'page_title': 'エラー',
-        'error' : err,
+        'error' : error,
         'org' : org,
     })
-    if isinstance(err, error.BoardNotFoundError):
+    if isinstance(error, BoardNotFoundError):
         org.response.out.write(tengine.render(':error', context, layout=':default/base'))
     else:
         namespace = context['namespace']

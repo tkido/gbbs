@@ -55,18 +55,6 @@ def delete_memcache(path):
 def namespaced(path):
     return str('/%s%s' % (namespace_manager.get_namespace(), path))
 
-def get_board(board_id):
-    namespace_manager.set_namespace(const.BOARD_NAMESPACE)
-    board = memcache.get(board_id)
-    if not board:
-        board = ndb.Key('Board', board_id).get()
-    if not board or not board.readable():
-        return None
-    else:
-        memcache.add(board_id, board, 3600)
-        namespace_manager.set_namespace(board_id)
-        return board
-
 def board_required():
     def wrapper_func(original_func):
         def decorated_func(org, namespace, *args, **kwargs):
