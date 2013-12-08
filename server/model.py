@@ -13,7 +13,7 @@ import const
 import config
 
 class Counter(ndb.Model):
-    #id = "Board", "MyUser" or "Thread" or "Theme"
+    #id = "Board", "MyUser", "Thread", "Theme"
     count = ndb.IntegerProperty(required=True, indexed=False)
 
 class Board(ndb.Model):
@@ -31,8 +31,9 @@ class Board(ndb.Model):
     template = ndb.TextProperty(indexed=False)
     
     hash_cycle = ndb.IntegerProperty(required=True, indexed=False)  #0:ever(no change) 1:year 2:month 3:day
-    timezone = ndb.IntegerProperty(required=True, indexed=False)
     salt = ndb.StringProperty(required=True, indexed=False)
+    timezone = ndb.IntegerProperty(required=True, indexed=False)
+    
     allow_index = ndb.BooleanProperty(required=True, indexed=False)
     allow_robots = ndb.BooleanProperty(required=True, indexed=False)
     

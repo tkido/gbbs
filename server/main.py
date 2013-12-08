@@ -113,10 +113,10 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         board = context['board']
         title_template = board.validate_title(self.request.get('title_template'))
         if not title_template:
-            error.page(self, context, error.TitleValidationError()); return;
+            error.page(self, context, error.TitleValidation(board)); return;
         template = board.validate_template(self.request.get('template'))
         if not template:
-            error.page(self, context, error.ContentValidationError()); return;
+            error.page(self, context, error.ContentValidation(board)); return;
         
         @ndb.transactional()
         def increment_tc():
@@ -127,7 +127,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         tc_key = ndb.Key('Counter', 'Theme')
         theme_id = increment_tc()
         if not theme_id:
-            error.page(self, context, error.NewThemeIdCouldNotGetError()); return;
+            error.page(self, context, error.NewThemeIdCouldNotGet()); return;
         
         myuser = context['user']
         now = board.now()
@@ -146,12 +146,12 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
                            )
         theme_key = theme.put()
         if not theme_key:
-            error.page(self, context, error.NewThemeCouldNotCreateError()); return;
+            error.page(self, context, error.NewThemeCouldNotCreate()); return;
         
         tc_key = ndb.Key('Counter', 'Thread')
         thread_id = increment_tc()
         if not thread_id:
-            error.page(self, context, error.NewThreadIdCouldNotGetError()); return;
+            error.page(self, context, error.NewThreadIdCouldNotGet()); return;
         thread = model.Thread(id = thread_id,
                               theme_id = theme_id,
                               author_id = myuser.myuser_id,
@@ -177,7 +177,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
                              )
         thread_key = thread.put()
         if not thread_key:
-            error.page(self, context, error.NewThreadCouldNotCreateError()); return;
+            error.page(self, context, error.NewThreadCouldNotCreate()); return;
         
         self.redirect(util.namespaced('/%d/' % thread_id))
         
@@ -196,7 +196,7 @@ class WriteHandler(webapp2.RequestHandler):
         board = context['board']
         content = board.validate_content(self.request.get('content'))
         if not content:
-            error.page(self, context, error.ContentValidationError()); return;
+            error.page(self, context, error.ContentValidation(board)); return;
         
         thread_id = int(thread_id)
         thread_key = ndb.Key('Thread', thread_id)
@@ -237,16 +237,16 @@ class WriteHandler(webapp2.RequestHandler):
             other = model.Response.get_by_id(new_id)
             if other:
                 logging.error('***** raise error')
-                raise error.SameIdError()
+                raise error.SameId()
             else:
                 return response.put()
         while not success:
             try:
                 success = write_unique()
-            except error.SameIdError, err:
+            except error.SameId, err:
                 new_id += 1
                 if new_id > 10000:
-                    error.page(self, context, error.ThreadNotWritableError()); return;
+                    error.page(self, context, error.ThreadNotWritable()); return;
                 new_number = new_id % 10000
                 response.key = ndb.Key('Response', new_id)
                 response.number = new_number
@@ -282,9 +282,9 @@ class EditTemplateHandler(webapp2.RequestHandler):
     def get(self, context, theme_id):
         theme = ndb.Key('Theme', int(theme_id)).get()
         if not theme:
-            error.page(self, context, error.ThemeNotFoundError()); return;
+            error.page(self, context, error.ThemeNotFound()); return;
         if not theme.writable():
-            error.page(self, context, error.ThemeNotWritableError()); return;
+            error.page(self, context, error.ThemeNotWritable()); return;
         context.update({
             'page_title': 'テンプレート編集',
             'theme': theme,
@@ -300,12 +300,12 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
     @util.myuser_required(const.WRITER)
     def post(self, context, theme_id):
         board = context['board']
-        title_template = model.Theme.validate_title_template(self.request.get('title_template'))
+        title_template = board.validate_title(self.request.get('title_template'))
         if not title_template:
-            error.page(self, context, error.TitleValidationError()); return;
-        template = model.Theme.validate_template(self.request.get('template'))
+            error.page(self, context, error.TitleValidation(board)); return;
+        template = board.validate_template(self.request.get('template'))
         if not template:
-            error.page(self, context, error.ContentValidationError()); return;
+            error.page(self, context, error.ContentValidation(board)); return;
         
         theme_id = int(theme_id)
         theme_key = ndb.Key('Theme', theme_id)
@@ -315,7 +315,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
         def update_template():
             theme = theme_key.get()
             if not theme.writable():
-                raise error.ThemeNotWritableError()
+                raise error.ThemeNotWritable()
             theme.title_template = title_template
             theme.template = template
             theme.updated_at = board.now()
@@ -323,7 +323,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
             theme.put()
         try:
             update_template()
-        except error.ThemeNotWritableError, err:
+        except error.ThemeNotWritable, err:
             error.page(self, context, err); return;
         else:
             self.redirect(util.namespaced('/edit/%d/' % theme_id))
@@ -390,7 +390,7 @@ class AgreeHandler(webapp2.RequestHandler):
                     myuser.status = const.WRITER
                 return myuser.put()
             if not rise_to_writer():
-                error.page(self, context, error.UserCouldNotUpdateError()); return;
+                error.page(self, context, error.UserCouldNotUpdate()); return;
             else:
                 redirect_to = self.request.get('continue') or '/%s/' % namespace
                 self.redirect(str(redirect_to))
