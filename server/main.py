@@ -75,8 +75,7 @@ class ThreadHandler(webapp2.RequestHandler):
         })
         
         now = board.now()
-        if last_number >= board.max_reses or \
-           ((now - thread.responsed_at) > datetime.timedelta(seconds = 10) and thread.response_count < last_number):
+        if ((now - thread.responsed_at) > datetime.timedelta(seconds = 10) and thread.response_count < last_number):
             thread.responsed_at = now
             thread.response_count = last_number
             thread.put()
@@ -84,7 +83,7 @@ class ThreadHandler(webapp2.RequestHandler):
         html = tengine.render(':thread', context)
         self.response.out.write(html)
         
-        if thread.next_thread_id == 0 and thread.response_count >= board.max_reses:
+        if thread.next_thread_id == 0 and last_number >= board.max_reses:
             thread = prepare_next_thread(thread_key, board)
             html = None
         if thread.next_thread_id > 0 and thread.next_thread_title == '':
@@ -465,7 +464,7 @@ def prepare_next_thread(thread_key, board):
     @ndb.transactional()
     def set_next_thread_id():
         thread = thread_key.get()
-        if thread.next_thread_id == 0 and thread.response_count >= board.max_reses:
+        if thread.next_thread_id == 0:
             thread.next_thread_id = next_thread_id
             thread.put()
             return thread
