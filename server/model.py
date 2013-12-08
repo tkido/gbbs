@@ -1,6 +1,9 @@
 #!/usr/local/bin/python
 # -*- coding:utf-8 -*-
+
+import base64
 import datetime
+import hashlib
 import logging
 import re
 
@@ -10,7 +13,7 @@ import const
 import config
 
 class Counter(ndb.Model):
-    #id = "MyUser" or "Thread" or "Theme"
+    #id = "Board", "MyUser" or "Thread" or "Theme"
     count = ndb.IntegerProperty(required=True, indexed=False)
 
 class Board(ndb.Model):
@@ -19,18 +22,77 @@ class Board(ndb.Model):
     updater_id = ndb.IntegerProperty(required=True, indexed=False)
     
     status = ndb.IntegerProperty(required=True)
-    updated_at = ndb.DateTimeProperty(required=True)
+    updated_at = ndb.DateTimeProperty(required=True, indexed=False)
     since = ndb.DateTimeProperty(required=True, indexed=False)
     
     title = ndb.StringProperty(required=True, indexed=False)
-    description = ndb.StringProperty(required=True, indexed=False)
-    keywords = ndb.StringProperty(required=True, indexed=False)
-    template = ndb.TextProperty(required=True)
+    description = ndb.StringProperty(indexed=False)
+    keywords = ndb.StringProperty(indexed=False)
+    template = ndb.TextProperty(indexed=False)
+    
+    hash_cycle = ndb.IntegerProperty(required=True, indexed=False)  #0:ever(no change) 1:year 2:month 3:day
+    timezone = ndb.IntegerProperty(required=True, indexed=False)
+    salt = ndb.StringProperty(required=True, indexed=False)
+    allow_index = ndb.BooleanProperty(required=True, indexed=False)
+    allow_robots = ndb.BooleanProperty(required=True, indexed=False)
+    
+    max_reses = ndb.IntegerProperty(required=True, indexed=False)
+    max_threads = ndb.IntegerProperty(required=True, indexed=False)
+    max_chars = ndb.IntegerProperty(required=True, indexed=False)
+    max_chars_title = ndb.IntegerProperty(required=True, indexed=False)
+    max_chars_template = ndb.IntegerProperty(required=True, indexed=False)
+    max_rows = ndb.IntegerProperty(required=True, indexed=False)
+    max_rows_template = ndb.IntegerProperty(required=True, indexed=False)
 
     def readable(self):
         return self.status != const.DELETED
     def writable(self):
         return self.status == const.NORMAL
+
+    def now(self):
+      return datetime.datetime.now() + datetime.timedelta(hours = self.timezone)
+    
+    def hash(self, source):
+      sha1 = hashlib.sha1()
+      sha1.update(str(source))
+      sha1.update(self.salt)
+      
+      local_now = self.now()
+      if self.hash_cycle >= 1:
+        sha1.update(str(local_now.year))
+      if self.hash_cycle >= 2:
+        sha1.update(str(local_now.month))
+      if self.hash_cycle >= 3:
+        sha1.update(str(local_now.day))
+      
+      rst = sha1.digest()
+      rst = base64.urlsafe_b64encode(rst)
+      rst = rst[:8]
+      return rst
+      
+    def validate_content(self, content):
+        if not content or \
+           len(content) > self.max_chars or \
+           len(re.findall('\n', content)) >= self.max_chars:
+            return None
+        return content
+    
+    def validate_title(self, title):
+        d_count = len(re.findall('%d', title))
+        if not title or \
+           len(title) > self.max_chars_title or \
+           d_count >= 2:
+            return None
+        if d_count == 0:
+            title += u' その%d'
+        return title
+    
+    def validate_template(self, template):
+        if not template or \
+           len(template) > self.max_chars_template or \
+           len(re.findall('\n', template)) >= self.max_rows_template:
+            return None
+        return template
     
 class MyUser(ndb.Model):
     #id = user.user_id()
@@ -62,25 +124,6 @@ class Theme(ndb.Model):
     def writable(self):
         return self.status == const.NORMAL
     
-    @classmethod
-    def validate_title_template(cls, title_template):
-        d_count = len(re.findall('%d', title_template))
-        if not title_template or \
-           len(title_template) > config.MAX_CHARS_IN_TITLE or \
-           d_count >= 2:
-            return None
-        if d_count == 0:
-            title_template += u' その%d'
-        return title_template
-    
-    @classmethod
-    def validate_template(cls, template):
-        if not template or \
-           len(template) > config.MAX_CHARS_IN_CONTENT or \
-           len(re.findall('\n', template)) >= config.MAX_ROWS_IN_CONTENT:
-            return None
-        return template
-
 class Thread(ndb.Model):
     #id = from model.Counter("Thread").count
     theme_id = ndb.IntegerProperty(required=True)
@@ -107,22 +150,6 @@ class Thread(ndb.Model):
     
     def readable(self):
         return self.status != const.DELETED
-    def writable(self):
-        return self.status == const.NORMAL and \
-               self.response_count < config.MAX_RESES_IN_THREAD
-    def need_to_update_response_count(self, now, last_number):
-        return last_number >= config.MAX_RESES_IN_THREAD or \
-               ((now - self.responsed_at) > datetime.timedelta(seconds = 10) and \
-                self.response_count < last_number)
-    def need_to_prepare_next_thread(self):
-        return self.next_thread_id == 0 and \
-               self.response_count >= config.MAX_RESES_IN_THREAD
-    def need_to_create_next_thread(self):
-        return self.next_thread_id > 0 and \
-               self.next_thread_title == ''
-    def need_to_store(self):
-        return self.status == const.NORMAL and \
-               self.next_thread_title != ''
     
     @classmethod
     def query_normal(cls):
@@ -151,14 +178,6 @@ class Response(ndb.Model):
     char_name = ndb.StringProperty(indexed=False)
     char_id = ndb.StringProperty(indexed=False)
     char_emotion = ndb.StringProperty(indexed=False)
-    
-    @classmethod
-    def validate_content(cls, content):
-        if not content or \
-           len(content) > config.MAX_CHARS_IN_CONTENT or \
-           len(re.findall('\n', content)) >= config.MAX_ROWS_IN_CONTENT:
-            return None
-        return content
     
     @classmethod
     def query_normal(cls, thread_id, first):

@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import os
-import datetime
+import uuid
 
 from google.appengine.api import memcache
 from google.appengine.api import namespace_manager
@@ -21,7 +21,7 @@ def initialize(org):
     user = users.get_current_user()
     myuser = model.MyUser.get_by_id(user.user_id())
     if myuser:
-        org.redirect('/admin/')
+        org.redirect('/s/')
         return
     now = util.now()
     myuser = model.MyUser(id = user.user_id(),
@@ -36,7 +36,7 @@ def initialize(org):
     board_counter = model.Counter(id = 'Board', count = 0)
     
     ndb.put_multi([myuser, myuser_counter, board_counter])
-    org.redirect('/admin/')
+    org.redirect('/s/')
 
 class IndexHandler(webapp2.RequestHandler):
     def get(self):
@@ -50,7 +50,7 @@ class IndexHandler(webapp2.RequestHandler):
         board_counter = model.Counter.get_by_id('Board')
         
         context = {
-            'page_title' : '管理者専用ページ',
+            'page_title' : 'システム管理者専用ページ',
             'namespace' : const.BOARD_NAMESPACE,
             'user' : myuser,
             'login_url' : '/login?continue=' + self.request.uri,
@@ -59,7 +59,7 @@ class IndexHandler(webapp2.RequestHandler):
             'total_user': myuser_counter.count,
             'total_board': board_counter.count,
         }
-        html = tengine.render(':admin/index', context, layout=':admin/base')
+        html = tengine.render(':sysadmin/index', context, layout=':sysadmin/base')
         self.response.out.write(html)
 
 class EnvironmentHandler(webapp2.RequestHandler):
@@ -90,10 +90,24 @@ class CreateBoardHandler(webapp2.RequestHandler):
                             updated_at = now,
                             since = now,
                             
-                            title = '東方BBS',
-                            description = '東方のキャラ掲示板です。',
-                            keywords = '東方,BBS,掲示板,キャラ掲示板',
-                            template = '東方のキャラ掲示板です。ゆっくりしていってね！！！',
+                            title = '%s BBS' % namespace,
+                            description = '',
+                            keywords = '',
+                            template = '',
+                            
+                            hash_cycle = 3, #0:ever(no change) 1:year 2:month 3:day
+                            timezone = 9,
+                            salt = str(uuid.uuid4()),
+                            allow_index = True,
+                            allow_robots = True,
+                            
+                            max_reses = 3,
+                            max_threads = 3,
+                            max_chars = 4096,
+                            max_chars_title = 32,
+                            max_chars_template = 4096 * 2,
+                            max_rows = 80,
+                            max_rows_template = 80,
                            )
         
         namespace_manager.set_namespace(namespace)

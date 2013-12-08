@@ -22,7 +22,7 @@
 <?py if thread.prev_thread_title: ?>
             <li><a href="/#{ namespace }/related/#{ thread_id }/">関連スレ一覧</a></li>
 <?py #end ?>
-<?py if thread.writable(): ?>
+<?py if thread.writable: ?>
             <li><a href="/#{ namespace }/edit/#{ thread.theme_id }/">テンプレ編集</a></li>
 <?py #end ?>
           </ul>
@@ -59,7 +59,7 @@
 </div>
 <?py #end ?>
 
-<?py if thread.writable(): ?>
+<?py if thread.writable: ?>
 <h2>あなたのレス</h2>
 <div id="form">
   <div class="res-content">

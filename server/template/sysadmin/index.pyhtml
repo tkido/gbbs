@@ -1,5 +1,4 @@
-<h1>${ page_title }</h1>
 <ul>
-    <li>管理ユーザー総数：#{ total_user }</li>
-    <li>掲示板総数：#{ total_board }</li>
+  <li>管理ユーザー総数：#{ total_user }</li>
+  <li>掲示板総数：#{ total_board }</li>
 </ul>

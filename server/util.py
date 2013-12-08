@@ -1,9 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding:utf-8 -*-
 
-import base64
 import datetime
-import hashlib
 import logging
 import re
 
@@ -16,24 +14,6 @@ import config
 import const
 import error
 import model
-
-def hash(source):
-  string_source = str(source)
-  sha1 = hashlib.sha1()
-  sha1.update(string_source + config.SALT)
-
-  local_now = now()
-  if config.ID_CHANGE_CYCLE >= 1:
-    sha1.update(str(local_now.year))
-  if config.ID_CHANGE_CYCLE >= 2:
-    sha1.update(str(local_now.month))
-  if config.ID_CHANGE_CYCLE >= 3:
-    sha1.update(str(local_now.day))
-
-  rst = sha1.digest()
-  rst = base64.urlsafe_b64encode(rst)
-  rst = rst[:8]
-  return rst
 
 def now():
   return datetime.datetime.now() + datetime.timedelta(hours = config.TIMEZONE)

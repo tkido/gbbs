@@ -36,32 +36,36 @@ class ThreadHandler(webapp2.RequestHandler):
     @util.board_required()
     @util.memcached_with()
     def get(self, context, thread_id, first, hyphen, last):
+        board = context['board']
+        
         thread_id = int(thread_id)
         thread_key = ndb.Key('Thread', thread_id)
         thread = thread_key.get()
-        
         if not thread or not thread.readable():
             error.page(self, context, error.ThreadNotFound()); return;
         
         if first:
             first = int(first)
-            if 0 < first <= config.MAX_RESES_IN_THREAD:
+            if 0 < first <= board.max_reses:
                 fetch_count = 1
             else:
                 error.page(self, context, error.ThreadArgument('/%d/' % thread_id)); return;
         else:
             first = 1
-            fetch_count = config.MAX_RESES_IN_THREAD
+            fetch_count = board.max_reses
         if hyphen:
-            fetch_count = config.MAX_RESES_IN_THREAD - first + 1
+            fetch_count = board.max_reses - first + 1
             if last:
                 last = int(last)
-                if first <= last <= config.MAX_RESES_IN_THREAD:
+                if first <= last <= board.max_reses:
                     fetch_count = last - first + 1
             else:
                 error.page(self, context, error.ThreadArgument('/%d/' % thread_id)); return;
         query = model.Response.query_normal(thread_id, first)
         reses = query.fetch(fetch_count) if fetch_count else []
+        
+        last_number = reses[-1].key.id() % 10000 if reses else 0
+        thread.writable = (thread.status == const.NORMAL and last_number < board.max_reses)
         
         context.update({
             'page_title': thread.title,
@@ -70,9 +74,9 @@ class ThreadHandler(webapp2.RequestHandler):
             'reses': reses,
         })
         
-        now = util.now()
-        last_number = reses[-1].key.id() % 10000 if reses else 0
-        if thread.need_to_update_response_count(now, last_number):
+        now = board.now()
+        if last_number >= board.max_reses or \
+           ((now - thread.responsed_at) > datetime.timedelta(seconds = 10) and thread.response_count < last_number):
             thread.responsed_at = now
             thread.response_count = last_number
             thread.put()
@@ -80,16 +84,15 @@ class ThreadHandler(webapp2.RequestHandler):
         html = tengine.render(':thread', context)
         self.response.out.write(html)
         
-        if thread.need_to_prepare_next_thread():
-            thread = prepare_next_thread(thread_key)
+        if thread.next_thread_id == 0 and thread.response_count >= board.max_reses:
+            thread = prepare_next_thread(thread_key, board)
             html = None
-        if thread.need_to_create_next_thread():
-            thread = create_next_thread(thread_key)
+        if thread.next_thread_id > 0 and thread.next_thread_title == '':
+            thread = create_next_thread(thread_key, board)
             html = None
-        if thread.need_to_store():
+        if thread.status == const.NORMAL and thread.next_thread_title != '':
             thread = store(thread_key)
             html = None
-        
         return html
 
 class NewThreadHandler(webapp2.RequestHandler):
@@ -107,10 +110,11 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
     @util.board_required()
     @util.myuser_required(const.WRITER)
     def post(self, context):
-        title_template = model.Theme.validate_title_template(self.request.get('title_template'))
+        board = context['board']
+        title_template = board.validate_title(self.request.get('title_template'))
         if not title_template:
             error.page(self, context, error.TitleValidationError()); return;
-        template = model.Theme.validate_template(self.request.get('template'))
+        template = board.validate_template(self.request.get('template'))
         if not template:
             error.page(self, context, error.ContentValidationError()); return;
         
@@ -126,7 +130,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
             error.page(self, context, error.NewThemeIdCouldNotGetError()); return;
         
         myuser = context['user']
-        now = util.now()
+        now = board.now()
         theme = model.Theme(id = theme_id,
                             author_id = myuser.myuser_id,
                             updater_id = myuser.myuser_id,
@@ -159,7 +163,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
                               
                               title = title_template % 1,
                               datetime_str = util.datetime_to_str(now),
-                              hashed_id = util.hash(myuser.myuser_id),
+                              hashed_id = board.hash(myuser.myuser_id),
                               content = template,
                               
                               thread_number = 1,
@@ -179,7 +183,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         
         if config.LOCAL_SDK:
             time.sleep(0.5)
-        clean_old_threads()
+        clean_old_threads(board)
 
 class WriteHandler(webapp2.RequestHandler):
     @util.board_required()
@@ -189,7 +193,8 @@ class WriteHandler(webapp2.RequestHandler):
     @util.board_required()
     @util.myuser_required(const.WRITER)
     def post(self, context, thread_id):
-        content = model.Response.validate_content(self.request.get('content'))
+        board = context['board']
+        content = board.validate_content(self.request.get('content'))
         if not content:
             error.page(self, context, error.ContentValidationError()); return;
         
@@ -197,10 +202,10 @@ class WriteHandler(webapp2.RequestHandler):
         thread_key = ndb.Key('Thread', thread_id)
         thread = thread_key.get()
         
-        now = util.now()
+        now = board.now()
         datetime_str = util.datetime_to_str(now)
         myuser = context['user']
-        hashed_id = util.hash(myuser.myuser_id)
+        hashed_id = board.hash(myuser.myuser_id)
         
         char_name = self.request.get('char_name') or '名無しの村人さん'
         char_id = self.request.get('character') or 'none'
@@ -294,6 +299,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
     @util.board_required()
     @util.myuser_required(const.WRITER)
     def post(self, context, theme_id):
+        board = context['board']
         title_template = model.Theme.validate_title_template(self.request.get('title_template'))
         if not title_template:
             error.page(self, context, error.TitleValidationError()); return;
@@ -312,7 +318,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
                 raise error.ThemeNotWritableError()
             theme.title_template = title_template
             theme.template = template
-            theme.updated_at = util.now()
+            theme.updated_at = board.now()
             theme.updater_id = myuser.myuser_id
             theme.put()
         try:
@@ -326,6 +332,7 @@ class LoginHandler(webapp2.RequestHandler):
     @util.board_required()
     def get(self, context):
         namespace = context['namespace']
+        board = context['board']
         user = users.get_current_user()
         if not user:
             self.redirect(str(users.create_login_url(self.request.uri)))
@@ -347,7 +354,7 @@ class LoginHandler(webapp2.RequestHandler):
         myuser_id = increment_uc()
         if not myuser_id:
             error.page(self, context, error.NewUserIdCouldNotGet()); return;
-        now = util.now()
+        now = board.now()
         myuser = model.MyUser(id = user.user_id(),
                               user = user,
                               myuser_id = myuser_id,
@@ -410,8 +417,9 @@ class StoredHandler(webapp2.RequestHandler):
     @util.board_required()
     @util.memcached_with()
     def get(self, context, year, month):
+        board = context['board']
         if ((not year) and (not month)):
-            update_to = util.now()
+            update_to = board.now()
             update_from = update_to - datetime.timedelta(days = 31)
             page_title = '最近一ヶ月'
         else:
@@ -444,7 +452,7 @@ class MyPageHandler(webapp2.RequestHandler):
         })
         self.response.out.write(tengine.render(':mypage', context))
 
-def prepare_next_thread(thread_key):
+def prepare_next_thread(thread_key, board):
     tc_key = ndb.Key('Counter', 'Thread')
     @ndb.transactional()
     def increment_tc():
@@ -457,18 +465,18 @@ def prepare_next_thread(thread_key):
     @ndb.transactional()
     def set_next_thread_id():
         thread = thread_key.get()
-        if thread.need_to_prepare_next_thread():
+        if thread.next_thread_id == 0 and thread.response_count >= board.max_reses:
             thread.next_thread_id = next_thread_id
             thread.put()
             return thread
     return set_next_thread_id()
     
-def create_next_thread(thread_key):
+def create_next_thread(thread_key, board):
     thread = thread_key.get()
-    now = util.now()
+    now = board.now()
     datetime_str = util.datetime_to_str(now)
     myuser_id = 0
-    hashed_id = util.hash(myuser_id)
+    hashed_id = board.hash(myuser_id)
     
     theme = ndb.Key('Theme', thread.theme_id).get()
     next_thread_number = thread.thread_number + 1
@@ -533,10 +541,10 @@ def store(thread_key):
         thread.put()
     store_thread()
 
-def clean_old_threads():
+def clean_old_threads(board):
     query = model.Thread.query_normal()
-    keys = query.fetch(config.MAX_THREADS_IN_BOARD+3, keys_only=True)
-    needs = len(keys) - config.MAX_THREADS_IN_BOARD
+    keys = query.fetch(board.max_threads+3, keys_only=True)
+    needs = len(keys) - board.max_threads
     for i in range(needs):
         store(keys[-i-1])
     

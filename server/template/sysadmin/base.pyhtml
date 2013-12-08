@@ -13,8 +13,6 @@
 
 #{_content}
 
-<?py include(':_gae-banner') ?>
-
 <?py include(':_analytics') ?>
 
 </div>
