@@ -7,7 +7,7 @@
 
 <h2>新しいスレッドを作成する</h2>
 <p>
-<form method="post" action="/${ namespace }/_new">
+<form method="post" action="/#{ namespace }/_new">
     <strong>新スレッドのタイトル：</strong><br />
     <input name="title_template" type="text" /><br />
     <strong>新スレッドのテンプレート：</strong><br />

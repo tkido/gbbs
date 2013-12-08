@@ -4,14 +4,14 @@ ${ board.template }
 </p>
 <div class="thread-list">
   <ol>
-    <?py i = 0 ?>
-    <?py for thread in threads: ?>
-    <?py i += 1 ?>
+<?py i = 0 ?>
+<?py for thread in threads: ?>
+<?py i += 1 ?>
     <li>
       <a href="/#{ namespace }/#{ thread.key.id() }/">
-        ${ i }: ${ thread.title } (${ thread.response_count })
+        #{ i }: ${ thread.title } (#{ thread.response_count })
       </a>
     </li>
-    <?py #end ?>
+<?py #end ?>
   </ol>
 </div>

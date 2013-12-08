@@ -5,8 +5,8 @@
     <div class="message-cell">
       <div class="message">
 <dl>
-  <dt>ユーザーID:</dt><dd>${ user.myuser_id }</dd>
-  <dt>ステータス:</dt><dd>${ status_str }</dd>
+  <dt>ユーザーID:</dt><dd>#{ user.myuser_id }</dd>
+  <dt>ステータス:</dt><dd>#{ status_str }</dd>
   <dt>メールアドレス:</dt><dd>${ user.user.email() }</dd>
 </dl>
       </div>
