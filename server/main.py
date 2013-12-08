@@ -387,11 +387,11 @@ class AgreeHandler(webapp2.RequestHandler):
                 myuser = myuser_key.get()
                 if myuser.status == const.READER:
                     myuser.status = const.WRITER
+                    util.flush_user(myuser)
                 return myuser.put()
             if not rise_to_writer():
                 error.page(self, context, error.UserCouldNotUpdate()); return;
             else:
-                util.flush_user(myuser)
                 redirect_to = self.request.get('continue') or '/%s/' % namespace
                 self.redirect(str(redirect_to))
 

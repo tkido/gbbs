@@ -46,9 +46,9 @@ def board_required():
             board = memcache.get(namespace)
             if not board:
                 board = ndb.Key('Board', namespace).get()
+                memcache.add(namespace, board, 3600)
             if not board or not board.readable():
                 error.page(org, context, error.BoardNotFound()); return;
-            memcache.add(namespace, board, 3600)
             namespace_manager.set_namespace(namespace)
             context.update({
                 'namespace' : namespace,
@@ -87,9 +87,9 @@ def myuser_required(required_auth = const.BANNED):
             myuser = memcache.get(user.user_id())
             if not myuser:
                 myuser = model.MyUser.get_by_id(user.user_id())
+                memcache.add(user.user_id(), myuser, 600)
             if not myuser or not myuser.readable():
                 org.redirect(str(context['login_url'])); return;
-            memcache.add(user.user_id(), myuser, 600)
             context.update({
                 'user': myuser,
                 'logout_url': users.create_logout_url(namespaced('/')),

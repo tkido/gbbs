@@ -7,6 +7,7 @@ import hashlib
 import logging
 import re
 
+from google.appengine.api import memcache
 from google.appengine.ext import ndb
 
 import const
@@ -108,7 +109,7 @@ class MyUser(ndb.Model):
     
     def readable(self):
         return self.status != const.DELETED
-
+    
 class Theme(ndb.Model):
     #id = from model.Counter("Theme").count
     author_id = ndb.IntegerProperty(required=True, indexed=False)
