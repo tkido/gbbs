@@ -252,7 +252,7 @@ class WriteHandler(webapp2.RequestHandler):
                 
                 logging.error('***** new_id = %d' % new_id)
                 logging.error('***** response.key.id = %d' % response.key.id())
-        util.delete_memcache('/%d/' % thread_id)
+        util.flush_page('/%d/' % thread_id)
         if config.LOCAL_SDK:
             time.sleep(0.5)
         self.redirect(util.namespaced('/%d/#%d' % (thread_id, new_number)))
@@ -391,6 +391,7 @@ class AgreeHandler(webapp2.RequestHandler):
             if not rise_to_writer():
                 error.page(self, context, error.UserCouldNotUpdate()); return;
             else:
+                util.flush_user(myuser)
                 redirect_to = self.request.get('continue') or '/%s/' % namespace
                 self.redirect(str(redirect_to))
 
@@ -518,7 +519,7 @@ def create_next_thread(thread_key, board):
 
     next_thread = get_or_insert()
     if next_thread:
-        util.delete_memcache('/related/%d/' % thread.theme_id)
+        util.flush_page('/related/%d/' % thread.theme_id)
         @ndb.transactional()
         def set_next_thread_title():
             thread = thread_key.get()

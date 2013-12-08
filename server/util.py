@@ -28,12 +28,12 @@ def datetime_to_str(dt):
                                                 dt.second
                                                )
 
-def flush_user():
-    pass
+def flush_user(myuser):
+    memcache.delete(myuser.user.user_id())
 
-def delete_memcache(path):
+def flush_page(path):
     path = namespaced(path)
-    memcache.delete_multi([path + '!login', path + '!logout'])
+    memcache.delete_multi([path + '!login', path])
 
 def namespaced(path):
     return str('/%s%s' % (namespace_manager.get_namespace(), path))
@@ -64,7 +64,7 @@ def memcached_with(second = const.MEMCACHE_DEFAULT_KEEP_SECONDS):
     def wrapper_func(original_func):
         def decorated_func(org, context, *args, **kwargs):
             user = users.get_current_user()
-            key = org.request.path + ('!login' if user else '!logout')
+            key = org.request.path + ('!login' if user else '')
             html = memcache.get(key)
             if html:
                 org.response.out.write(html)
