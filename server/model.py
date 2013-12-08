@@ -105,6 +105,9 @@ class MyUser(ndb.Model):
     status = ndb.IntegerProperty(required=True)
     updated_at = ndb.DateTimeProperty(required=True, indexed=False)
     since = ndb.DateTimeProperty(required=True, indexed=False)
+    
+    def readable(self):
+        return self.status != const.DELETED
 
 class Theme(ndb.Model):
     #id = from model.Counter("Theme").count

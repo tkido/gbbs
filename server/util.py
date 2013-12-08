@@ -28,6 +28,9 @@ def datetime_to_str(dt):
                                                 dt.second
                                                )
 
+def flush_user():
+    pass
+
 def delete_memcache(path):
     path = namespaced(path)
     memcache.delete_multi([path + '!login', path + '!logout'])
@@ -81,9 +84,12 @@ def myuser_required(required_auth = const.BANNED):
             user = users.get_current_user()
             if not user:
                 org.redirect(str(users.create_login_url(context['login_url']))); return;
-            myuser = model.MyUser.get_by_id(user.user_id())
+            myuser = memcache.get(user.user_id())
             if not myuser:
+                myuser = model.MyUser.get_by_id(user.user_id())
+            if not myuser or not myuser.readable():
                 org.redirect(str(context['login_url'])); return;
+            memcache.add(user.user_id(), myuser, 600)
             context.update({
                 'user': myuser,
                 'logout_url': users.create_logout_url(namespaced('/')),
