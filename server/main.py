@@ -278,14 +278,19 @@ class RelatedThreadHandler(webapp2.RequestHandler):
 class EditTemplateHandler(webapp2.RequestHandler):
     @util.board_required()
     @util.myuser_required(const.WRITER)
-    def get(self, context, theme_id):
-        theme = ndb.Key('Theme', int(theme_id)).get()
+    def get(self, context, thread_id):
+        thread_id = int(thread_id)
+        thread = ndb.Key('Thread', thread_id).get()
+        if not thread or not thread.readable():
+            error.page(self, context, error.ThreadNotFound()); return;
+        if thread.status != const.NORMAL:
+            error.page(self, context, error.ThemeNotWritable()); return;
+        theme = ndb.Key('Theme', thread.theme_id).get()
         if not theme:
             error.page(self, context, error.ThemeNotFound()); return;
-        if not theme.writable():
-            error.page(self, context, error.ThemeNotWritable()); return;
         context.update({
             'page_title': 'テンプレート編集',
+            'thread': thread,
             'theme': theme,
         })
         self.response.out.write(tengine.render(':edit', context))
@@ -297,7 +302,18 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
     
     @util.board_required()
     @util.myuser_required(const.WRITER)
-    def post(self, context, theme_id):
+    def post(self, context, thread_id):
+        thread_id = int(thread_id)
+        thread = ndb.Key('Thread', thread_id).get()
+        if not thread or not thread.readable():
+            error.page(self, context, error.ThreadNotFound()); return;
+        if thread.status != const.NORMAL:
+            error.page(self, context, error.ThemeNotWritable()); return;
+        theme_key = ndb.Key('Theme', thread.theme_id)
+        theme = theme_key.get()
+        if not theme:
+            error.page(self, context, error.ThemeNotFound()); return;
+        
         board = context['board']
         title_template = board.validate_title(self.request.get('title_template'))
         if not title_template:
@@ -306,15 +322,10 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
         if not template:
             error.page(self, context, error.ContentValidation(board)); return;
         
-        theme_id = int(theme_id)
-        theme_key = ndb.Key('Theme', theme_id)
         myuser = context['user']
-        
         @ndb.transactional()
         def update_template():
             theme = theme_key.get()
-            if not theme.writable():
-                raise error.ThemeNotWritable()
             theme.title_template = title_template
             theme.template = template
             theme.updated_at = board.now()
@@ -325,7 +336,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
         except error.ThemeNotWritable, err:
             error.page(self, context, err); return;
         else:
-            self.redirect(util.namespaced('/edit/%d/' % theme_id))
+            self.redirect(util.namespaced('/edit/%d/' % thread_id))
 
 class LoginHandler(webapp2.RequestHandler):
     @util.board_required()
