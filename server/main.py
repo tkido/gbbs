@@ -445,7 +445,7 @@ class LoginHandler(webapp2.RequestHandler):
             return
         myuser = model.MyUser.get_by_id(user.user_id())
         if myuser:
-            if (myuser.status == const.READER) or (myuser.status == const.DELETED) :
+            if (myuser.status == const.READER) or (myuser.status == const.DELETED):
                 redirect_to = '/%s/agreement/' % namespace
                 if self.request.get('continue'):
                     redirect_to += '?continue=%s' % self.request.get('continue')
@@ -482,27 +482,22 @@ class LoginHandler(webapp2.RequestHandler):
 
 class AgreeHandler(webapp2.RequestHandler):
     @util.board_required()
-    @util.myuser_required(const.READER)
+    @util.myuser_required(const.DELETED)
     def get(self, context):
         namespace = context['namespace']
         myuser = context['user']
-        if myuser.status != const.READER:
-            redirect_to = self.request.get('continue') or '/%s/' % namespace
-            self.redirect(str(redirect_to))
-        else:
+        if (myuser.status == const.READER) or (myuser.status == const.DELETED):
             myuser_key = myuser.key
             @ndb.transactional()
             def rise_to_writer():
                 myuser = myuser_key.get()
-                if myuser.status == const.READER:
-                    myuser.status = const.WRITER
-                    util.flush_user(myuser)
+                myuser.status = const.WRITER
+                util.flush_user(myuser)
                 return myuser.put()
             if not rise_to_writer():
                 error.page(self, context, error.UserCouldNotUpdate()); return;
-            else:
-                redirect_to = self.request.get('continue') or '/%s/' % namespace
-                self.redirect(str(redirect_to))
+        redirect_to = self.request.get('continue') or '/%s/' % namespace
+        self.redirect(str(redirect_to))
 
 class AgreementHandler(webapp2.RequestHandler):
     @util.board_required()
