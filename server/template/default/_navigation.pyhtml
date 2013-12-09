@@ -1,0 +1,6 @@
+<div class="navigation">
+  <ul>
+    <li><a href="/">トップに戻る</a></li>
+    <li><a href="/static/help.html">ヘルプ</a></li>
+  </ul>
+</div>

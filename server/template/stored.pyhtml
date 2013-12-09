@@ -5,16 +5,4 @@
   <option value='/toho/stored/2013/10'>2013年10月</option>
   <option value='/toho/stored/2013/9'>2013年9月</option>
 </select>
-<div class="thread-list">
-  <ol>
-    <?py i = 0 ?>
-    <?py for thread in threads: ?>
-    <?py i += 1 ?>
-    <li>
-      <a href="/#{ namespace }/#{ thread.key.id() }/">
-        ${ i }: ${ thread.title } (${ thread.response_count })
-      </a>
-    </li>
-    <?py #end ?>
-  </ol>
-</div>
+<?py include(':_thread-list') ?>

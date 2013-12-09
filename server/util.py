@@ -1,9 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding:utf-8 -*-
 
-import base64
 import datetime
-import hashlib
 import logging
 import re
 
@@ -16,24 +14,6 @@ import config
 import const
 import error
 import model
-
-def hash(source):
-  string_source = str(source)
-  sha1 = hashlib.sha1()
-  sha1.update(string_source + config.SALT)
-
-  local_now = now()
-  if config.ID_CHANGE_CYCLE >= 1:
-    sha1.update(str(local_now.year))
-  if config.ID_CHANGE_CYCLE >= 2:
-    sha1.update(str(local_now.month))
-  if config.ID_CHANGE_CYCLE >= 3:
-    sha1.update(str(local_now.day))
-
-  rst = sha1.digest()
-  rst = base64.urlsafe_b64encode(rst)
-  rst = rst[:8]
-  return rst
 
 def now():
   return datetime.datetime.now() + datetime.timedelta(hours = config.TIMEZONE)
@@ -48,64 +28,49 @@ def datetime_to_str(dt):
                                                 dt.second
                                                )
 
-def delete_memcache(path):
+def flush_user(myuser):
+    memcache.delete(myuser.user.user_id())
+
+def flush_page(path):
     path = namespaced(path)
-    memcache.delete_multi([path + '!login', path + '!logout'])
+    memcache.delete_multi([path + '!login', path])
 
 def namespaced(path):
     return str('/%s%s' % (namespace_manager.get_namespace(), path))
 
-def get_board(board_id):
-    namespace_manager.set_namespace(const.BOARD_NAMESPACE)
-    board = memcache.get(board_id)
-    if not board:
-        board = ndb.Key('Board', board_id).get()
-    if not board:
-        raise error.BoardNotFoundError()
-    else:
-        memcache.add(board_id, board, 3600)
-    namespace_manager.set_namespace(board_id)
-    return board
-
-def myuser_required(required_auth = const.BANNED):
+def board_required():
     def wrapper_func(original_func):
         def decorated_func(org, namespace, *args, **kwargs):
-            board = get_board(namespace)
-            user = users.get_current_user()
-            if not user:
-                org.redirect(str(users.create_login_url('/%s/login?continue=%s' % (namespace, org.request.uri))))
-                return
-            myuser = model.MyUser.get_by_id(user.user_id())
-            if not myuser:
-                org.redirect(str('/%s/login?continue=%s' % (namespace, org.request.uri)))
-                return
-            context = {'namespace' : namespace,
-                       'board': board,
-                       'user': myuser,
-                       'login_url': '/%s/login?continue=%s' % (namespace, org.request.uri),
-                       'logout_url': users.create_logout_url(org.request.uri) }
-            if myuser.status < required_auth:
-                error.page(org, context, error.AuthorityRequiredError(required_auth, myuser.status)); return;
+            context = {}
+            namespace_manager.set_namespace(const.BOARD_NAMESPACE)
+            board = memcache.get(namespace)
+            if not board:
+                board = ndb.Key('Board', namespace).get()
+                memcache.add(namespace, board, 3600)
+            if not board or not board.readable():
+                error.page(org, context, error.BoardNotFound()); return;
+            namespace_manager.set_namespace(namespace)
+            context.update({
+                'namespace' : namespace,
+                'board': board,
+                'login_url': '/%s/_login?continue=%s' % (namespace, org.request.uri),
+                'logout_url': users.create_logout_url(org.request.uri),
+            })
             original_func(org, context, *args, **kwargs)
         return decorated_func
     return wrapper_func
 
 def memcached_with(second = const.MEMCACHE_DEFAULT_KEEP_SECONDS):
     def wrapper_func(original_func):
-        def decorated_func(org, namespace, *args, **kwargs):
-            board = get_board(namespace)
+        def decorated_func(org, context, *args, **kwargs):
             user = users.get_current_user()
-            key = org.request.path + ('!login' if user else '!logout')
+            key = org.request.path + ('!login' if user else '')
             html = memcache.get(key)
             if html:
                 org.response.out.write(html)
                 return
             else:
-                context = {'namespace' : namespace,
-                           'board': board,
-                           'user': user,
-                           'login_url': '/%s/login?continue=%s' % (namespace, org.request.uri),
-                           'logout_url': users.create_logout_url(org.request.uri) }
+                context.update({ 'user': user })
                 html = original_func(org, context, *args, **kwargs)
                 if html:
                     html += """<!-- memcached with "%s" at "%s" -->""" % (key, now())
@@ -113,14 +78,25 @@ def memcached_with(second = const.MEMCACHE_DEFAULT_KEEP_SECONDS):
         return decorated_func
     return wrapper_func
 
-def namespace_required():
+def myuser_required(required_auth = const.BANNED):
     def wrapper_func(original_func):
-        def decorated_func(org, namespace, *args, **kwargs):
-            board = get_board(namespace)
-            context = {'namespace' : namespace,
-                       'board': board,
-                       'login_url': '/%s/login?continue=%s' % (namespace, org.request.uri),
-                       'logout_url': users.create_logout_url(org.request.uri) }
+        def decorated_func(org, context, *args, **kwargs):
+            user = users.get_current_user()
+            if not user:
+                org.redirect(str(users.create_login_url(context['login_url']))); return;
+            myuser = memcache.get(user.user_id())
+            if not myuser:
+                myuser = model.MyUser.get_by_id(user.user_id())
+                memcache.add(user.user_id(), myuser, 600)
+            if not myuser or not myuser.readable():
+                org.redirect(str(context['login_url'])); return;
+            context.update({
+                'user': myuser,
+                'logout_url': users.create_logout_url(namespaced('/')),
+            })
+            if myuser.status < required_auth:
+                error.page(org, context, error.AuthorityRequiredError(required_auth, myuser.status)); return;
             original_func(org, context, *args, **kwargs)
         return decorated_func
     return wrapper_func
+

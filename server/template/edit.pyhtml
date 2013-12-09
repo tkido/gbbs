@@ -9,7 +9,7 @@
 
 <h2>次スレのテンプレート</h2>
 <p>
-<form method="post" action="/#{ namespace }/_edit/${ theme.key.id() }">
+<form method="post" action="/#{ namespace }/_edit/#{ thread.key.id() }">
     <strong>次スレッドのタイトル：</strong><br />
     <input name="title_template" type="text" value="${ theme.title_template }" /><br />
     <strong>次スレッドのテンプレート：</strong><br />

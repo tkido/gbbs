@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8"/>
+<title>GBBS ${ page_title }</title> 
+<link rel="shortcut icon" href="/static/favicon.ico" /> 
+<link rel="stylesheet" href="/static/gbbs.css" type="text/css" media="all" />
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+</head> 
+<body>
+<div class="container">
+
+<h1>${ page_title }</h1>
+
+#{_content}
+
+<?py include(':_analytics') ?>
+
+</div>
+</body>
+</html>

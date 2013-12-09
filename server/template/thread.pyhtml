@@ -2,9 +2,9 @@
 <a name="0"></a>
 <div class="template">
   <div class="res-header">
-    <a href="/${ namespace }/#{ thread_id }/"><span class="res-number">0</span></a>
+    <a href="/#{ namespace }/#{ thread_id }/"><span class="res-number">0</span></a>
     <span class="char-name">テンプレート</span>
-    <span class="datetime">${ thread.datetime_str }</span>
+    <span class="datetime">#{ thread.datetime_str }</span>
     <span class="hash">ID:#{ thread.hashed_id }</span>
   </div>
   <div class="res-content">
@@ -14,16 +14,14 @@
         <div class="navigation">
           <ul>
 <?py if thread.prev_thread_title: ?>
-            <li><a href="/${ namespace }/#{ thread.prev_thread_id }/">前スレ</a></li>
+            <li><a href="/#{ namespace }/#{ thread.prev_thread_id }/" title="${ thread.prev_thread_title }">前スレ</a></li>
 <?py #end ?>
 <?py if thread.next_thread_title: ?>
-            <li><a href="/${ namespace }/#{ thread.next_thread_id }/">次スレ</a></li>
+            <li><a href="/#{ namespace }/#{ thread.next_thread_id }/" title="${ thread.next_thread_title }">次スレ</a></li>
 <?py #end ?>
-<?py if thread.prev_thread_title: ?>
-            <li><a href="/${ namespace }/related/#{ thread_id }/">関連スレ一覧</a></li>
-<?py #end ?>
-<?py if thread.writable(): ?>
-            <li><a href="/${ namespace }/edit/#{ thread.theme_id }/">テンプレ編集</a></li>
+            <li><a href="/#{ namespace }/related/#{ thread_id }/">関連スレ一覧</a></li>
+<?py if thread.writable: ?>
+            <li><a href="/#{ namespace }/edit/#{ thread_id }/">テンプレ編集</a></li>
 <?py #end ?>
           </ul>
         </div>
@@ -36,9 +34,9 @@
 <a name="#{ res.number }"></a>
 <div class="response">
   <div class="res-header">
-    <a href="/${ namespace }/#{ thread_id }/#{ res.number }"><span class="res-number">#{ res.number }</span></a>
+    <a href="/#{ namespace }/#{ thread_id }/#{ res.number }"><span class="res-number">#{ res.number }</span></a>
     <span class="char-name">${ res.char_name }</span>
-    <span class="datetime">${ res.datetime_str }</span>
+    <span class="datetime">#{ res.datetime_str }</span>
     <span class="hash">ID:#{ res.hashed_id }</span>
   </div>
   <div class="res-content">
@@ -59,7 +57,7 @@
 </div>
 <?py #end ?>
 
-<?py if thread.writable(): ?>
+<?py if thread.writable: ?>
 <h2>あなたのレス</h2>
 <div id="form">
   <div class="res-content">
@@ -73,7 +71,7 @@
     </div>
     <div class="message-cell">
       <div class="message">
-        <form method="post" action="/${ namespace }/_write/#{ thread_id }">
+        <form method="post" action="/#{ namespace }/_write/#{ thread_id }">
           <select name="character" class="character">
             <option value="none">村人</option>
           </select>
@@ -92,18 +90,16 @@
   <div class="res-content">
     <div class="message-cell">
       <div class="message">
-        このスレにはもう書きこめません。
+        このスレは終了しました。
         <div class="navigation">
           <ul>
 <?py if thread.prev_thread_title: ?>
-            <li><a href="/${ namespace }/#{ thread.prev_thread_id }/">前スレ</a></li>
+            <li><a href="/#{ namespace }/#{ thread.prev_thread_id }/" title="${ thread.prev_thread_title }">前スレ</a></li>
 <?py #end ?>
 <?py if thread.next_thread_title: ?>
-            <li><a href="/${ namespace }/#{ thread.next_thread_id }/">次スレ</a></li>
+            <li><a href="/#{ namespace }/#{ thread.next_thread_id }/" title="${ thread.next_thread_title }">次スレ</a></li>
 <?py #end ?>
-<?py if thread.prev_thread_title: ?>
-            <li><a href="/${ namespace }/related/#{ thread_id }/">関連スレ一覧</a></li>
-<?py #end ?>
+            <li><a href="/#{ namespace }/related/#{ thread_id }/">関連スレ一覧</a></li>
           </ul>
         </div>
       </div>

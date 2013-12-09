@@ -9,9 +9,9 @@
 <body>
 <div class="container">
 
-<h1>${ page_title }</h1>
-
 #{_content}
+
+<?py include(':default/_navigation') ?>
 
 <?py include(':_gae-banner') ?>
 

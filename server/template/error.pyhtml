@@ -1,0 +1,14 @@
+<h1 class="error-title">${ error.title }</h1>
+<div class="error">
+  ${ error.message }
+  <div class="navigation">
+    <ul>
+<?py if hasattr(error, "continue_uri"): ?>
+      <li><a href="/#{ namespace }${ error.continue_uri }">${ error.continue_label }</a></li>
+<?py #end ?>
+<?py if hasattr(error, "retry_uri"): ?>
+     <li><a href="/#{ namespace }${ error.retry_uri }">もう一度試す</a></li>
+<?py #end ?>
+    </ul>
+  </div>
+</div>

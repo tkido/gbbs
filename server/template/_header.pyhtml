@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="/static/gbbs.css" type="text/css" media="all" />
 <link rel="stylesheet" href="/static/#{ namespace }/custom.css" type="text/css" media="all" />
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-<script src="/static/${ namespace }/characters.js"></script>
+<script src="/static/#{ namespace }/characters.js"></script>
 <script src="/static/gbbs.js"></script>
 <meta name="description" content="${ board.description }">
 <meta name="keywords" content="${ board.keywords }">
