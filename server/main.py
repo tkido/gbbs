@@ -17,6 +17,102 @@ import model
 import tengine
 import util
 
+def prepare_next_thread(thread_key, board):
+    tc_key = ndb.Key('Counter', 'Thread')
+    @ndb.transactional()
+    def increment_tc():
+        tc = tc_key.get()
+        tc.count += 1
+        tc.put()
+        return tc.count
+    next_thread_id = increment_tc()
+    
+    @ndb.transactional()
+    def set_next_thread_id():
+        thread = thread_key.get()
+        if thread.next_thread_id == 0:
+            thread.next_thread_id = next_thread_id
+            thread.put()
+            return thread
+    return set_next_thread_id()
+    
+def create_next_thread(thread_key, board):
+    thread = thread_key.get()
+    now = board.now()
+    datetime_str = util.datetime_to_str(now)
+    myuser_id = 0
+    hashed_id = board.hash(myuser_id)
+    
+    theme = ndb.Key('Theme', thread.theme_id).get()
+    next_thread_number = thread.thread_number + 1
+    new_title = theme.title_template % next_thread_number
+    
+    next_key = ndb.Key('Thread', thread.next_thread_id)
+    @ndb.transactional()
+    def get_or_insert():
+        next_thread = next_key.get()
+        if next_thread:
+            return next_thread
+        else:
+            next_thread = model.Thread(id = thread.next_thread_id,
+                                       theme_id = thread.theme_id,
+                                       author_id = myuser_id,
+                                       updater_id = myuser_id,
+
+                                       status = const.NORMAL,
+                                       updated_at = now,
+                                       since = now,
+
+                                       title = new_title,
+                                       datetime_str = datetime_str,
+                                       hashed_id = hashed_id,
+                                       content = theme.template,
+
+                                       thread_number = next_thread_number,
+                                       response_count = 0,
+                                       responsed_at = now,
+
+                                       prev_thread_id = thread.key.id(),
+                                       prev_thread_title = thread.title,
+                                       next_thread_id = 0,
+                                       next_thread_title = '',
+                                      )
+            if next_thread.put():
+                return next_thread
+            else:
+                return None
+
+    next_thread = get_or_insert()
+    if next_thread:
+        util.flush_page('/related/%d/' % thread.theme_id)
+        @ndb.transactional()
+        def set_next_thread_title():
+            thread = thread_key.get()
+            if thread.next_thread_title == '':
+                thread.next_thread_title = next_thread.title
+                if thread.put():
+                    return thread
+                else:
+                    return None
+        return set_next_thread_title()
+    else:
+        return None
+
+def store(thread_key):
+    @ndb.transactional()
+    def store_thread():
+        thread = thread_key.get()
+        thread.status = const.STORED
+        thread.put()
+    store_thread()
+
+def clean_old_threads(board):
+    query = model.Thread.query_normal()
+    keys = query.fetch(board.max_threads+3, keys_only=True)
+    needs = len(keys) - board.max_threads
+    for i in range(needs):
+        store(keys[-i-1])
+
 class IndexHandler(webapp2.RequestHandler):
     @util.board_required()
     @util.memcached_with(5)
@@ -463,102 +559,6 @@ class MyPageHandler(webapp2.RequestHandler):
         })
         self.response.out.write(tengine.render(':mypage', context))
 
-def prepare_next_thread(thread_key, board):
-    tc_key = ndb.Key('Counter', 'Thread')
-    @ndb.transactional()
-    def increment_tc():
-        tc = tc_key.get()
-        tc.count += 1
-        tc.put()
-        return tc.count
-    next_thread_id = increment_tc()
-    
-    @ndb.transactional()
-    def set_next_thread_id():
-        thread = thread_key.get()
-        if thread.next_thread_id == 0:
-            thread.next_thread_id = next_thread_id
-            thread.put()
-            return thread
-    return set_next_thread_id()
-    
-def create_next_thread(thread_key, board):
-    thread = thread_key.get()
-    now = board.now()
-    datetime_str = util.datetime_to_str(now)
-    myuser_id = 0
-    hashed_id = board.hash(myuser_id)
-    
-    theme = ndb.Key('Theme', thread.theme_id).get()
-    next_thread_number = thread.thread_number + 1
-    new_title = theme.title_template % next_thread_number
-    
-    next_key = ndb.Key('Thread', thread.next_thread_id)
-    @ndb.transactional()
-    def get_or_insert():
-        next_thread = next_key.get()
-        if next_thread:
-            return next_thread
-        else:
-            next_thread = model.Thread(id = thread.next_thread_id,
-                                       theme_id = thread.theme_id,
-                                       author_id = myuser_id,
-                                       updater_id = myuser_id,
-
-                                       status = const.NORMAL,
-                                       updated_at = now,
-                                       since = now,
-
-                                       title = new_title,
-                                       datetime_str = datetime_str,
-                                       hashed_id = hashed_id,
-                                       content = theme.template,
-
-                                       thread_number = next_thread_number,
-                                       response_count = 0,
-                                       responsed_at = now,
-
-                                       prev_thread_id = thread.key.id(),
-                                       prev_thread_title = thread.title,
-                                       next_thread_id = 0,
-                                       next_thread_title = '',
-                                      )
-            if next_thread.put():
-                return next_thread
-            else:
-                return None
-
-    next_thread = get_or_insert()
-    if next_thread:
-        util.flush_page('/related/%d/' % thread.theme_id)
-        @ndb.transactional()
-        def set_next_thread_title():
-            thread = thread_key.get()
-            if thread.next_thread_title == '':
-                thread.next_thread_title = next_thread.title
-                if thread.put():
-                    return thread
-                else:
-                    return None
-        return set_next_thread_title()
-    else:
-        return None
-
-def store(thread_key):
-    @ndb.transactional()
-    def store_thread():
-        thread = thread_key.get()
-        thread.status = const.STORED
-        thread.put()
-    store_thread()
-
-def clean_old_threads(board):
-    query = model.Thread.query_normal()
-    keys = query.fetch(board.max_threads+3, keys_only=True)
-    needs = len(keys) - board.max_threads
-    for i in range(needs):
-        store(keys[-i-1])
-    
 app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),
                                (r'/([0-9a-z_-]{2,16})/related/(\d+)/', RelatedThreadHandler),
