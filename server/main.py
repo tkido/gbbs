@@ -444,12 +444,15 @@ class LoginHandler(webapp2.RequestHandler):
             self.redirect(str(users.create_login_url(self.request.uri)))
             return
         myuser = model.MyUser.get_by_id(user.user_id())
-        # myuserが削除済みの時の考慮が必要
         if myuser:
-            redirect_to = self.request.get('continue') or '/%s/' % namespace
-            self.redirect(str(redirect_to))
-            return
-        
+            if (myuser.status == const.READER) or (myuser.status == const.DELETED) :
+                redirect_to = '/%s/agreement/' % namespace
+                if self.request.get('continue'):
+                    redirect_to += '?continue=%s' % self.request.get('continue')
+                self.redirect(str(redirect_to)); return;
+            else:
+                redirect_to = self.request.get('continue') or '/%s/' % namespace
+                self.redirect(str(redirect_to)); return;
         uc_key = ndb.Key('Counter', 'MyUser')
         @ndb.transactional()
         def increment_uc():
@@ -472,11 +475,10 @@ class LoginHandler(webapp2.RequestHandler):
                              )
         if not myuser.put():
             error.page(self, context, error.NewUserCouldNotPut()); return;
-        else:
-            redirect_to = '/%s/agreement/' % namespace
-            if self.request.get('continue'):
-                redirect_to += '?continue=%s' % self.request.get('continue')
-            self.redirect(str(redirect_to))
+        redirect_to = '/%s/agreement/' % namespace
+        if self.request.get('continue'):
+            redirect_to += '?continue=%s' % self.request.get('continue')
+        self.redirect(str(redirect_to))
 
 class AgreeHandler(webapp2.RequestHandler):
     @util.board_required()
