@@ -1,0 +1,9 @@
+<?py if user: ?>
+<div class="error">
+すでに管理者ユーザが存在します！！
+</div>
+<?py else: ?>
+<form method="post" action="/s/_init/">
+  <input type="submit" value="送信する" /><br />
+</form>
+<?py #end ?>

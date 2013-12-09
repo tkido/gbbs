@@ -12,40 +12,16 @@ import webapp2
 
 import config
 import const
+import error
 import model
 import tengine
 import util
-
-def initialize(org):
-    namespace_manager.set_namespace(const.BOARD_NAMESPACE)
-    user = users.get_current_user()
-    myuser = model.MyUser.get_by_id(user.user_id())
-    if myuser:
-        org.redirect('/s/')
-        return
-    now = util.now()
-    myuser = model.MyUser(id = user.user_id(),
-                          user = user,
-                          myuser_id = 1,
-                          status = const.SYSTEM_ADMIN,
-                          
-                          ban_count = 0,
-                          updated_at = now,
-                          since = now )
-    myuser_counter = model.Counter(id = 'MyUser', count = 1)
-    board_counter = model.Counter(id = 'Board', count = 0)
-    
-    ndb.put_multi([myuser, myuser_counter, board_counter])
-    org.redirect('/s/')
 
 class IndexHandler(webapp2.RequestHandler):
     def get(self):
         namespace_manager.set_namespace(const.BOARD_NAMESPACE)
         user = users.get_current_user()
         myuser = model.MyUser.get_by_id(user.user_id())
-        if not myuser:
-            initialize(self)
-            return
         myuser_counter = model.Counter.get_by_id('MyUser')
         board_counter = model.Counter.get_by_id('Board')
         
@@ -53,8 +29,6 @@ class IndexHandler(webapp2.RequestHandler):
             'page_title' : 'システム管理者専用ページ',
             'namespace' : const.BOARD_NAMESPACE,
             'user' : myuser,
-            'login_url' : '/login?continue=' + self.request.uri,
-            'logout_url' : users.create_logout_url(self.request.uri),
             
             'total_user': myuser_counter.count,
             'total_board': board_counter.count,
@@ -75,12 +49,18 @@ class MemcacheHandler(webapp2.RequestHandler):
             self.response.out.write("%s = %s<br>\n" % (name, dic[name]))
 
 class CreateBoardHandler(webapp2.RequestHandler):
-    def get(self, namespace):
+    def post(self):
         namespace_manager.set_namespace(const.BOARD_NAMESPACE)
         user = users.get_current_user()
         myuser = model.MyUser.get_by_id(user.user_id())
         if not myuser:
             return
+        namespace = self.request.get('bbs_id')
+        board = model.Board.get_by_id(namespace)
+        if board:
+            raise error.SameId()
+        board_counter = model.Counter.get_by_id('Board')
+        board_counter.count += 1
         now = util.now()
         board = model.Board(id = namespace,
                             author_id = myuser.myuser_id,
@@ -109,18 +89,61 @@ class CreateBoardHandler(webapp2.RequestHandler):
                             max_rows = 80,
                             max_rows_template = 80,
                            )
-        
         namespace_manager.set_namespace(namespace)
         myuser_counter = model.Counter(id = 'MyUser', count = 0)
         theme_counter = model.Counter(id = 'Theme', count = 0)
         thread_counter = model.Counter(id = 'Thread', count = 0)
+        ndb.put_multi([board_counter, board, myuser_counter, thread_counter, theme_counter])
         
-        ndb.put_multi([myuser_counter, thread_counter, theme_counter, myuser, board])
+        self.redirect('/s/')
+
+class InitHandler(webapp2.RequestHandler):
+    def get(self):
+        namespace_manager.set_namespace(const.BOARD_NAMESPACE)
+        user = users.get_current_user()
+        myuser = model.MyUser.get_by_id(user.user_id())
+        context = {
+            'page_title' : '管理者ユーザとカウンタの作成',
+            'namespace' : const.BOARD_NAMESPACE,
+            'user' : myuser,
+        }
+        html = tengine.render(':sysadmin/init', context, layout=':sysadmin/base')
+        self.response.out.write(html)
+        
+class InitializeHandler(webapp2.RequestHandler):
+    def post(self):
+        namespace_manager.set_namespace(const.BOARD_NAMESPACE)
+        user = users.get_current_user()
+        myuser = model.MyUser.get_by_id(user.user_id())
+        myuser_counter = model.Counter.get_by_id('MyUser')
+        board_counter = model.Counter.get_by_id('Board')
+        if myuser:
+            self.redirect('/s/'); return;
+        if myuser_counter:
+            self.redirect('/s/'); return;
+        if board_counter:
+            self.redirect('/s/'); return;
+        now = util.now()
+        myuser = model.MyUser(id = user.user_id(),
+                              user = user,
+                              myuser_id = 1,
+                              status = const.SYSTEM_ADMIN,
+                              
+                              ban_count = 0,
+                              updated_at = now,
+                              since = now )
+        myuser_counter = model.Counter(id = 'MyUser', count = 1)
+        board_counter = model.Counter(id = 'Board', count = 0)
+        
+        ndb.put_multi([myuser, myuser_counter, board_counter])
+        self.redirect('/s/')
 
 app = webapp2.WSGIApplication([('/s/', IndexHandler),
                                ('/s/env', EnvironmentHandler),
                                (r'/s/memcache/([0-9a-z_-]{2,16})', MemcacheHandler),
-                               (r'/s/create/board/([0-9a-z_-]{2,16})', CreateBoardHandler),
+                               (r'/s/_create/', CreateBoardHandler),
+                               ('/s/init/', InitHandler),
+                               ('/s/_init/', InitializeHandler),
                                ],
                                debug=True
                               )

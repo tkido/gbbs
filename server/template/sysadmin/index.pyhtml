@@ -2,3 +2,9 @@
   <li>管理ユーザー総数：#{ total_user }</li>
   <li>掲示板総数：#{ total_board }</li>
 </ul>
+
+<h1>新しい掲示板の作成</h1>
+<form method="post" action="/s/_create/">
+  <input type="text" name="bbs_id" />
+  <input type="submit" value="送信する" />
+</form>
