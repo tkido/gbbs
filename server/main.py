@@ -127,7 +127,6 @@ class IndexHandler(webapp2.RequestHandler):
         self.response.out.write(html)
         return html
 
-
 class ThreadHandler(webapp2.RequestHandler):
     @util.board_required()
     @util.memcached_with()
@@ -190,95 +189,18 @@ class ThreadHandler(webapp2.RequestHandler):
             html = None
         return html
 
-class NewThreadHandler(webapp2.RequestHandler):
+class LinkHandler(webapp2.RequestHandler):
     @util.board_required()
-    @util.myuser_required(const.WRITER)
+    @util.memcached_with()
     def get(self, context):
-        context.update({'page_title' : '新しいスレッドの作成'})
-        self.response.out.write(tengine.render(':new', context))
-        
-class CreateNewThreadHandler(webapp2.RequestHandler):
-    @util.board_required()
-    def get(self, context):
-        error.page(self, context, error.PostMethodRequired('新スレッド作成画面へ戻る', '/new/')); return;
-    
-    @util.board_required()
-    @util.myuser_required(const.WRITER)
-    def post(self, context):
-        board = context['board']
-        title_template = board.validate_title(self.request.get('title_template'))
-        if not title_template:
-            error.page(self, context, error.TitleValidation(board)); return;
-        template = board.validate_template(self.request.get('template'))
-        if not template:
-            error.page(self, context, error.ContentValidation(board)); return;
-        
-        @ndb.transactional()
-        def increment_tc():
-            tc = tc_key.get()
-            tc.count += 1
-            tc.put()
-            return tc.count
-        tc_key = ndb.Key('Counter', 'Theme')
-        theme_id = increment_tc()
-        if not theme_id:
-            error.page(self, context, error.NewThemeIdCouldNotGet()); return;
-        
-        myuser = context['user']
-        now = board.now()
-        theme = model.Theme(id = theme_id,
-                            author_id = myuser.myuser_id,
-                            updater_id = myuser.myuser_id,
-                            
-                            status = const.NORMAL,
-                            updated_at = now,
-                            since = now,
-                            
-                            title_template = title_template,
-                            template = template,
-                            keeped_title_template = title_template,
-                            keeped_template = template,
-                           )
-        theme_key = theme.put()
-        if not theme_key:
-            error.page(self, context, error.NewThemeCouldNotCreate()); return;
-        
-        tc_key = ndb.Key('Counter', 'Thread')
-        thread_id = increment_tc()
-        if not thread_id:
-            error.page(self, context, error.NewThreadIdCouldNotGet()); return;
-        thread = model.Thread(id = thread_id,
-                              theme_id = theme_id,
-                              author_id = myuser.myuser_id,
-                              updater_id = myuser.myuser_id,
-                              
-                              status = const.NORMAL,
-                              updated_at = now,
-                              since = now,
-                              
-                              title = title_template % 1,
-                              datetime_str = util.datetime_to_str(now),
-                              hashed_id = board.hash(myuser.myuser_id),
-                              content = template,
-                              
-                              thread_number = 1,
-                              response_count = 0,
-                              responsed_at = now,
-                              
-                              prev_thread_id = 0,
-                              prev_thread_title = '',
-                              next_thread_id = 0,
-                              next_thread_title = '',
-                             )
-        thread_key = thread.put()
-        if not thread_key:
-            error.page(self, context, error.NewThreadCouldNotCreate()); return;
-        
-        self.redirect(util.namespaced('/%d/' % thread_id))
-        
-        if config.LOCAL_SDK:
-            time.sleep(0.5)
-        clean_old_threads(board)
+        href = self.request.get('to')
+        context.update({
+            'page_title' : '外部ページへのリンク',
+            'href': href,
+        })
+        html = tengine.render(':link', context)
+        self.response.out.write(html)
+        return html
 
 class WriteHandler(webapp2.RequestHandler):
     @util.board_required()
@@ -556,11 +478,102 @@ class MyPageHandler(webapp2.RequestHandler):
         })
         self.response.out.write(tengine.render(':mypage', context))
 
+class NewThreadHandler(webapp2.RequestHandler):
+    @util.board_required()
+    @util.myuser_required(const.WRITER)
+    def get(self, context):
+        context.update({'page_title' : '新しいスレッドの作成'})
+        self.response.out.write(tengine.render(':new', context))
+        
+class CreateNewThreadHandler(webapp2.RequestHandler):
+    @util.board_required()
+    def get(self, context):
+        error.page(self, context, error.PostMethodRequired('新スレッド作成画面へ戻る', '/new/')); return;
+    
+    @util.board_required()
+    @util.myuser_required(const.WRITER)
+    def post(self, context):
+        board = context['board']
+        title_template = board.validate_title(self.request.get('title_template'))
+        if not title_template:
+            error.page(self, context, error.TitleValidation(board)); return;
+        template = board.validate_template(self.request.get('template'))
+        if not template:
+            error.page(self, context, error.ContentValidation(board)); return;
+        
+        @ndb.transactional()
+        def increment_tc():
+            tc = tc_key.get()
+            tc.count += 1
+            tc.put()
+            return tc.count
+        tc_key = ndb.Key('Counter', 'Theme')
+        theme_id = increment_tc()
+        if not theme_id:
+            error.page(self, context, error.NewThemeIdCouldNotGet()); return;
+        
+        myuser = context['user']
+        now = board.now()
+        theme = model.Theme(id = theme_id,
+                            author_id = myuser.myuser_id,
+                            updater_id = myuser.myuser_id,
+                            
+                            status = const.NORMAL,
+                            updated_at = now,
+                            since = now,
+                            
+                            title_template = title_template,
+                            template = template,
+                            keeped_title_template = title_template,
+                            keeped_template = template,
+                           )
+        theme_key = theme.put()
+        if not theme_key:
+            error.page(self, context, error.NewThemeCouldNotCreate()); return;
+        
+        tc_key = ndb.Key('Counter', 'Thread')
+        thread_id = increment_tc()
+        if not thread_id:
+            error.page(self, context, error.NewThreadIdCouldNotGet()); return;
+        thread = model.Thread(id = thread_id,
+                              theme_id = theme_id,
+                              author_id = myuser.myuser_id,
+                              updater_id = myuser.myuser_id,
+                              
+                              status = const.NORMAL,
+                              updated_at = now,
+                              since = now,
+                              
+                              title = title_template % 1,
+                              datetime_str = util.datetime_to_str(now),
+                              hashed_id = board.hash(myuser.myuser_id),
+                              content = template,
+                              
+                              thread_number = 1,
+                              response_count = 0,
+                              responsed_at = now,
+                              
+                              prev_thread_id = 0,
+                              prev_thread_title = '',
+                              next_thread_id = 0,
+                              next_thread_title = '',
+                             )
+        thread_key = thread.put()
+        if not thread_key:
+            error.page(self, context, error.NewThreadCouldNotCreate()); return;
+        
+        self.redirect(util.namespaced('/%d/' % thread_id))
+        
+        if config.LOCAL_SDK:
+            time.sleep(0.5)
+        clean_old_threads(board)
+
 app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),
+                               (r'/([0-9a-z_-]{2,16})/link', LinkHandler),
                                (r'/([0-9a-z_-]{2,16})/related/(\d+)/', RelatedThreadHandler),
-                               (r'/([0-9a-z_-]{2,16})/_login', LoginHandler),
                                (r'/([0-9a-z_-]{2,16})/stored/(\d{4})?/?(\d{1,2})?/?', StoredHandler),
+                               (r'/([0-9a-z_-]{2,16})/_login', LoginHandler),
                                (r'/([0-9a-z_-]{2,16})/_write/(\d+)', WriteHandler),
                                (r'/([0-9a-z_-]{2,16})/mypage/', MyPageHandler),
                                (r'/([0-9a-z_-]{2,16})/agreement/', AgreementHandler),
