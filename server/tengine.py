@@ -11,15 +11,19 @@ import tenjin.gae
 from tenjin.helpers import escape, to_str
 from tenjin.helpers.html import text2html
 
+import config
+
 tenjin.gae.init()
 #logging.basicConfig(level=logging.DEBUG)
 #tenjin.logger = logging
 tengine = tenjin.Engine(path=['template'], postfix='.pyhtml', layout=':base')
 
+GBBS_URL_HEAD = 'http://%s/' % config.HTTP_HOST
 ANCHOR_PAT = re.compile('&gt;&gt;(1000|0|[1-9][0-9]{0,2})(-?)((1000|0|[1-9][0-9]{0,2})?)')
 # John Gruber's regex to find URLs in plain text, converted to Python/Unicode
 # https://gist.github.com/uogbuji/705383
 GRUBER_URLINTEXT_PAT = re.compile(ur'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))')
+
 
 def decorate(source):
     def anchor(source):
@@ -37,7 +41,10 @@ def decorate(source):
     def link(match):
         def replaced(match):
             g = match.group()
-            return '<a href=\"/%s/link?to=%s\">%s</a>' % (namespace_manager.get_namespace(), g, g)
+            if g.startswith(GBBS_URL_HEAD):
+                return '<a href=\"%s\">%s</a>' % (g, g)
+            else:
+                return '<a href=\"/%s/link?to=%s\">%s</a>' % (namespace_manager.get_namespace(), g, g)
         return re.sub(GRUBER_URLINTEXT_PAT, replaced, source)
     return anchor(link(source))
 

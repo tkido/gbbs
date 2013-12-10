@@ -64,7 +64,7 @@ def memcached_with(second = const.MEMCACHE_DEFAULT_KEEP_SECONDS):
     def wrapper_func(original_func):
         def decorated_func(org, context, *args, **kwargs):
             user = users.get_current_user()
-            key = org.request.path + ('!login' if user else '')
+            key = org.request.uri + ('!login' if user else '')
             html = memcache.get(key)
             if html:
                 org.response.out.write(html)
