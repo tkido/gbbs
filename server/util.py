@@ -32,7 +32,7 @@ def flush_user(myuser):
     memcache.delete(myuser.user.user_id())
 
 def flush_page(path):
-    path = namespaced(path)
+    path = 'http://%s/%s%s' % (config.HTTP_HOST, namespace_manager.get_namespace(), path)
     memcache.delete_multi([path + '!login', path])
 
 def namespaced(path):
