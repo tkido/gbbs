@@ -10,7 +10,7 @@
   <div class="res-content">
     <div class="message-cell">
       <div class="message">
-        #{ res_anchor(text2html(thread.content)) }
+        #{ decorate(text2html(thread.content)) }
         <div class="navigation">
           <ul>
 <?py if thread.prev_thread_title: ?>
@@ -50,7 +50,7 @@
     </div>
     <div class="message-cell">
       <div class="message">
-        #{ res_anchor(text2html(res.content)) }
+        #{ decorate(text2html(res.content)) }
       </div>
     </div>
   </div>

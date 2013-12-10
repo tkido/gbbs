@@ -14,10 +14,13 @@ tenjin.gae.init()
 #tenjin.logger = logging
 tengine = tenjin.Engine(path=['template'], postfix='.pyhtml', layout=':base')
 
-pattern = re.compile('&gt;&gt;(1000|0|[1-9][0-9]{0,2})(-?)((1000|0|[1-9][0-9]{0,2})?)')
-
-def res_anchor(source):
-    def replace(match):
+ANCHOR_PAT = re.compile('&gt;&gt;(1000|0|[1-9][0-9]{0,2})(-?)((1000|0|[1-9][0-9]{0,2})?)')
+# John Gruber's regex to find URLs in plain text, converted to Python/Unicode
+# https://gist.github.com/uogbuji/705383
+GRUBER_URLINTEXT_PAT = re.compile(ur'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))')
+ 
+def decorate(source):
+    def replace_anchor(match):
         g = match.groups()
         if g[1]:
             return '<a href=\"#%s\">&gt;&gt;</a><a href=\"%s%s%s\">%s%s%s</a>' % \
@@ -27,7 +30,11 @@ def res_anchor(source):
         else:
             return '<a href=\"#%s\">&gt;&gt;</a><a href=\"%s\">%s</a>%s%s' % \
                    (g[0], g[0], g[0], g[1], g[2])
-    return re.sub(pattern, replace, source)
+    def replace_uri(match):
+        g = match.group()
+        return '<a href=\"%s\">%s</a>' % (g, g)
+    source = re.sub(GRUBER_URLINTEXT_PAT, replace_uri, source)
+    return re.sub(ANCHOR_PAT, replace_anchor, source)
 
 def render(tempalte, context, **kwargs):
     return tengine.render(tempalte, context, **kwargs)
