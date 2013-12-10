@@ -7,6 +7,13 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 <script src="/static/#{ namespace }/characters.js"></script>
 <script src="/static/gbbs.js"></script>
+<?py if not board.allow_robots: ?>
+<meta name="robots" content="noindex,nofollow">
+<?py #end ?>
+<?py if board.description: ?>
 <meta name="description" content="${ board.description }">
+<?py #end ?>
+<?py if board.keywords: ?>
 <meta name="keywords" content="${ board.keywords }">
+<?py #end ?>
 </head> 
