@@ -24,7 +24,7 @@
   <div class="res-content">
     <div class="message-cell">
       <div class="message">
-        #{ res_anchor(text2html(theme.keeped_template)) }
+        #{ decorate(text2html(theme.keeped_template)) }
       </div>
     </div>
   </div>
