@@ -81,8 +81,8 @@ class CreateBoardHandler(webapp2.RequestHandler):
                             allow_index = True,
                             allow_robots = True,
                             
-                            max_reses = 3,
-                            max_threads = 3,
+                            max_reses = 1000,
+                            max_threads = 1000,
                             max_chars = 4096,
                             max_chars_title = 32,
                             max_chars_template = 4096 * 2,
