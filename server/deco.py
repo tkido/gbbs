@@ -35,7 +35,6 @@ def board():
                 original_func(org, context, *args, **kwargs)
             except error.Error as err:
                 error.page(org, context, err)
-                return
         return decorated_func
     return wrapper_func
 
