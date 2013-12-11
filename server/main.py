@@ -12,6 +12,7 @@ from google.appengine.ext import ndb
 
 import config
 import const
+import deco
 import error
 import model
 import tengine
@@ -114,8 +115,8 @@ def clean_old_threads(board):
         store(keys[-i-1])
 
 class IndexHandler(webapp2.RequestHandler):
-    @util.board_required()
-    @util.memcached_with(5)
+    @deco.board()
+    @deco.cache(5)
     def get(self, context):
         query = model.Thread.query_normal()
         threads = query.fetch(const.MAX_FETCH_COUNT)
@@ -128,8 +129,8 @@ class IndexHandler(webapp2.RequestHandler):
         return html
 
 class ThreadHandler(webapp2.RequestHandler):
-    @util.board_required()
-    @util.memcached_with()
+    @deco.board()
+    @deco.cache()
     def get(self, context, thread_id, first, hyphen, last):
         board = context['board']
         
@@ -190,8 +191,8 @@ class ThreadHandler(webapp2.RequestHandler):
         return html
 
 class LinkHandler(webapp2.RequestHandler):
-    @util.board_required()
-    @util.memcached_with()
+    @deco.board()
+    @deco.cache()
     def get(self, context):
         href = self.request.get('to')
         context.update({
@@ -203,12 +204,12 @@ class LinkHandler(webapp2.RequestHandler):
         return html
 
 class WriteHandler(webapp2.RequestHandler):
-    @util.board_required()
+    @deco.board()
     def get(self, context, thread_id):
         error.page(self, context, error.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)); return;
         
-    @util.board_required()
-    @util.myuser_required(const.WRITER)
+    @deco.board()
+    @deco.myuser(const.WRITER)
     def post(self, context, thread_id):
         board = context['board']
         content = board.validate_content(self.request.get('content'))
@@ -276,8 +277,8 @@ class WriteHandler(webapp2.RequestHandler):
         self.redirect(util.namespaced('/%d/#%d' % (thread_id, new_number)))
 
 class RelatedThreadHandler(webapp2.RequestHandler):
-    @util.board_required()
-    @util.memcached_with()
+    @deco.board()
+    @deco.cache()
     def get(self, context, thread_id):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
@@ -294,8 +295,8 @@ class RelatedThreadHandler(webapp2.RequestHandler):
         return html
 
 class EditTemplateHandler(webapp2.RequestHandler):
-    @util.board_required()
-    @util.myuser_required(const.WRITER)
+    @deco.board()
+    @deco.myuser(const.WRITER)
     def get(self, context, thread_id):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
@@ -314,12 +315,12 @@ class EditTemplateHandler(webapp2.RequestHandler):
         self.response.out.write(tengine.render(':edit', context))
 
 class UpdateTemplateHandler(webapp2.RequestHandler):
-    @util.board_required()
+    @deco.board()
     def get(self, context, thread_id):
         error.page(self, context, error.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)); return;
     
-    @util.board_required()
-    @util.myuser_required(const.WRITER)
+    @deco.board()
+    @deco.myuser(const.WRITER)
     def post(self, context, thread_id):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
@@ -357,7 +358,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
             self.redirect(util.namespaced('/edit/%d/' % thread_id))
 
 class LoginHandler(webapp2.RequestHandler):
-    @util.board_required()
+    @deco.board()
     def get(self, context):
         namespace = context['namespace']
         board = context['board']
@@ -403,8 +404,8 @@ class LoginHandler(webapp2.RequestHandler):
         self.redirect(str(redirect_to))
 
 class AgreeHandler(webapp2.RequestHandler):
-    @util.board_required()
-    @util.myuser_required(const.DELETED)
+    @deco.board()
+    @deco.myuser(const.DELETED)
     def get(self, context):
         namespace = context['namespace']
         myuser = context['user']
@@ -422,7 +423,7 @@ class AgreeHandler(webapp2.RequestHandler):
         self.redirect(str(redirect_to))
 
 class AgreementHandler(webapp2.RequestHandler):
-    @util.board_required()
+    @deco.board()
     def get(self, context):
         namespace = context['namespace']
         user = users.get_current_user()
@@ -440,8 +441,8 @@ class AgreementHandler(webapp2.RequestHandler):
         
 
 class StoredHandler(webapp2.RequestHandler):
-    @util.board_required()
-    @util.memcached_with()
+    @deco.board()
+    @deco.cache()
     def get(self, context, year, month):
         board = context['board']
         if ((not year) and (not month)):
@@ -469,8 +470,8 @@ class StoredHandler(webapp2.RequestHandler):
         return html
         
 class MyPageHandler(webapp2.RequestHandler):
-    @util.board_required()
-    @util.myuser_required(const.BANNED)
+    @deco.board()
+    @deco.myuser(const.BANNED)
     def get(self, context):
         context.update({
             'page_title' : 'ユーザー情報',
@@ -479,19 +480,19 @@ class MyPageHandler(webapp2.RequestHandler):
         self.response.out.write(tengine.render(':mypage', context))
 
 class NewThreadHandler(webapp2.RequestHandler):
-    @util.board_required()
-    @util.myuser_required(const.WRITER)
+    @deco.board()
+    @deco.myuser(const.WRITER)
     def get(self, context):
         context.update({'page_title' : '新しいスレッドの作成'})
         self.response.out.write(tengine.render(':new', context))
         
 class CreateNewThreadHandler(webapp2.RequestHandler):
-    @util.board_required()
+    @deco.board()
     def get(self, context):
         error.page(self, context, error.PostMethodRequired('新スレッド作成画面へ戻る', '/new/')); return;
     
-    @util.board_required()
-    @util.myuser_required(const.WRITER)
+    @deco.board()
+    @deco.myuser(const.WRITER)
     def post(self, context):
         board = context['board']
         title_template = board.validate_title(self.request.get('title_template'))
