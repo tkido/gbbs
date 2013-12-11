@@ -109,6 +109,8 @@ class MyUser(ndb.Model):
     
     def readable(self):
         return self.status != const.DELETED
+    def flush(self):
+        memcache.delete(self.key.id())
     
 class Theme(ndb.Model):
     #id = from model.Counter("Theme").count
