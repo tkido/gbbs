@@ -231,7 +231,6 @@ class WriteHandler(webapp2.RequestHandler):
         
         new_id = model.Response.latest_num_of(thread_id) + 1
         new_number = new_id % const.TT
-        logging.error('new_id = %d' % new_id)
         response = model.Response(id = new_id,
                                   author_id = myuser.myuser_id,
                                   updater_id = myuser.myuser_id,
@@ -249,18 +248,17 @@ class WriteHandler(webapp2.RequestHandler):
                                   char_id = char_id,
                                   char_emotion = char_emotion,
                                  )
-        success = False
         @ndb.transactional()
         def write_unique():
             other = model.Response.get_by_id(new_id)
             if other:
-                logging.error('***** raise error')
                 raise error.SameId()
             else:
                 return response.put()
-        while not success:
+        while True:
             try:
-                success = write_unique()
+                if write_unique():
+                    break
             except error.SameId, err:
                 new_id += 1
                 new_number = new_id % const.TT
@@ -268,9 +266,6 @@ class WriteHandler(webapp2.RequestHandler):
                     error.page(self, context, error.ThreadNotWritable()); return;
                 response.key = ndb.Key('Response', new_id)
                 response.number = new_number
-                
-                logging.error('***** new_id = %d' % new_id)
-                logging.error('***** response.key.id = %d' % response.key.id())
         util.flush_page('/%d/' % thread_id)
         if config.LOCAL_SDK:
             time.sleep(0.5)
