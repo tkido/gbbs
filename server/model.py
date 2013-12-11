@@ -169,7 +169,7 @@ class Thread(ndb.Model):
         return cls.query(cls.theme_id == theme_id)
 
 class Response(ndb.Model):
-    #id = thread.id * 10000 + id
+    #id = thread.id * const.TT + number
     author_id = ndb.IntegerProperty(required=True, indexed=False)
     updater_id = ndb.IntegerProperty(required=True, indexed=False)
     
@@ -188,16 +188,16 @@ class Response(ndb.Model):
     
     @classmethod
     def query_normal(cls, thread_id, first):
-        first_key = ndb.Key('Response', thread_id * 10000 + first)
-        last_key = ndb.Key('Response', thread_id * 10000 + 1000)
+        first_key = ndb.Key('Response', thread_id * const.TT + first)
+        last_key = ndb.Key('Response', thread_id * const.TT + const.K)
         return cls.query(first_key <= cls._key).filter(cls._key <= last_key)
     
     @classmethod
     def latest_num_of(cls, thread_id):
-        first_id = thread_id * 10000
+        first_id = thread_id * const.TT
         first_key = ndb.Key('Response', first_id)
-        last_key = ndb.Key('Response', first_id + 1000)
-        keys = cls.query(first_key <= cls._key).filter(cls._key <= last_key).fetch(1000, keys_only=True)
+        last_key = ndb.Key('Response', first_id + const.K)
+        keys = cls.query(first_key <= cls._key).filter(cls._key <= last_key).fetch(config.MAX_FETCH, keys_only=True)
         if not keys:
             return first_id
         id = keys[-1].id()

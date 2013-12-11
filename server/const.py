@@ -1,8 +1,6 @@
 #!/usr/local/bin/python
 # -*- coding:utf-8 -*-
 
-MEMCACHE_DEFAULT_KEEP_SECONDS = 60
-
 #day of the week in Japanese
 WEEKDAYS = ['月', '火', '水', '木', '金', '土', '日']
 
@@ -45,7 +43,9 @@ STORED        =-1
 BANNED        =-2
 DELETED       =-3
 
-MAX_FETCH_COUNT = 1000
-
 #for boards
 BOARD_NAMESPACE = 'default'
+
+#const
+K  =  1000
+TT = 10000 # ten thousand

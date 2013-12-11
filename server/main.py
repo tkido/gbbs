@@ -119,7 +119,7 @@ class IndexHandler(webapp2.RequestHandler):
     @deco.cache(5)
     def get(self, context):
         query = model.Thread.query_normal()
-        threads = query.fetch(const.MAX_FETCH_COUNT)
+        threads = query.fetch(config.MAX_FETCH)
         context.update({
             'page_title' : '',
             'threads': threads,
@@ -160,7 +160,7 @@ class ThreadHandler(webapp2.RequestHandler):
         query = model.Response.query_normal(thread_id, first)
         reses = query.fetch(fetch_count) if fetch_count else []
         
-        last_number = reses[-1].key.id() % 10000 if reses else 0
+        last_number = reses[-1].key.id() % const.TT if reses else 0
         thread.writable = (thread.status == const.NORMAL and last_number < board.max_reses)
         
         context.update({
@@ -230,7 +230,7 @@ class WriteHandler(webapp2.RequestHandler):
         char_emotion = self.request.get('emotion') or 'normal'
         
         new_id = model.Response.latest_num_of(thread_id) + 1
-        new_number = new_id % 10000
+        new_number = new_id % const.TT
         logging.error('new_id = %d' % new_id)
         response = model.Response(id = new_id,
                                   author_id = myuser.myuser_id,
@@ -263,9 +263,9 @@ class WriteHandler(webapp2.RequestHandler):
                 success = write_unique()
             except error.SameId, err:
                 new_id += 1
-                if new_id > 10000:
+                new_number = new_id % const.TT
+                if new_number > const.K:
                     error.page(self, context, error.ThreadNotWritable()); return;
-                new_number = new_id % 10000
                 response.key = ndb.Key('Response', new_id)
                 response.number = new_number
                 
@@ -460,7 +460,7 @@ class StoredHandler(webapp2.RequestHandler):
                 update_from = datetime.datetime(year, month, 1)
                 update_to = datetime.datetime(year+1, 1, 1) if month == 12 else datetime.datetime(year, month+1, 1)
                 page_title = '%d年%d月' % (year, month)
-        threads = model.Thread.query_stored(update_from, update_to).fetch(1000)
+        threads = model.Thread.query_stored(update_from, update_to).fetch(config.MAX_FETCH)
         context.update({
             'page_title' : '%sの過去ログ' % page_title,
             'threads': threads,

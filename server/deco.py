@@ -8,6 +8,7 @@ from google.appengine.api import namespace_manager
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
+import config
 import const
 import error
 import model
@@ -21,7 +22,7 @@ def board():
             board = memcache.get(namespace)
             if not board:
                 board = ndb.Key('Board', namespace).get()
-                memcache.add(namespace, board, 3600)
+                memcache.add(namespace, board, config.CACHED_BOARD)
             if not board or not board.readable():
                 error.page(org, context, error.BoardNotFound()); return;
             namespace_manager.set_namespace(namespace)
@@ -35,7 +36,7 @@ def board():
         return decorated_func
     return wrapper_func
 
-def cache(second = const.MEMCACHE_DEFAULT_KEEP_SECONDS):
+def cache(second = config.CACHED_DEFAULT):
     def wrapper_func(original_func):
         def decorated_func(org, context, *args, **kwargs):
             user = users.get_current_user()
@@ -62,7 +63,7 @@ def myuser(required_auth = const.BANNED):
             myuser = memcache.get(user.user_id())
             if not myuser:
                 myuser = model.MyUser.get_by_id(user.user_id())
-                memcache.add(user.user_id(), myuser, 600)
+                memcache.add(user.user_id(), myuser, config.CACHED_MYUSER)
             if not myuser or not myuser.readable():
                 org.redirect(str(context['login_url'])); return;
             context.update({
