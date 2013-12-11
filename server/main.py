@@ -250,8 +250,7 @@ class WriteHandler(webapp2.RequestHandler):
                                  )
         @ndb.transactional()
         def write_unique():
-            other = model.Response.get_by_id(new_id)
-            if other:
+            if model.Response.get_by_id(new_id):
                 raise error.SameId()
             else:
                 return response.put()
@@ -259,10 +258,10 @@ class WriteHandler(webapp2.RequestHandler):
             try:
                 if write_unique():
                     break
-            except error.SameId, err:
+            except error.SameId:
                 new_id += 1
                 new_number = new_id % const.TT
-                if new_number > const.K:
+                if new_number > board.max_reses:
                     error.page(self, context, error.ThreadNotWritable()); return;
                 response.key = ndb.Key('Response', new_id)
                 response.number = new_number
