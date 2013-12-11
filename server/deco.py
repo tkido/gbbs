@@ -17,22 +17,25 @@ import util
 def board():
     def wrapper_func(original_func):
         def decorated_func(org, namespace, *args, **kwargs):
-            context = {}
-            namespace_manager.set_namespace(const.BOARD_NAMESPACE)
-            board = memcache.get(namespace)
-            if not board:
-                board = ndb.Key('Board', namespace).get()
-                memcache.add(namespace, board, config.CACHED_BOARD)
-            if not board or not board.readable():
-                error.page(org, context, error.BoardNotFound()); return;
-            namespace_manager.set_namespace(namespace)
-            context.update({
-                'namespace' : namespace,
-                'board': board,
-                'login_url': '/%s/_login?continue=%s' % (namespace, org.request.uri),
-                'logout_url': users.create_logout_url(org.request.uri),
-            })
-            original_func(org, context, *args, **kwargs)
+            try:
+                context = {}
+                namespace_manager.set_namespace(const.BOARD_NAMESPACE)
+                board = memcache.get(namespace)
+                if not board:
+                    board = ndb.Key('Board', namespace).get()
+                    memcache.add(namespace, board, config.CACHED_BOARD)
+                if not board or not board.readable(): raise error.BoardNotFound()
+                namespace_manager.set_namespace(namespace)
+                context.update({
+                    'namespace' : namespace,
+                    'board': board,
+                    'login_url': '/%s/_login?continue=%s' % (namespace, org.request.uri),
+                    'logout_url': users.create_logout_url(org.request.uri),
+                })
+                original_func(org, context, *args, **kwargs)
+            except error.Error as err:
+                error.page(org, context, err)
+                return
         return decorated_func
     return wrapper_func
 
@@ -70,8 +73,7 @@ def myuser(required_auth = const.BANNED):
                 'user': myuser,
                 'logout_url': users.create_logout_url(util.namespaced('/')),
             })
-            if myuser.status < required_auth:
-                error.page(org, context, error.AuthorityRequiredError(required_auth, myuser.status)); return;
+            if myuser.status < required_auth: raise error.AuthorityRequired(required_auth, myuser.status)
             original_func(org, context, *args, **kwargs)
         return decorated_func
     return wrapper_func
