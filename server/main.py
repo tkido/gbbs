@@ -413,9 +413,9 @@ class AgreeHandler(webapp2.RequestHandler):
             myuser_key = myuser.key
             @ndb.transactional()
             def rise_to_writer():
-                myuser.flush()
                 myuser = myuser_key.get()
                 myuser.status = const.WRITER
+                myuser.flush()
                 return myuser.put()
             if not rise_to_writer():
                 error.page(self, context, error.UserCouldNotUpdate()); return;
