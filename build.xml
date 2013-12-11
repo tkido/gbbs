@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="gbbs" default="test">
   
-  <property file="build.properties" />
-  
   <target name="test">
     <echo message="Exec below, if you want deploy."/>
-    <echo message="appcfg.py --email=${email} update server"/>
+    <echo message="appcfg.py --email=$tkido@tohobbs.net update server"/>
   </target>
   
   <target name="production">
     <replace file="server/app.yaml"
              token="tohobbs-hrd"
-             value="${appid}"
+             value="gbbs-p"
              encoding="UTF-8" />
     
     <replace dir="server"
@@ -23,7 +21,7 @@
     </replace>
     
     <echo message="Exec below, if you want deploy."/>
-    <echo message="appcfg.py --email=${email} update server"/>
+    <echo message="appcfg.py --email=tkido@gbbs.jp update server"/>
   </target>
   
 </project>
