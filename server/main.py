@@ -336,7 +336,6 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
 class LoginHandler(webapp2.RequestHandler):
     @deco.board()
     def get(self, context):
-        namespace = context['namespace']
         board = context['board']
         user = users.get_current_user()
         if not user: raise ex.RedirectLogin()
@@ -372,7 +371,6 @@ class AgreeHandler(webapp2.RequestHandler):
     @deco.board()
     @deco.myuser(const.DELETED)
     def get(self, context):
-        namespace = context['namespace']
         myuser = context['user']
         if (myuser.status == const.READER) or (myuser.status == const.DELETED):
             myuser_key = myuser.key
@@ -390,10 +388,9 @@ class AgreementHandler(webapp2.RequestHandler):
     def get(self, context):
         namespace = context['namespace']
         user = users.get_current_user()
+        login_url = '/%s/_agree' % namespace
         if self.request.get('continue'):
-            login_url = '/%s/_agree?continue=%s' % (namespace, self.request.get('continue'))
-        else:
-            login_url = '/%s/_agree' % namespace
+            login_url += '?continue=%s' % self.request.get('continue')
         context.update({
             'page_title': '利用規約',
             'user': user,
@@ -401,7 +398,6 @@ class AgreementHandler(webapp2.RequestHandler):
             'logout_url': users.create_logout_url('/%s/' % namespace),
         })
         self.response.out.write(tengine.render(':agreement', context))
-        
 
 class StoredHandler(webapp2.RequestHandler):
     @deco.board()
