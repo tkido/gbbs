@@ -35,16 +35,16 @@ def board():
                 original_func(org, context, *args, **kwargs)
             except ex.Error as err:
                 ex.page(org, context, err)
-            except ex.RedirectLogin as red:
-                to = red.to if red.to else org.request.uri
-                org.redirect(str(users.create_login_url(to)))
-            except ex.RedirectContinue:
-                org.redirect(str(org.request.get('continue') or '/%s/' % namespace))
             except ex.RedirectAgreement:
                 to = '/%s/agreement/' % namespace
                 if org.request.get('continue'):
                     to += '?continue=%s' % org.request.get('continue')
                 org.redirect(str(to))
+            except ex.RedirectLogin as red:
+                to = red.to if red.to else org.request.uri
+                org.redirect(str(users.create_login_url(to)))
+            except ex.RedirectContinue:
+                org.redirect(str(org.request.get('continue') or '/%s/' % namespace))
             except ex.Redirect as red:
                 org.redirect(str('/%s%s' % (namespace, red.to)))
         return decorated_func
@@ -77,8 +77,7 @@ def myuser(required_auth = const.BANNED):
             if not myuser:
                 myuser = model.MyUser.get_by_id(user.user_id())
                 memcache.add(user.user_id(), myuser, config.CACHED_MYUSER)
-            if not myuser or not myuser.readable():
-                org.redirect(str(context['login_url'])); return;
+            if not myuser or not myuser.readable(): raise ex.Redirect(context['login_url'])
             context.update({
                 'user': myuser,
                 'logout_url': users.create_logout_url(util.namespaced('/')),
