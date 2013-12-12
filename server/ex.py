@@ -88,18 +88,18 @@ class ThreadNotWritable(Error):
     self.title = 'このスレッドにはもう書き込めません'
     self.message = 'レス数がすでに%dに達している、すでに過去ログになっている、書き込み禁止されている、などの理由により、もう書けません。' % config.MAX_RESES_IN_THREAD
 
-class TitleValidation(Error):
+class InvalidTitle(Error):
   def __init__(self, board):
     self.title = 'タイトルが不正です'
     self.message = '空ではなく、%d字以内である必要があります。' % board.max_chars_title
     self.message += '2つ以上の『%d』を含むことはできません。'
         
-class ContentValidation(Error):
+class InvalidContent(Error):
   def __init__(self, board):
     self.title = '内容が不正です'
     self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows, board.max_chars)
 
-class TemplateValidation(Error):
+class InvalidTemplate(Error):
   def __init__(self, board):
     self.title = '内容が不正です'
     self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows_template, board.max_chars_template)
