@@ -203,4 +203,3 @@ class Response(ndb.Model):
             return first_id
         id = keys[-1].id()
         return first_id if id < first_id else id
-

@@ -27,34 +27,35 @@ def page(org, context, error):
         })
         org.response.out.write(tengine.render(':error', context))
 
-class Redirect(Exception):
-    """Base class for Redirect in this application."""
+class Throwable(Exception):
+    pass
+
+class Redirect(Throwable):
     def __init__(self, to = ''):
         self.to = to
-
 class RedirectAgreement(Redirect):
     pass
 class RedirectContinue(Redirect):
     pass
 class RedirectLogin(Redirect):
     pass
-
-class Error(Exception):
-    """Base class for errors in this application."""
+    
+class SameId(Throwable):
     pass
 
-class SameId(Error):
-  pass
+
+class Error(Exception):
+    pass
 
 class BoardNotFound(Error):
   def __init__(self):
-    self.title = '板が見つかりません'
-    self.message = '板が存在しないか、すでに削除されています。'
+    self.title = '掲示板が見つかりません'
+    self.message = '存在しないか、すでに削除されています。'
 
 class ThreadNotFound(Error):
   def __init__(self):
     self.title = 'スレッドが見つかりません'
-    self.message = 'スレッドが存在しないか、すでに削除されています。'
+    self.message = '存在しないか、すでに削除されています。'
 
 class ThreadArgument(Error):
   def __init__(self, continue_uri):
@@ -63,16 +64,6 @@ class ThreadArgument(Error):
     self.continue_label = 'スレッド全体を見る'
     self.continue_uri = continue_uri
 
-class UserNotFound(Error):
-  def __init__(self):
-    self.title = 'ユーザーデータの取得に失敗しました'
-    self.message = '再度アクセスすれば成功するかもしれません。うまくいかない場合は報告して下さい。'
-
-class UserCouldNotUpdate(Error):
-  def __init__(self):
-    self.title = 'ユーザーデータの更新に失敗しました'
-    self.message = '再度アクセスすれば成功する可能性が高いです。それでもうまくいかない場合は報告して下さい。'
-    
 class PostMethodRequired(Error):
   def __init__(self, continue_label = None, continue_uri = None):
     self.title = 'POSTメソッドでのアクセスが必要です'
@@ -95,8 +86,35 @@ class ThemeNotWritable(Error):
 class ThreadNotWritable(Error):
   def __init__(self):
     self.title = 'このスレッドにはもう書き込めません'
-    self.message = 'レス数がすでに%dに達している、すでに過去ログになっている、書き込み禁止されている、など。' % config.MAX_RESES_IN_THREAD
+    self.message = 'レス数がすでに%dに達している、すでに過去ログになっている、書き込み禁止されている、などの理由により、もう書けません。' % config.MAX_RESES_IN_THREAD
 
+class TitleValidation(Error):
+  def __init__(self, board):
+    self.title = 'タイトルが不正です'
+    self.message = '空ではなく、%d字以内である必要があります。' % board.max_chars_title
+    self.message += '2つ以上の『%d』を含むことはできません。'
+        
+class ContentValidation(Error):
+  def __init__(self, board):
+    self.title = '内容が不正です'
+    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows, board.max_chars)
+
+class TemplateValidation(Error):
+  def __init__(self, board):
+    self.title = '内容が不正です'
+    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows_template, board.max_chars_template)
+
+# ndb error
+class UserNotFound(Error):
+  def __init__(self):
+    self.title = 'ユーザーデータの取得に失敗しました'
+    self.message = '再度アクセスすれば成功するかもしれません。うまくいかない場合は報告して下さい。'
+
+class UserCouldNotUpdate(Error):
+  def __init__(self):
+    self.title = 'ユーザーデータの更新に失敗しました'
+    self.message = '再度アクセスすれば成功する可能性が高いです。それでもうまくいかない場合は報告して下さい。'
+    
 class NewUserIdCouldNotGet(Error):
   def __init__(self):
     self.title = '新しいユーザーIDの取得に失敗しました'
@@ -111,22 +129,6 @@ class NewThreadCouldNotPut(Error):
   def __init__(self):
     self.title = '新スレッドの作成に失敗しました'
     self.message = '再送信を行うと今度は成功する可能性がありますが、続いて失敗した場合はそれ以上繰り返さずに、あとでもう一度書き込んで下さい。フォームの入力内容はブラウザの戻るボタンで戻ることによって取り戻せる可能性があります。時間を置いて試してもうまくいかない場合は、バグかもしれませんので報告して下さい。'
-
-class TitleValidation(Error):
-  def __init__(self, board):
-    self.title = 'タイトルが不正です'
-    self.message = '空ではなく、%d字以内である必要があります。' % board.max_chars_title
-    self.message += '2つ以上の『%d』が含むことはできません。'
-        
-class ContentValidation(Error):
-  def __init__(self, board):
-    self.title = '内容が不正です'
-    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows, board.max_chars)
-
-class TemplateValidation(Error):
-  def __init__(self, board):
-    self.title = '内容が不正です'
-    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows_template, board.max_chars_template)
 
 class NewUserCouldNotPut(Error):
   def __init__(self):

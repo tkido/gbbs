@@ -202,6 +202,35 @@ class LinkHandler(webapp2.RequestHandler):
         self.response.out.write(html)
         return html
 
+class StoredHandler(webapp2.RequestHandler):
+    @deco.board()
+    @deco.cache()
+    def get(self, context, year, month):
+        board = context['board']
+        if ((not year) and (not month)):
+            update_to = board.now()
+            update_from = update_to - datetime.timedelta(days = 31)
+            page_title = '最近一ヶ月'
+        else:
+            year = int(year)
+            if not month:
+                update_from = datetime.datetime(year, 1, 1)
+                update_to = datetime.datetime(year+1, 1, 1)
+                page_title = '%d年' % year
+            else:
+                month = int(month)
+                update_from = datetime.datetime(year, month, 1)
+                update_to = datetime.datetime(year+1, 1, 1) if month == 12 else datetime.datetime(year, month+1, 1)
+                page_title = '%d年%d月' % (year, month)
+        threads = model.Thread.query_stored(update_from, update_to).fetch(config.MAX_FETCH)
+        context.update({
+            'page_title' : '%sの過去ログ' % page_title,
+            'threads': threads,
+        })
+        html = tengine.render(':stored', context)
+        self.response.out.write(html)
+        return html
+
 class WriteHandler(webapp2.RequestHandler):
     @deco.board()
     def get(self, context, thread_id):
@@ -364,22 +393,6 @@ class LoginHandler(webapp2.RequestHandler):
         if not myuser.put(): raise ex.NewUserCouldNotPut()
         raise ex.RedirectAgreement()
 
-class AgreeHandler(webapp2.RequestHandler):
-    @deco.board()
-    @deco.myuser(const.DELETED)
-    def get(self, context):
-        myuser = context['user']
-        if (myuser.status == const.READER) or (myuser.status == const.DELETED):
-            myuser_key = myuser.key
-            @ndb.transactional()
-            def rise_to_writer():
-                myuser = myuser_key.get()
-                myuser.status = const.WRITER
-                myuser.flush()
-                return myuser.put()
-            if not rise_to_writer(): raise ex.UserCouldNotUpdate()
-        raise ex.RedirectContinue()
-
 class AgreementHandler(webapp2.RequestHandler):
     @deco.board()
     def get(self, context):
@@ -396,35 +409,22 @@ class AgreementHandler(webapp2.RequestHandler):
         })
         self.response.out.write(tengine.render(':agreement', context))
 
-class StoredHandler(webapp2.RequestHandler):
+class AgreeHandler(webapp2.RequestHandler):
     @deco.board()
-    @deco.cache()
-    def get(self, context, year, month):
-        board = context['board']
-        if ((not year) and (not month)):
-            update_to = board.now()
-            update_from = update_to - datetime.timedelta(days = 31)
-            page_title = '最近一ヶ月'
-        else:
-            year = int(year)
-            if not month:
-                update_from = datetime.datetime(year, 1, 1)
-                update_to = datetime.datetime(year+1, 1, 1)
-                page_title = '%d年' % year
-            else:
-                month = int(month)
-                update_from = datetime.datetime(year, month, 1)
-                update_to = datetime.datetime(year+1, 1, 1) if month == 12 else datetime.datetime(year, month+1, 1)
-                page_title = '%d年%d月' % (year, month)
-        threads = model.Thread.query_stored(update_from, update_to).fetch(config.MAX_FETCH)
-        context.update({
-            'page_title' : '%sの過去ログ' % page_title,
-            'threads': threads,
-        })
-        html = tengine.render(':stored', context)
-        self.response.out.write(html)
-        return html
-        
+    @deco.myuser(const.DELETED)
+    def get(self, context):
+        myuser = context['user']
+        if (myuser.status == const.READER) or (myuser.status == const.DELETED):
+            myuser_key = myuser.key
+            @ndb.transactional()
+            def rise_to_writer():
+                myuser = myuser_key.get()
+                myuser.status = const.WRITER
+                myuser.flush()
+                return myuser.put()
+            if not rise_to_writer(): raise ex.UserCouldNotUpdate()
+        raise ex.RedirectContinue()
+
 class MyPageHandler(webapp2.RequestHandler):
     @deco.board()
     @deco.myuser(const.BANNED)
