@@ -3,7 +3,7 @@
   
   <target name="test">
     <echo message="Exec below, if you want deploy."/>
-    <echo message="appcfg.py --email=$tkido@tohobbs.net update server"/>
+    <echo message="appcfg.py --email=tkido@tohobbs.net update server"/>
   </target>
   
   <target name="production">
