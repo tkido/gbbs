@@ -7,9 +7,15 @@
   </target>
   
   <target name="production">
+    <property file="build.properties" />
+    
     <replace file="server/app.yaml"
              token="tohobbs-hrd"
-             value="gbbs-p"
+             value="${appid}"
+             encoding="UTF-8" />
+    <replace file="server/cron.yaml"
+             token="tkido@tohobbs.net"
+             value="${mail}"
              encoding="UTF-8" />
     
     <replace dir="server"
@@ -21,7 +27,7 @@
     </replace>
     
     <echo message="Exec below, if you want deploy."/>
-    <echo message="appcfg.py --email=tkido@gbbs.jp update server"/>
+    <echo message="appcfg.py --email=${mail} update server"/>
   </target>
   
 </project>
