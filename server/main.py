@@ -119,6 +119,7 @@ def clean_old_threads(board):
         store(keys[-i-1])
 
 class TopPageHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.cache(3)
     def get(self, context):
         boards = m.Board.query_normal().fetch(conf.MAX_FETCH)
@@ -131,6 +132,7 @@ class TopPageHandler(webapp2.RequestHandler):
         return html
 
 class IndexHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     @deco.cache(5)
     def get(self, context):
@@ -145,6 +147,7 @@ class IndexHandler(webapp2.RequestHandler):
         return html
 
 class ThreadHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     @deco.cache()
     def get(self, context, thread_id, first, hyphen, last):
@@ -206,6 +209,7 @@ class ThreadHandler(webapp2.RequestHandler):
         return html
 
 class LinkHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     @deco.cache()
     def get(self, context):
@@ -219,6 +223,7 @@ class LinkHandler(webapp2.RequestHandler):
         return html
 
 class StoredHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     @deco.cache()
     def get(self, context, year, month):
@@ -248,10 +253,12 @@ class StoredHandler(webapp2.RequestHandler):
         return html
 
 class WriteHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     def get(self, context, thread_id):
         raise ex.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
         
+    @deco.catch()
     @deco.board()
     @deco.myuser(c.WRITER)
     def post(self, context, thread_id):
@@ -310,6 +317,7 @@ class WriteHandler(webapp2.RequestHandler):
         raise ex.Redirect('/%d/#%d' % (thread_id, new_number))
 
 class RelatedThreadHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     @deco.cache()
     def get(self, context, thread_id):
@@ -327,6 +335,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
         return html
 
 class EditTemplateHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     @deco.myuser(c.WRITER)
     def get(self, context, thread_id):
@@ -344,10 +353,12 @@ class EditTemplateHandler(webapp2.RequestHandler):
         self.response.out.write(tengine.render(':edit', context))
 
 class UpdateTemplateHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     def get(self, context, thread_id):
         raise ex.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
     
+    @deco.catch()
     @deco.board()
     @deco.myuser(c.WRITER)
     def post(self, context, thread_id):
@@ -376,6 +387,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
         raise ex.Redirect('/edit/%d/' % thread_id)
 
 class LoginHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     def get(self, context):
         board = context['board']
@@ -410,6 +422,7 @@ class LoginHandler(webapp2.RequestHandler):
         raise ex.RedirectAgreement()
 
 class AgreementHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     def get(self, context):
         ns = context['ns']
@@ -426,6 +439,7 @@ class AgreementHandler(webapp2.RequestHandler):
         self.response.out.write(tengine.render(':agreement', context))
 
 class AgreeHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     @deco.myuser(c.DELETED)
     def get(self, context):
@@ -442,6 +456,7 @@ class AgreeHandler(webapp2.RequestHandler):
         raise ex.RedirectContinue()
 
 class MyPageHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     @deco.myuser(c.BANNED)
     def get(self, context):
@@ -452,6 +467,7 @@ class MyPageHandler(webapp2.RequestHandler):
         self.response.out.write(tengine.render(':mypage', context))
 
 class NewThreadHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     @deco.myuser(c.WRITER)
     def get(self, context):
@@ -459,10 +475,12 @@ class NewThreadHandler(webapp2.RequestHandler):
         self.response.out.write(tengine.render(':new', context))
         
 class CreateNewThreadHandler(webapp2.RequestHandler):
+    @deco.catch()
     @deco.board()
     def get(self, context):
         raise ex.PostMethodRequired('新スレッド作成画面へ戻る', '/new/')
     
+    @deco.catch()
     @deco.board()
     @deco.myuser(c.WRITER)
     def post(self, context):

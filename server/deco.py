@@ -14,24 +14,11 @@ import ex
 import m
 import util
 
-def board():
+def catch():
     def wrapper_func(original_func):
-        def decorated_func(org, ns, *args, **kwargs):
+        def decorated_func(org, ns = '', *args, **kwargs):
             try:
-                context = {}
-                namespace_manager.set_namespace(c.BOARD_NAMESPACE)
-                board = memcache.get(ns)
-                if not board:
-                    board = ndb.Key('Board', ns).get()
-                    memcache.add(ns, board, conf.CACHED_BOARD)
-                if not board or not board.readable(): raise ex.BoardNotFound()
-                namespace_manager.set_namespace(ns)
-                context.update({
-                    'ns' : ns,
-                    'board': board,
-                    'login_url': '/%s/_login?continue=%s' % (ns, org.request.uri),
-                    'logout_url': users.create_logout_url(org.request.uri),
-                })
+                context = { 'ns' : ns }
                 original_func(org, context, *args, **kwargs)
             # Catch Redirect
             except ex.RedirectAgreement:
@@ -53,6 +40,27 @@ def board():
                 logging.exception(err)
             except Exception as e:
                 logging.exception(e)
+        return decorated_func
+    return wrapper_func
+
+def board():
+    def wrapper_func(original_func):
+        def decorated_func(org, context, *args, **kwargs):
+            namespace_manager.set_namespace(c.BOARD_NAMESPACE)
+            ns = context['ns']
+            board = memcache.get(ns)
+            if not board:
+                board = ndb.Key('Board', ns).get()
+                memcache.add(ns, board, conf.CACHED_BOARD)
+            if not board or not board.readable(): raise ex.BoardNotFound()
+            namespace_manager.set_namespace(ns)
+            context.update({
+                'ns' : ns,
+                'board': board,
+                'login_url': '/%s/_login?continue=%s' % (ns, org.request.uri),
+                'logout_url': users.create_logout_url(org.request.uri),
+            })
+            original_func(org, context, *args, **kwargs)
         return decorated_func
     return wrapper_func
 
