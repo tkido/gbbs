@@ -29,8 +29,8 @@ def page(org, context, error):
 
 class Redirect(Exception):
     """Base class for Redirect in this application."""
-    def __init__(self, to = '/'):
-        self.to = to or '/'
+    def __init__(self, to = ''):
+        self.to = to
 
 class RedirectAgreement(Redirect):
     pass

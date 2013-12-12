@@ -35,8 +35,9 @@ def board():
                 original_func(org, context, *args, **kwargs)
             except ex.Error as err:
                 ex.page(org, context, err)
-            except ex.RedirectLogin:
-                org.redirect(str(users.create_login_url(org.request.uri)))
+            except ex.RedirectLogin as red:
+                to = red.to if red.to else org.request.uri
+                org.redirect(str(users.create_login_url(to)))
             except ex.RedirectContinue:
                 org.redirect(str(org.request.get('continue') or '/%s/' % namespace))
             except ex.RedirectAgreement:
@@ -44,8 +45,8 @@ def board():
                 if org.request.get('continue'):
                     to += '?continue=%s' % org.request.get('continue')
                 org.redirect(str(to))
-            except ex.Redirect as redirect:
-                org.redirect(str('/%s%s' % (namespace, redirect.to)))
+            except ex.Redirect as red:
+                org.redirect(str('/%s%s' % (namespace, red.to)))
         return decorated_func
     return wrapper_func
 
@@ -71,8 +72,7 @@ def myuser(required_auth = const.BANNED):
     def wrapper_func(original_func):
         def decorated_func(org, context, *args, **kwargs):
             user = users.get_current_user()
-            if not user:
-                org.redirect(str(users.create_login_url(context['login_url']))); return;
+            if not user: raise ex.RedirectLogin(context['login_url'])
             myuser = memcache.get(user.user_id())
             if not myuser:
                 myuser = model.MyUser.get_by_id(user.user_id())
