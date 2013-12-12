@@ -18,6 +18,10 @@ import model
 import tengine
 import util
 
+if not config.LOCAL_SDK:
+    from google.appengine.ext import ereporter
+    ereporter.register_logger()
+
 def prepare_next_thread(thread_key, board):
     tc_key = ndb.Key('Counter', 'Thread')
     @ndb.transactional()

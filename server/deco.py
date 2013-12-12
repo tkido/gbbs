@@ -33,8 +33,7 @@ def board():
                     'logout_url': users.create_logout_url(org.request.uri),
                 })
                 original_func(org, context, *args, **kwargs)
-            except ex.Error as err:
-                ex.page(org, context, err)
+            # Catch Redirect
             except ex.RedirectAgreement:
                 to = '/%s/agreement/' % namespace
                 if org.request.get('continue'):
@@ -47,6 +46,13 @@ def board():
                 org.redirect(str(org.request.get('continue') or '/%s/' % namespace))
             except ex.Redirect as red:
                 org.redirect(str('/%s%s' % (namespace, red.to)))
+            # Catch Error
+            except ex.AppError as err:
+                ex.page(org, context, err)
+            except ex.SysError as err:
+                logging.exception(err)
+            except Exception as e:
+                logging.exception(e)
         return decorated_func
     return wrapper_func
 

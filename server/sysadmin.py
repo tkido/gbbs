@@ -17,6 +17,10 @@ import model
 import tengine
 import util
 
+if not config.LOCAL_SDK:
+    from google.appengine.ext import ereporter
+    ereporter.register_logger()
+
 class IndexHandler(webapp2.RequestHandler):
     def get(self):
         namespace_manager.set_namespace(const.BOARD_NAMESPACE)
