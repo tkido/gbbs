@@ -10,8 +10,8 @@ import re
 from google.appengine.api import memcache
 from google.appengine.ext import ndb
 
-import const
-import config
+import c
+import conf
 import ex
 
 class Counter(ndb.Model):
@@ -48,9 +48,9 @@ class Board(ndb.Model):
     max_rows_template = ndb.IntegerProperty(required=True, indexed=False)
 
     def readable(self):
-        return self.status != const.DELETED
+        return self.status != c.DELETED
     def writable(self):
-        return self.status == const.NORMAL
+        return self.status == c.NORMAL
 
     def now(self):
       return datetime.datetime.now() + datetime.timedelta(hours = self.timezone)
@@ -109,12 +109,12 @@ class MyUser(ndb.Model):
     since = ndb.DateTimeProperty(required=True, indexed=False)
     
     def readable(self):
-        return self.status != const.DELETED
+        return self.status != c.DELETED
     def flush(self):
         memcache.delete(self.key.id())
     
 class Theme(ndb.Model):
-    #id = from model.Counter("Theme").count
+    #id = Counter("Theme").count
     author_id = ndb.IntegerProperty(required=True, indexed=False)
     updater_id = ndb.IntegerProperty(required=True, indexed=False)
     
@@ -128,12 +128,12 @@ class Theme(ndb.Model):
     keeped_template = ndb.TextProperty(required=True)
     
     def readable(self):
-        return self.status != const.DELETED
+        return self.status != c.DELETED
     def writable(self):
-        return self.status == const.NORMAL
+        return self.status == c.NORMAL
     
 class Thread(ndb.Model):
-    #id = from model.Counter("Thread").count
+    #id = Counter("Thread").count
     theme_id = ndb.IntegerProperty(required=True)
     author_id = ndb.IntegerProperty(required=True, indexed=False)
     updater_id = ndb.IntegerProperty(required=True, indexed=False)
@@ -157,20 +157,20 @@ class Thread(ndb.Model):
     next_thread_title = ndb.StringProperty(indexed=False)
     
     def readable(self):
-        return self.status != const.DELETED
+        return self.status != c.DELETED
     
     @classmethod
     def query_normal(cls):
-        return cls.query(cls.status == const.NORMAL).order(-cls.updated_at)
+        return cls.query(cls.status == c.NORMAL).order(-cls.updated_at)
     @classmethod
     def query_stored(cls, update_from, update_to):
-        return cls.query(cls.status == const.STORED).filter(cls.updated_at >= update_from).filter(cls.updated_at < update_to).order(-cls.updated_at)
+        return cls.query(cls.status == c.STORED).filter(cls.updated_at >= update_from).filter(cls.updated_at < update_to).order(-cls.updated_at)
     @classmethod
     def query_theme(cls, theme_id):
         return cls.query(cls.theme_id == theme_id)
 
 class Response(ndb.Model):
-    #id = thread.id * const.TT + number
+    #id = thread.id * c.TT + number
     author_id = ndb.IntegerProperty(required=True, indexed=False)
     updater_id = ndb.IntegerProperty(required=True, indexed=False)
     
@@ -189,16 +189,16 @@ class Response(ndb.Model):
     
     @classmethod
     def query_normal(cls, thread_id, first):
-        first_key = ndb.Key('Response', thread_id * const.TT + first)
-        last_key = ndb.Key('Response', thread_id * const.TT + const.K)
+        first_key = ndb.Key('Response', thread_id * c.TT + first)
+        last_key = ndb.Key('Response', thread_id * c.TT + c.K)
         return cls.query(first_key <= cls._key).filter(cls._key <= last_key)
     
     @classmethod
     def latest_num_of(cls, thread_id):
-        first_id = thread_id * const.TT
+        first_id = thread_id * c.TT
         first_key = ndb.Key('Response', first_id)
-        last_key = ndb.Key('Response', first_id + const.K)
-        keys = cls.query(first_key <= cls._key).filter(cls._key <= last_key).fetch(config.MAX_FETCH, keys_only=True)
+        last_key = ndb.Key('Response', first_id + c.K)
+        keys = cls.query(first_key <= cls._key).filter(cls._key <= last_key).fetch(conf.MAX_FETCH, keys_only=True)
         if not keys:
             return first_id
         id = keys[-1].id()

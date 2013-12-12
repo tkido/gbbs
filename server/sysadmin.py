@@ -10,28 +10,28 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 import webapp2
 
-import config
-import const
+import conf
+import c
 import ex
-import model
+import m
 import tengine
 import util
 
-if not config.LOCAL_SDK:
+if not conf.LOCAL_SDK:
     from google.appengine.ext import ereporter
     ereporter.register_logger()
 
 class IndexHandler(webapp2.RequestHandler):
     def get(self):
-        namespace_manager.set_namespace(const.BOARD_NAMESPACE)
+        namespace_manager.set_namespace(c.BOARD_NAMESPACE)
         user = users.get_current_user()
-        myuser = model.MyUser.get_by_id(user.user_id())
-        myuser_counter = model.Counter.get_by_id('MyUser')
-        board_counter = model.Counter.get_by_id('Board')
+        myuser = m.MyUser.get_by_id(user.user_id())
+        myuser_counter = m.Counter.get_by_id('MyUser')
+        board_counter = m.Counter.get_by_id('Board')
         
         context = {
             'page_title' : 'システム管理者専用ページ',
-            'namespace' : const.BOARD_NAMESPACE,
+            'namespace' : c.BOARD_NAMESPACE,
             'user' : myuser,
             
             'total_user': myuser_counter.count,
@@ -54,61 +54,61 @@ class MemcacheHandler(webapp2.RequestHandler):
 
 class CreateBoardHandler(webapp2.RequestHandler):
     def post(self):
-        namespace_manager.set_namespace(const.BOARD_NAMESPACE)
+        namespace_manager.set_namespace(c.BOARD_NAMESPACE)
         user = users.get_current_user()
-        myuser = model.MyUser.get_by_id(user.user_id())
+        myuser = m.MyUser.get_by_id(user.user_id())
         if not myuser:
             return
         namespace = self.request.get('bbs_id')
-        board = model.Board.get_by_id(namespace)
+        board = m.Board.get_by_id(namespace)
         if board:
             raise ex.SameId()
-        board_counter = model.Counter.get_by_id('Board')
+        board_counter = m.Counter.get_by_id('Board')
         board_counter.count += 1
         now = util.now()
-        board = model.Board(id = namespace,
-                            author_id = myuser.myuser_id,
-                            updater_id = myuser.myuser_id,
-                            
-                            status = const.NORMAL,
-                            updated_at = now,
-                            since = now,
-                            
-                            title = '%s BBS' % namespace,
-                            description = '',
-                            keywords = '',
-                            template = '',
-                            
-                            hash_cycle = 3, #0:ever(no change) 1:year 2:month 3:day
-                            timezone = 9,
-                            salt = str(uuid.uuid4()),
-                            allow_index = True,
-                            allow_robots = True,
-                            
-                            max_reses = 1000,
-                            max_threads = 1000,
-                            max_chars = 4096,
-                            max_chars_title = 32,
-                            max_chars_template = 4096 * 2,
-                            max_rows = 80,
-                            max_rows_template = 80,
-                           )
+        board = m.Board(id = namespace,
+                        author_id = myuser.myuser_id,
+                        updater_id = myuser.myuser_id,
+                        
+                        status = c.NORMAL,
+                        updated_at = now,
+                        since = now,
+                        
+                        title = '%s BBS' % namespace,
+                        description = '',
+                        keywords = '',
+                        template = '',
+                        
+                        hash_cycle = 3, #0:ever(no change) 1:year 2:month 3:day
+                        timezone = 9,
+                        salt = str(uuid.uuid4()),
+                        allow_index = True,
+                        allow_robots = True,
+                        
+                        max_reses = 1000,
+                        max_threads = 1000,
+                        max_chars = 4096,
+                        max_chars_title = 32,
+                        max_chars_template = 4096 * 2,
+                        max_rows = 80,
+                        max_rows_template = 80,
+                       )
         namespace_manager.set_namespace(namespace)
-        myuser_counter = model.Counter(id = 'MyUser', count = 0)
-        theme_counter = model.Counter(id = 'Theme', count = 0)
-        thread_counter = model.Counter(id = 'Thread', count = 0)
+        myuser_counter = m.Counter(id = 'MyUser', count = 0)
+        theme_counter = m.Counter(id = 'Theme', count = 0)
+        thread_counter = m.Counter(id = 'Thread', count = 0)
         ndb.put_multi([board_counter, board, myuser_counter, thread_counter, theme_counter])
         
         self.redirect('/s/')
 
 class InitHandler(webapp2.RequestHandler):
     def get(self):
-        namespace_manager.set_namespace(const.BOARD_NAMESPACE)
+        namespace_manager.set_namespace(c.BOARD_NAMESPACE)
         user = users.get_current_user()
-        myuser = model.MyUser.get_by_id(user.user_id())
+        myuser = m.MyUser.get_by_id(user.user_id())
         context = {
             'page_title' : '管理者ユーザとカウンタの作成',
-            'namespace' : const.BOARD_NAMESPACE,
+            'namespace' : c.BOARD_NAMESPACE,
             'user' : myuser,
         }
         html = tengine.render(':sysadmin/init', context, layout=':sysadmin/base')
@@ -116,11 +116,11 @@ class InitHandler(webapp2.RequestHandler):
         
 class InitializeHandler(webapp2.RequestHandler):
     def post(self):
-        namespace_manager.set_namespace(const.BOARD_NAMESPACE)
+        namespace_manager.set_namespace(c.BOARD_NAMESPACE)
         user = users.get_current_user()
-        myuser = model.MyUser.get_by_id(user.user_id())
-        myuser_counter = model.Counter.get_by_id('MyUser')
-        board_counter = model.Counter.get_by_id('Board')
+        myuser = m.MyUser.get_by_id(user.user_id())
+        myuser_counter = m.Counter.get_by_id('MyUser')
+        board_counter = m.Counter.get_by_id('Board')
         if myuser:
             self.redirect('/s/'); return;
         if myuser_counter:
@@ -128,16 +128,17 @@ class InitializeHandler(webapp2.RequestHandler):
         if board_counter:
             self.redirect('/s/'); return;
         now = util.now()
-        myuser = model.MyUser(id = user.user_id(),
-                              user = user,
-                              myuser_id = 1,
-                              status = const.SYSTEM_ADMIN,
-                              
-                              ban_count = 0,
-                              updated_at = now,
-                              since = now )
-        myuser_counter = model.Counter(id = 'MyUser', count = 1)
-        board_counter = model.Counter(id = 'Board', count = 0)
+        myuser = m.MyUser(id = user.user_id(),
+                          user = user,
+                          myuser_id = 1,
+                          status = c.SYSTEM_ADMIN,
+                          
+                          ban_count = 0,
+                          updated_at = now,
+                          since = now,
+                         )
+        myuser_counter = m.Counter(id = 'MyUser', count = 1)
+        board_counter = m.Counter(id = 'Board', count = 0)
         
         ndb.put_multi([myuser, myuser_counter, board_counter])
         self.redirect('/s/')
