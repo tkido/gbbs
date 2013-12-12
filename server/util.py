@@ -8,7 +8,7 @@ from google.appengine.api import namespace_manager
 
 import config
 import const
-import error
+import ex
 import model
 
 def now():

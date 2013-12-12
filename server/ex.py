@@ -27,9 +27,21 @@ def page(org, context, error):
         })
         org.response.out.write(tengine.render(':error', context))
 
+class Redirect(Exception):
+    """Base class for Redirect in this application."""
+    def __init__(self, to = '/'):
+        self.to = to or '/'
+
+class RedirectAgreement(Redirect):
+    pass
+class RedirectContinue(Redirect):
+    pass
+class RedirectLogin(Redirect):
+    pass
+
 class Error(Exception):
-  """Base class for exceptions in this application."""
-  pass
+    """Base class for errors in this application."""
+    pass
 
 class SameId(Error):
   pass
