@@ -123,6 +123,11 @@ class ContentValidation(Error):
     self.title = '内容が不正です'
     self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows, board.max_chars)
 
+class TemplateValidation(Error):
+  def __init__(self, board):
+    self.title = '内容が不正です'
+    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows_template, board.max_chars_template)
+
 class NewUserCouldNotPut(Error):
   def __init__(self):
     self.title = '新規ユーザーの作成に失敗しました'

@@ -212,7 +212,6 @@ class WriteHandler(webapp2.RequestHandler):
     def post(self, context, thread_id):
         board = context['board']
         content = board.validate_content(self.request.get('content'))
-        if not content: raise ex.ContentValidation(board)
         
         thread_id = int(thread_id)
         thread_key = ndb.Key('Thread', thread_id)
@@ -317,9 +316,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
         
         board = context['board']
         title_template = board.validate_title(self.request.get('title_template'))
-        if not title_template: raise ex.TitleValidation(board)
         template = board.validate_template(self.request.get('template'))
-        if not template: raise ex.ContentValidation(board)
         
         myuser = context['user']
         @ndb.transactional()
@@ -455,9 +452,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
     def post(self, context):
         board = context['board']
         title_template = board.validate_title(self.request.get('title_template'))
-        if not title_template: raise ex.TitleValidation(board)
         template = board.validate_template(self.request.get('template'))
-        if not template: raise ex.ContentValidation(board)
         
         @ndb.transactional()
         def increment_tc():

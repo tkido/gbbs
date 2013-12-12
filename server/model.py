@@ -12,6 +12,7 @@ from google.appengine.ext import ndb
 
 import const
 import config
+import ex
 
 class Counter(ndb.Model):
     #id = "Board", "MyUser", "Thread", "Theme"
@@ -76,7 +77,7 @@ class Board(ndb.Model):
         if not content or \
            len(content) > self.max_chars or \
            len(re.findall('\n', content)) >= self.max_chars:
-            return None
+            raise ex.ContentValidation(self)
         return content
     
     def validate_title(self, title):
@@ -84,7 +85,7 @@ class Board(ndb.Model):
         if not title or \
            len(title) > self.max_chars_title or \
            d_count >= 2:
-            return None
+            raise ex.TitleValidation(self)
         if d_count == 0:
             title += u' その%d'
         return title
@@ -93,7 +94,7 @@ class Board(ndb.Model):
         if not template or \
            len(template) > self.max_chars_template or \
            len(re.findall('\n', template)) >= self.max_rows_template:
-            return None
+            raise ex.TemplateValidation(self)
         return template
     
 class MyUser(ndb.Model):
