@@ -8,10 +8,10 @@ from google.appengine.api import namespace_manager
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-import config
-import const
+import conf
+import c
 import ex
-import model
+import m
 import util
 
 def board():
@@ -19,11 +19,11 @@ def board():
         def decorated_func(org, namespace, *args, **kwargs):
             try:
                 context = {}
-                namespace_manager.set_namespace(const.BOARD_NAMESPACE)
+                namespace_manager.set_namespace(c.BOARD_NAMESPACE)
                 board = memcache.get(namespace)
                 if not board:
                     board = ndb.Key('Board', namespace).get()
-                    memcache.add(namespace, board, config.CACHED_BOARD)
+                    memcache.add(namespace, board, conf.CACHED_BOARD)
                 if not board or not board.readable(): raise ex.BoardNotFound()
                 namespace_manager.set_namespace(namespace)
                 context.update({
@@ -56,7 +56,7 @@ def board():
         return decorated_func
     return wrapper_func
 
-def cache(second = config.CACHED_DEFAULT):
+def cache(second = conf.CACHED_DEFAULT):
     def wrapper_func(original_func):
         def decorated_func(org, context, *args, **kwargs):
             user = users.get_current_user()
@@ -74,19 +74,19 @@ def cache(second = config.CACHED_DEFAULT):
         return decorated_func
     return wrapper_func
 
-def myuser(required_auth = const.BANNED):
+def myuser(required_auth = c.BANNED):
     def wrapper_func(original_func):
         def decorated_func(org, context, *args, **kwargs):
             user = users.get_current_user()
             if not user: raise ex.RedirectLogin(context['login_url'])
             myuser = memcache.get(user.user_id())
             if not myuser:
-                myuser = model.MyUser.get_by_id(user.user_id())
-                memcache.add(user.user_id(), myuser, config.CACHED_MYUSER)
+                myuser = m.MyUser.get_by_id(user.user_id())
+                memcache.add(user.user_id(), myuser, conf.CACHED_MYUSER)
             if not myuser or not myuser.readable(): raise ex.Redirect(context['login_url'])
             context.update({
                 'user': myuser,
-                'logout_url': users.create_logout_url(util.namespaced('/')),
+                'logout_url': users.create_logout_url('/%s/' % context['namespace']),
             })
             if myuser.status < required_auth: raise ex.AuthorityRequired(required_auth, myuser.status)
             original_func(org, context, *args, **kwargs)

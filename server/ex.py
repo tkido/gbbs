@@ -1,8 +1,8 @@
 #!/usr/local/bin/python
 # -*- coding:utf-8 -*-
 
-import config
-import const
+import conf
+import c
 
 from google.appengine.api import namespace_manager
 from google.appengine.api import users
@@ -64,7 +64,7 @@ class ThreadNotFound(AppError):
 class ThreadArgument(AppError):
   def __init__(self, continue_uri):
     self.title = 'レス番号の範囲指定が間違っています'
-    self.message = '指定できる範囲は1-%dです。' % config.MAX_RESES_IN_THREAD
+    self.message = '指定できる範囲は1-%dです。' % conf.MAX_RESES_IN_THREAD
     self.continue_label = 'スレッド全体を見る'
     self.continue_uri = continue_uri
 
@@ -78,7 +78,7 @@ class PostMethodRequired(AppError):
 class AuthorityRequired(AppError):
   def __init__(self, required_auth, your_auth):
     self.title = '権限が足りません'
-    self.message = '指定された動作には『%s』以上の権限が必要ですが、現在の権限は『%s』です。権限についてはヘルプをご覧下さい。' % (const.AUTHORITIES[required_auth], const.AUTHORITIES[your_auth])
+    self.message = '指定された動作には『%s』以上の権限が必要ですが、現在の権限は『%s』です。権限についてはヘルプをご覧下さい。' % (c.AUTHORITIES[required_auth], c.AUTHORITIES[your_auth])
     self.report = ''
     self.help = '/authority'
 
@@ -90,7 +90,7 @@ class ThemeNotWritable(AppError):
 class ThreadNotWritable(AppError):
   def __init__(self):
     self.title = 'このスレッドにはもう書き込めません'
-    self.message = 'レス数がすでに%dに達している、すでに過去ログになっている、書き込み禁止されている、などの理由により、もう書けません。' % config.MAX_RESES_IN_THREAD
+    self.message = 'レス数がすでに%dに達している、すでに過去ログになっている、書き込み禁止されている、などの理由により、もう書けません。' % conf.MAX_RESES_IN_THREAD
 
 class InvalidTitle(AppError):
   def __init__(self, board):

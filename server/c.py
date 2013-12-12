@@ -46,6 +46,6 @@ DELETED       =-3
 #for boards
 BOARD_NAMESPACE = 'default'
 
-#const
+#c
 K  =  1000
 TT = 10000 # ten thousand

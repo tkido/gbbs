@@ -10,15 +10,15 @@ from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-import config
-import const
+import conf
+import c
 import deco
 import ex
-import model
+import m
 import tengine
 import util
 
-if not config.LOCAL_SDK:
+if not conf.LOCAL_SDK:
     from google.appengine.ext import ereporter
     ereporter.register_logger()
 
@@ -59,29 +59,29 @@ def create_next_thread(thread_key, board):
         if next_thread:
             return next_thread
         else:
-            next_thread = model.Thread(id = thread.next_thread_id,
-                                       theme_id = thread.theme_id,
-                                       author_id = myuser_id,
-                                       updater_id = myuser_id,
+            next_thread = m.Thread(id = thread.next_thread_id,
+                                   theme_id = thread.theme_id,
+                                   author_id = myuser_id,
+                                   updater_id = myuser_id,
 
-                                       status = const.NORMAL,
-                                       updated_at = now,
-                                       since = now,
+                                   status = c.NORMAL,
+                                   updated_at = now,
+                                   since = now,
 
-                                       title = new_title,
-                                       datetime_str = datetime_str,
-                                       hashed_id = hashed_id,
-                                       content = theme.template,
+                                   title = new_title,
+                                   datetime_str = datetime_str,
+                                   hashed_id = hashed_id,
+                                   content = theme.template,
 
-                                       thread_number = next_thread_number,
-                                       response_count = 0,
-                                       responsed_at = now,
+                                   thread_number = next_thread_number,
+                                   response_count = 0,
+                                   responsed_at = now,
 
-                                       prev_thread_id = thread.key.id(),
-                                       prev_thread_title = thread.title,
-                                       next_thread_id = 0,
-                                       next_thread_title = '',
-                                      )
+                                   prev_thread_id = thread.key.id(),
+                                   prev_thread_title = thread.title,
+                                   next_thread_id = 0,
+                                   next_thread_title = '',
+                                  )
             if next_thread.put():
                 return next_thread
             else:
@@ -107,12 +107,12 @@ def store(thread_key):
     @ndb.transactional()
     def store_thread():
         thread = thread_key.get()
-        thread.status = const.STORED
+        thread.status = c.STORED
         thread.put()
     store_thread()
 
 def clean_old_threads(board):
-    query = model.Thread.query_normal()
+    query = m.Thread.query_normal()
     keys = query.fetch(board.max_threads+3, keys_only=True)
     needs = len(keys) - board.max_threads
     for i in range(needs):
@@ -122,8 +122,8 @@ class IndexHandler(webapp2.RequestHandler):
     @deco.board()
     @deco.cache(5)
     def get(self, context):
-        query = model.Thread.query_normal()
-        threads = query.fetch(config.MAX_FETCH)
+        query = m.Thread.query_normal()
+        threads = query.fetch(conf.MAX_FETCH)
         context.update({
             'page_title' : '',
             'threads': threads,
@@ -160,11 +160,11 @@ class ThreadHandler(webapp2.RequestHandler):
                     fetch_count = last - first + 1
             else:
                 raise ex.ThreadArgument('/%d/' % thread_id)
-        query = model.Response.query_normal(thread_id, first)
+        query = m.Response.query_normal(thread_id, first)
         reses = query.fetch(fetch_count) if fetch_count else []
         
-        last_number = reses[-1].key.id() % const.TT if reses else 0
-        thread.writable = (thread.status == const.NORMAL and last_number < board.max_reses)
+        last_number = reses[-1].key.id() % c.TT if reses else 0
+        thread.writable = (thread.status == c.NORMAL and last_number < board.max_reses)
         
         context.update({
             'page_title': thread.title,
@@ -188,7 +188,7 @@ class ThreadHandler(webapp2.RequestHandler):
         if thread.next_thread_id > 0 and thread.next_thread_title == '':
             thread = create_next_thread(thread_key, board)
             html = None
-        if thread.status == const.NORMAL and thread.next_thread_title != '':
+        if thread.status == c.NORMAL and thread.next_thread_title != '':
             thread = store(thread_key)
             html = None
         return html
@@ -226,7 +226,7 @@ class StoredHandler(webapp2.RequestHandler):
                 update_from = datetime.datetime(year, month, 1)
                 update_to = datetime.datetime(year+1, 1, 1) if month == 12 else datetime.datetime(year, month+1, 1)
                 page_title = '%d年%d月' % (year, month)
-        threads = model.Thread.query_stored(update_from, update_to).fetch(config.MAX_FETCH)
+        threads = m.Thread.query_stored(update_from, update_to).fetch(conf.MAX_FETCH)
         context.update({
             'page_title' : '%sの過去ログ' % page_title,
             'threads': threads,
@@ -241,7 +241,7 @@ class WriteHandler(webapp2.RequestHandler):
         raise ex.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
         
     @deco.board()
-    @deco.myuser(const.WRITER)
+    @deco.myuser(c.WRITER)
     def post(self, context, thread_id):
         board = context['board']
         content = board.validate_content(self.request.get('content'))
@@ -259,28 +259,28 @@ class WriteHandler(webapp2.RequestHandler):
         char_id = self.request.get('character') or 'none'
         char_emotion = self.request.get('emotion') or 'normal'
         
-        new_id = model.Response.latest_num_of(thread_id) + 1
-        new_number = new_id % const.TT
-        response = model.Response(id = new_id,
-                                  author_id = myuser.myuser_id,
-                                  updater_id = myuser.myuser_id,
-                                  
-                                  status = const.NORMAL,
-                                  updated_at = now,
-                                  since = now,
-                                  
-                                  number = new_number,
-                                  datetime_str = datetime_str,
-                                  hashed_id = hashed_id,
-                                  content = content,
-                                  
-                                  char_name = char_name,
-                                  char_id = char_id,
-                                  char_emotion = char_emotion,
-                                 )
+        new_id = m.Response.latest_num_of(thread_id) + 1
+        new_number = new_id % c.TT
+        response = m.Response(id = new_id,
+                              author_id = myuser.myuser_id,
+                              updater_id = myuser.myuser_id,
+                              
+                              status = c.NORMAL,
+                              updated_at = now,
+                              since = now,
+                              
+                              number = new_number,
+                              datetime_str = datetime_str,
+                              hashed_id = hashed_id,
+                              content = content,
+                              
+                              char_name = char_name,
+                              char_id = char_id,
+                              char_emotion = char_emotion,
+                             )
         @ndb.transactional()
         def write_unique():
-            if model.Response.get_by_id(new_id):
+            if m.Response.get_by_id(new_id):
                 raise ex.SameId()
             else:
                 return response.put()
@@ -289,12 +289,12 @@ class WriteHandler(webapp2.RequestHandler):
                 if write_unique(): break
             except ex.SameId:
                 new_id += 1
-                new_number = new_id % const.TT
+                new_number = new_id % c.TT
                 if new_number > board.max_reses: raise ex.ThreadNotWritable()
                 response.key = ndb.Key('Response', new_id)
                 response.number = new_number
         util.flush_page('/%d/' % thread_id)
-        if config.LOCAL_SDK: time.sleep(0.5)
+        if conf.LOCAL_SDK: time.sleep(0.5)
         raise ex.Redirect('/%d/#%d' % (thread_id, new_number))
 
 class RelatedThreadHandler(webapp2.RequestHandler):
@@ -304,7 +304,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
         if not thread or not thread.readable(): raise ex.ThreadNotFound()
-        threads = model.Thread.query_theme(thread.theme_id).fetch()
+        threads = m.Thread.query_theme(thread.theme_id).fetch()
         context.update({
             'page_title': '関連スレ一覧',
             'thread': thread,
@@ -316,12 +316,12 @@ class RelatedThreadHandler(webapp2.RequestHandler):
 
 class EditTemplateHandler(webapp2.RequestHandler):
     @deco.board()
-    @deco.myuser(const.WRITER)
+    @deco.myuser(c.WRITER)
     def get(self, context, thread_id):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
         if not thread or not thread.readable(): raise ex.ThreadNotFound()
-        if thread.status != const.NORMAL: raise ex.ThemeNotWritable()
+        if thread.status != c.NORMAL: raise ex.ThemeNotWritable()
         theme = ndb.Key('Theme', thread.theme_id).get()
         if not theme: raise ex.ThemeNotFound()
         context.update({
@@ -337,12 +337,12 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
         raise ex.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
     
     @deco.board()
-    @deco.myuser(const.WRITER)
+    @deco.myuser(c.WRITER)
     def post(self, context, thread_id):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
         if not thread or not thread.readable(): raise ex.ThreadNotFound()
-        if thread.status != const.NORMAL: raise ex.ThemeNotWritable()
+        if thread.status != c.NORMAL: raise ex.ThemeNotWritable()
         theme_key = ndb.Key('Theme', thread.theme_id)
         theme = theme_key.get()
         if not theme: raise ex.ThemeNotFound()
@@ -369,9 +369,9 @@ class LoginHandler(webapp2.RequestHandler):
         board = context['board']
         user = users.get_current_user()
         if not user: raise ex.RedirectLogin()
-        myuser = model.MyUser.get_by_id(user.user_id())
+        myuser = m.MyUser.get_by_id(user.user_id())
         if myuser:
-            if (myuser.status == const.READER) or (myuser.status == const.DELETED):
+            if (myuser.status == c.READER) or (myuser.status == c.DELETED):
                 raise ex.RedirectAgreement()
             else:
                 raise ex.RedirectContinue()
@@ -385,15 +385,15 @@ class LoginHandler(webapp2.RequestHandler):
         myuser_id = increment_uc()
         if not myuser_id: raise ex.NewUserIdCouldNotGet()
         now = board.now()
-        myuser = model.MyUser(id = user.user_id(),
-                              user = user,
-                              myuser_id = myuser_id,
-                              ban_count = 0,
-                              
-                              status = const.READER,
-                              updated_at = now,
-                              since = now,
-                             )
+        myuser = m.MyUser(id = user.user_id(),
+                          user = user,
+                          myuser_id = myuser_id,
+                          ban_count = 0,
+                          
+                          status = c.READER,
+                          updated_at = now,
+                          since = now,
+                         )
         if not myuser.put(): raise ex.NewUserCouldNotPut()
         raise ex.RedirectAgreement()
 
@@ -415,15 +415,15 @@ class AgreementHandler(webapp2.RequestHandler):
 
 class AgreeHandler(webapp2.RequestHandler):
     @deco.board()
-    @deco.myuser(const.DELETED)
+    @deco.myuser(c.DELETED)
     def get(self, context):
         myuser = context['user']
-        if (myuser.status == const.READER) or (myuser.status == const.DELETED):
+        if (myuser.status == c.READER) or (myuser.status == c.DELETED):
             myuser_key = myuser.key
             @ndb.transactional()
             def rise_to_writer():
                 myuser = myuser_key.get()
-                myuser.status = const.WRITER
+                myuser.status = c.WRITER
                 myuser.flush()
                 return myuser.put()
             if not rise_to_writer(): raise ex.UserCouldNotUpdate()
@@ -431,17 +431,17 @@ class AgreeHandler(webapp2.RequestHandler):
 
 class MyPageHandler(webapp2.RequestHandler):
     @deco.board()
-    @deco.myuser(const.BANNED)
+    @deco.myuser(c.BANNED)
     def get(self, context):
         context.update({
             'page_title' : 'ユーザー情報',
-            'status_str' : const.AUTHORITIES[context['user'].status],
+            'status_str' : c.AUTHORITIES[context['user'].status],
         })
         self.response.out.write(tengine.render(':mypage', context))
 
 class NewThreadHandler(webapp2.RequestHandler):
     @deco.board()
-    @deco.myuser(const.WRITER)
+    @deco.myuser(c.WRITER)
     def get(self, context):
         context.update({'page_title' : '新しいスレッドの作成'})
         self.response.out.write(tengine.render(':new', context))
@@ -452,7 +452,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         raise ex.PostMethodRequired('新スレッド作成画面へ戻る', '/new/')
     
     @deco.board()
-    @deco.myuser(const.WRITER)
+    @deco.myuser(c.WRITER)
     def post(self, context):
         board = context['board']
         title_template = board.validate_title(self.request.get('title_template'))
@@ -470,51 +470,51 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         
         myuser = context['user']
         now = board.now()
-        theme = model.Theme(id = theme_id,
-                            author_id = myuser.myuser_id,
-                            updater_id = myuser.myuser_id,
-                            
-                            status = const.NORMAL,
-                            updated_at = now,
-                            since = now,
-                            
-                            title_template = title_template,
-                            template = template,
-                            keeped_title_template = title_template,
-                            keeped_template = template,
-                           )
+        theme = m.Theme(id = theme_id,
+                        author_id = myuser.myuser_id,
+                        updater_id = myuser.myuser_id,
+                        
+                        status = c.NORMAL,
+                        updated_at = now,
+                        since = now,
+                        
+                        title_template = title_template,
+                        template = template,
+                        keeped_title_template = title_template,
+                        keeped_template = template,
+                       )
         theme_key = theme.put()
         if not theme_key: raise ex.NewThemeCouldNotCreate()
         
         tc_key = ndb.Key('Counter', 'Thread')
         thread_id = increment_tc()
         if not thread_id: raise ex.NewThreadIdCouldNotGet()
-        thread = model.Thread(id = thread_id,
-                              theme_id = theme_id,
-                              author_id = myuser.myuser_id,
-                              updater_id = myuser.myuser_id,
-                              
-                              status = const.NORMAL,
-                              updated_at = now,
-                              since = now,
-                              
-                              title = title_template % 1,
-                              datetime_str = util.datetime_to_str(now),
-                              hashed_id = board.hash(myuser.myuser_id),
-                              content = template,
-                              
-                              thread_number = 1,
-                              response_count = 0,
-                              responsed_at = now,
-                              
-                              prev_thread_id = 0,
-                              prev_thread_title = '',
-                              next_thread_id = 0,
-                              next_thread_title = '',
-                             )
+        thread = m.Thread(id = thread_id,
+                          theme_id = theme_id,
+                          author_id = myuser.myuser_id,
+                          updater_id = myuser.myuser_id,
+                          
+                          status = c.NORMAL,
+                          updated_at = now,
+                          since = now,
+                          
+                          title = title_template % 1,
+                          datetime_str = util.datetime_to_str(now),
+                          hashed_id = board.hash(myuser.myuser_id),
+                          content = template,
+                          
+                          thread_number = 1,
+                          response_count = 0,
+                          responsed_at = now,
+                          
+                          prev_thread_id = 0,
+                          prev_thread_title = '',
+                          next_thread_id = 0,
+                          next_thread_title = '',
+                         )
         thread_key = thread.put()
         if not thread_key: raise ex.NewThreadCouldNotCreate()
-        if config.LOCAL_SDK: time.sleep(0.5)
+        if conf.LOCAL_SDK: time.sleep(0.5)
         clean_old_threads(board)
         raise ex.Redirect('/%d/' % thread_id)
 
