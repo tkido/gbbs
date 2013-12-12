@@ -13,7 +13,7 @@ from google.appengine.ext import ndb
 import config
 import const
 import deco
-import error
+import ex
 import model
 import tengine
 import util
@@ -137,14 +137,14 @@ class ThreadHandler(webapp2.RequestHandler):
         thread_id = int(thread_id)
         thread_key = ndb.Key('Thread', thread_id)
         thread = thread_key.get()
-        if not thread or not thread.readable(): raise error.ThreadNotFound()
+        if not thread or not thread.readable(): raise ex.ThreadNotFound()
         
         if first:
             first = int(first)
             if 0 < first <= board.max_reses:
                 fetch_count = 1
             else:
-                raise error.ThreadArgument('/%d/' % thread_id)
+                raise ex.ThreadArgument('/%d/' % thread_id)
         else:
             first = 1
             fetch_count = board.max_reses
@@ -155,7 +155,7 @@ class ThreadHandler(webapp2.RequestHandler):
                 if first <= last <= board.max_reses:
                     fetch_count = last - first + 1
             else:
-                raise error.ThreadArgument('/%d/' % thread_id)
+                raise ex.ThreadArgument('/%d/' % thread_id)
         query = model.Response.query_normal(thread_id, first)
         reses = query.fetch(fetch_count) if fetch_count else []
         
@@ -205,14 +205,14 @@ class LinkHandler(webapp2.RequestHandler):
 class WriteHandler(webapp2.RequestHandler):
     @deco.board()
     def get(self, context, thread_id):
-        raise error.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
+        raise ex.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
         
     @deco.board()
     @deco.myuser(const.WRITER)
     def post(self, context, thread_id):
         board = context['board']
         content = board.validate_content(self.request.get('content'))
-        if not content: raise error.ContentValidation(board)
+        if not content: raise ex.ContentValidation(board)
         
         thread_id = int(thread_id)
         thread_key = ndb.Key('Thread', thread_id)
@@ -249,21 +249,21 @@ class WriteHandler(webapp2.RequestHandler):
         @ndb.transactional()
         def write_unique():
             if model.Response.get_by_id(new_id):
-                raise error.SameId()
+                raise ex.SameId()
             else:
                 return response.put()
         while True:
             try:
                 if write_unique(): break
-            except error.SameId:
+            except ex.SameId:
                 new_id += 1
                 new_number = new_id % const.TT
-                if new_number > board.max_reses: raise error.ThreadNotWritable()
+                if new_number > board.max_reses: raise ex.ThreadNotWritable()
                 response.key = ndb.Key('Response', new_id)
                 response.number = new_number
         util.flush_page('/%d/' % thread_id)
         if config.LOCAL_SDK: time.sleep(0.5)
-        self.redirect(util.namespaced('/%d/#%d' % (thread_id, new_number)))
+        raise ex.Redirect('/%d/#%d' % (thread_id, new_number))
 
 class RelatedThreadHandler(webapp2.RequestHandler):
     @deco.board()
@@ -271,7 +271,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
     def get(self, context, thread_id):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
-        if not thread or not thread.readable(): raise error.ThreadNotFound()
+        if not thread or not thread.readable(): raise ex.ThreadNotFound()
         threads = model.Thread.query_theme(thread.theme_id).fetch()
         context.update({
             'page_title': '関連スレ一覧',
@@ -288,10 +288,10 @@ class EditTemplateHandler(webapp2.RequestHandler):
     def get(self, context, thread_id):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
-        if not thread or not thread.readable(): raise error.ThreadNotFound()
-        if thread.status != const.NORMAL: raise error.ThemeNotWritable()
+        if not thread or not thread.readable(): raise ex.ThreadNotFound()
+        if thread.status != const.NORMAL: raise ex.ThemeNotWritable()
         theme = ndb.Key('Theme', thread.theme_id).get()
-        if not theme: raise error.ThemeNotFound()
+        if not theme: raise ex.ThemeNotFound()
         context.update({
             'page_title': 'テンプレート編集',
             'thread': thread,
@@ -302,24 +302,24 @@ class EditTemplateHandler(webapp2.RequestHandler):
 class UpdateTemplateHandler(webapp2.RequestHandler):
     @deco.board()
     def get(self, context, thread_id):
-        raise error.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
+        raise ex.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
     
     @deco.board()
     @deco.myuser(const.WRITER)
     def post(self, context, thread_id):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
-        if not thread or not thread.readable(): raise error.ThreadNotFound()
-        if thread.status != const.NORMAL: raise error.ThemeNotWritable()
+        if not thread or not thread.readable(): raise ex.ThreadNotFound()
+        if thread.status != const.NORMAL: raise ex.ThemeNotWritable()
         theme_key = ndb.Key('Theme', thread.theme_id)
         theme = theme_key.get()
-        if not theme: raise error.ThemeNotFound()
+        if not theme: raise ex.ThemeNotFound()
         
         board = context['board']
         title_template = board.validate_title(self.request.get('title_template'))
-        if not title_template: raise error.TitleValidation(board)
+        if not title_template: raise ex.TitleValidation(board)
         template = board.validate_template(self.request.get('template'))
-        if not template: raise error.ContentValidation(board)
+        if not template: raise ex.ContentValidation(board)
         
         myuser = context['user']
         @ndb.transactional()
@@ -330,8 +330,8 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
             theme.updated_at = board.now()
             theme.updater_id = myuser.myuser_id
             theme.put()
-        if not update_template(): raise error.ThemeNotWritable()
-        self.redirect(util.namespaced('/edit/%d/' % thread_id))
+        if not update_template(): raise ex.ThemeNotWritable()
+        raise ex.Redirect('/edit/%d/' % thread_id)
 
 class LoginHandler(webapp2.RequestHandler):
     @deco.board()
@@ -339,19 +339,13 @@ class LoginHandler(webapp2.RequestHandler):
         namespace = context['namespace']
         board = context['board']
         user = users.get_current_user()
-        if not user:
-            self.redirect(str(users.create_login_url(self.request.uri)))
-            return
+        if not user: raise ex.RedirectLogin()
         myuser = model.MyUser.get_by_id(user.user_id())
         if myuser:
             if (myuser.status == const.READER) or (myuser.status == const.DELETED):
-                redirect_to = '/%s/agreement/' % namespace
-                if self.request.get('continue'):
-                    redirect_to += '?continue=%s' % self.request.get('continue')
-                self.redirect(str(redirect_to)); return;
+                raise ex.RedirectAgreement()
             else:
-                redirect_to = self.request.get('continue') or '/%s/' % namespace
-                self.redirect(str(redirect_to)); return;
+                raise ex.RedirectContinue()
         uc_key = ndb.Key('Counter', 'MyUser')
         @ndb.transactional()
         def increment_uc():
@@ -360,7 +354,7 @@ class LoginHandler(webapp2.RequestHandler):
             uc.put()
             return uc.count
         myuser_id = increment_uc()
-        if not myuser_id: raise error.NewUserIdCouldNotGet()
+        if not myuser_id: raise ex.NewUserIdCouldNotGet()
         now = board.now()
         myuser = model.MyUser(id = user.user_id(),
                               user = user,
@@ -371,11 +365,8 @@ class LoginHandler(webapp2.RequestHandler):
                               updated_at = now,
                               since = now,
                              )
-        if not myuser.put(): raise error.NewUserCouldNotPut()
-        redirect_to = '/%s/agreement/' % namespace
-        if self.request.get('continue'):
-            redirect_to += '?continue=%s' % self.request.get('continue')
-        self.redirect(str(redirect_to))
+        if not myuser.put(): raise ex.NewUserCouldNotPut()
+        raise ex.RedirectAgreement()
 
 class AgreeHandler(webapp2.RequestHandler):
     @deco.board()
@@ -391,9 +382,8 @@ class AgreeHandler(webapp2.RequestHandler):
                 myuser.status = const.WRITER
                 myuser.flush()
                 return myuser.put()
-            if not rise_to_writer(): raise error.UserCouldNotUpdate()
-        redirect_to = self.request.get('continue') or '/%s/' % namespace
-        self.redirect(str(redirect_to))
+            if not rise_to_writer(): raise ex.UserCouldNotUpdate()
+        raise ex.RedirectContinue()
 
 class AgreementHandler(webapp2.RequestHandler):
     @deco.board()
@@ -462,16 +452,16 @@ class NewThreadHandler(webapp2.RequestHandler):
 class CreateNewThreadHandler(webapp2.RequestHandler):
     @deco.board()
     def get(self, context):
-        raise error.PostMethodRequired('新スレッド作成画面へ戻る', '/new/')
+        raise ex.PostMethodRequired('新スレッド作成画面へ戻る', '/new/')
     
     @deco.board()
     @deco.myuser(const.WRITER)
     def post(self, context):
         board = context['board']
         title_template = board.validate_title(self.request.get('title_template'))
-        if not title_template: raise error.TitleValidation(board)
+        if not title_template: raise ex.TitleValidation(board)
         template = board.validate_template(self.request.get('template'))
-        if not template: raise error.ContentValidation(board)
+        if not template: raise ex.ContentValidation(board)
         
         @ndb.transactional()
         def increment_tc():
@@ -481,7 +471,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
             return tc.count
         tc_key = ndb.Key('Counter', 'Theme')
         theme_id = increment_tc()
-        if not theme_id: raise error.NewThemeIdCouldNotGet()
+        if not theme_id: raise ex.NewThemeIdCouldNotGet()
         
         myuser = context['user']
         now = board.now()
@@ -499,11 +489,11 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
                             keeped_template = template,
                            )
         theme_key = theme.put()
-        if not theme_key: raise error.NewThemeCouldNotCreate()
+        if not theme_key: raise ex.NewThemeCouldNotCreate()
         
         tc_key = ndb.Key('Counter', 'Thread')
         thread_id = increment_tc()
-        if not thread_id: raise error.NewThreadIdCouldNotGet()
+        if not thread_id: raise ex.NewThreadIdCouldNotGet()
         thread = model.Thread(id = thread_id,
                               theme_id = theme_id,
                               author_id = myuser.myuser_id,
@@ -528,10 +518,10 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
                               next_thread_title = '',
                              )
         thread_key = thread.put()
-        if not thread_key: raise error.NewThreadCouldNotCreate()
-        self.redirect(util.namespaced('/%d/' % thread_id))
+        if not thread_key: raise ex.NewThreadCouldNotCreate()
         if config.LOCAL_SDK: time.sleep(0.5)
         clean_old_threads(board)
+        raise ex.Redirect('/%d/' % thread_id)
 
 app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),

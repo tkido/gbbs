@@ -58,7 +58,7 @@ class CreateBoardHandler(webapp2.RequestHandler):
         namespace = self.request.get('bbs_id')
         board = model.Board.get_by_id(namespace)
         if board:
-            raise error.SameId()
+            raise ex.SameId()
         board_counter = model.Counter.get_by_id('Board')
         board_counter.count += 1
         now = util.now()
