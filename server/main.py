@@ -118,6 +118,18 @@ def clean_old_threads(board):
     for i in range(needs):
         store(keys[-i-1])
 
+class TopPageHandler(webapp2.RequestHandler):
+    @deco.cache(3)
+    def get(self, context):
+        boards = m.Board.query_normal().fetch(conf.MAX_FETCH)
+        context.update({
+            'page_title' : 'トップページ',
+            'boards': boards,
+        })
+        html = tengine.render(':default/index', context, layout=':default/base')
+        self.response.out.write(html)
+        return html
+
 class IndexHandler(webapp2.RequestHandler):
     @deco.board()
     @deco.cache(5)
@@ -518,7 +530,8 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         clean_old_threads(board)
         raise ex.Redirect('/%d/' % thread_id)
 
-app = webapp2.WSGIApplication([(r'/([0-9a-z_-]{2,16})/', IndexHandler),
+app = webapp2.WSGIApplication([('/', TopPageHandler),
+                               (r'/([0-9a-z_-]{2,16})/', IndexHandler),
                                (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),
                                (r'/([0-9a-z_-]{2,16})/link', LinkHandler),
                                (r'/([0-9a-z_-]{2,16})/related/(\d+)/', RelatedThreadHandler),

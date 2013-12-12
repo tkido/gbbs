@@ -47,6 +47,10 @@ class Board(ndb.Model):
     max_rows = ndb.IntegerProperty(required=True, indexed=False)
     max_rows_template = ndb.IntegerProperty(required=True, indexed=False)
 
+    @classmethod
+    def query_normal(cls):
+        return cls.query(cls.status == c.NORMAL, namespace = c.BOARD_NAMESPACE)
+
     def readable(self):
         return self.status != c.DELETED
     def writable(self):

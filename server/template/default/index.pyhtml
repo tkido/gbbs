@@ -1,0 +1,15 @@
+<h1>GBBS トップページ</h1>
+<div class="board-list">
+  <ol>
+<?py i = 0 ?>
+<?py for board in boards: ?>
+<?py i += 1 ?>
+    <li>
+      <a href="/#{ board.key.id() }/">
+        #{ i }: ${ board.title }
+      </a>
+      ${ board.description }
+    </li>
+<?py #end ?>
+  </ol>
+</div>
