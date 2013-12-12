@@ -58,7 +58,7 @@ def board():
 
 def cache(second = conf.CACHED_DEFAULT):
     def wrapper_func(original_func):
-        def decorated_func(org, context, *args, **kwargs):
+        def decorated_func(org, context = {}, *args, **kwargs):
             user = users.get_current_user()
             key = org.request.uri + ('!login' if user else '')
             html = memcache.get(key)

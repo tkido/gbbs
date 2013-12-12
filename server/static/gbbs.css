@@ -175,6 +175,27 @@ http://b4t.jp/823
   font-weight: bold;
 }
 
+.board-list {
+  overflow: hidden;
+  *zoom: 1;
+}
+.board-list ol {
+  background-color: #ccffcc;
+  padding: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+  border-radius: 8px;
+}
+.board-list ol li {
+  list-style: none;
+  margin: 2px 8px;
+}
+.board-list ol li a {
+  font-weight: bold;
+}
+
 dl {
   clear: both;
 }
