@@ -31,7 +31,7 @@ class Throwable(Exception):
     pass
 
 class Redirect(Throwable):
-    def __init__(self, to):
+    def __init__(self, to = ''):
         self.to = to
 class RedirectAgreement(Redirect):
     pass
