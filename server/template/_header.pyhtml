@@ -3,9 +3,9 @@
 <title>${ board.title } ${ page_title }</title> 
 <link rel="shortcut icon" href="/static/favicon.ico" /> 
 <link rel="stylesheet" href="/static/gbbs.css" type="text/css" media="all" />
-<link rel="stylesheet" href="/static/#{ namespace }/custom.css" type="text/css" media="all" />
+<link rel="stylesheet" href="/static/#{ ns }/custom.css" type="text/css" media="all" />
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-<script src="/static/#{ namespace }/characters.js"></script>
+<script src="/static/#{ ns }/characters.js"></script>
 <script src="/static/gbbs.js"></script>
 <?py if not board.allow_robots: ?>
 <meta name="robots" content="noindex,nofollow">

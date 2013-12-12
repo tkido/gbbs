@@ -16,26 +16,26 @@ import util
 
 def board():
     def wrapper_func(original_func):
-        def decorated_func(org, namespace, *args, **kwargs):
+        def decorated_func(org, ns, *args, **kwargs):
             try:
                 context = {}
                 namespace_manager.set_namespace(c.BOARD_NAMESPACE)
-                board = memcache.get(namespace)
+                board = memcache.get(ns)
                 if not board:
-                    board = ndb.Key('Board', namespace).get()
-                    memcache.add(namespace, board, conf.CACHED_BOARD)
+                    board = ndb.Key('Board', ns).get()
+                    memcache.add(ns, board, conf.CACHED_BOARD)
                 if not board or not board.readable(): raise ex.BoardNotFound()
-                namespace_manager.set_namespace(namespace)
+                namespace_manager.set_namespace(ns)
                 context.update({
-                    'namespace' : namespace,
+                    'ns' : ns,
                     'board': board,
-                    'login_url': '/%s/_login?continue=%s' % (namespace, org.request.uri),
+                    'login_url': '/%s/_login?continue=%s' % (ns, org.request.uri),
                     'logout_url': users.create_logout_url(org.request.uri),
                 })
                 original_func(org, context, *args, **kwargs)
             # Catch Redirect
             except ex.RedirectAgreement:
-                to = '/%s/agreement/' % namespace
+                to = '/%s/agreement/' % ns
                 if org.request.get('continue'):
                     to += '?continue=%s' % org.request.get('continue')
                 org.redirect(str(to))
@@ -43,9 +43,9 @@ def board():
                 to = red.to if red.to else org.request.uri
                 org.redirect(str(users.create_login_url(to)))
             except ex.RedirectContinue:
-                org.redirect(str(org.request.get('continue') or '/%s/' % namespace))
+                org.redirect(str(org.request.get('continue') or '/%s/' % ns))
             except ex.Redirect as red:
-                org.redirect(str('/%s%s' % (namespace, red.to)))
+                org.redirect(str('/%s%s' % (ns, red.to)))
             # Catch Error
             except ex.AppError as err:
                 ex.page(org, context, err)
@@ -86,7 +86,7 @@ def myuser(required_auth = c.BANNED):
             if not myuser or not myuser.readable(): raise ex.Redirect(context['login_url'])
             context.update({
                 'user': myuser,
-                'logout_url': users.create_logout_url('/%s/' % context['namespace']),
+                'logout_url': users.create_logout_url('/%s/' % context['ns']),
             })
             if myuser.status < required_auth: raise ex.AuthorityRequired(required_auth, myuser.status)
             original_func(org, context, *args, **kwargs)

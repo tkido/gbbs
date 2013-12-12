@@ -19,7 +19,7 @@ class Counter(ndb.Model):
     count = ndb.IntegerProperty(required=True, indexed=False)
 
 class Board(ndb.Model):
-    #id = namespace string
+    #id = ns string
     author_id = ndb.IntegerProperty(required=True, indexed=False)
     updater_id = ndb.IntegerProperty(required=True, indexed=False)
     

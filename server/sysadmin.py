@@ -31,7 +31,7 @@ class IndexHandler(webapp2.RequestHandler):
         
         context = {
             'page_title' : 'システム管理者専用ページ',
-            'namespace' : c.BOARD_NAMESPACE,
+            'ns' : c.BOARD_NAMESPACE,
             'user' : myuser,
             
             'total_user': myuser_counter.count,
@@ -46,8 +46,8 @@ class EnvironmentHandler(webapp2.RequestHandler):
             self.response.out.write("%s = %s<br>\n" % (name, os.environ[name]))
 
 class MemcacheHandler(webapp2.RequestHandler):
-    def get(self, namespace):
-        namespace_manager.set_namespace(namespace)
+    def get(self, ns):
+        namespace_manager.set_namespace(ns)
         dic = memcache.get_stats()
         for name in dic.keys():
             self.response.out.write("%s = %s<br>\n" % (name, dic[name]))
@@ -59,14 +59,14 @@ class CreateBoardHandler(webapp2.RequestHandler):
         myuser = m.MyUser.get_by_id(user.user_id())
         if not myuser:
             return
-        namespace = self.request.get('bbs_id')
-        board = m.Board.get_by_id(namespace)
+        ns = self.request.get('bbs_id')
+        board = m.Board.get_by_id(ns)
         if board:
             raise ex.SameId()
         board_counter = m.Counter.get_by_id('Board')
         board_counter.count += 1
         now = util.now()
-        board = m.Board(id = namespace,
+        board = m.Board(id = ns,
                         author_id = myuser.myuser_id,
                         updater_id = myuser.myuser_id,
                         
@@ -74,7 +74,7 @@ class CreateBoardHandler(webapp2.RequestHandler):
                         updated_at = now,
                         since = now,
                         
-                        title = '%s BBS' % namespace,
+                        title = '%s BBS' % ns,
                         description = '',
                         keywords = '',
                         template = '',
@@ -93,7 +93,7 @@ class CreateBoardHandler(webapp2.RequestHandler):
                         max_rows = 80,
                         max_rows_template = 80,
                        )
-        namespace_manager.set_namespace(namespace)
+        namespace_manager.set_namespace(ns)
         myuser_counter = m.Counter(id = 'MyUser', count = 0)
         theme_counter = m.Counter(id = 'Theme', count = 0)
         thread_counter = m.Counter(id = 'Thread', count = 0)
@@ -108,7 +108,7 @@ class InitHandler(webapp2.RequestHandler):
         myuser = m.MyUser.get_by_id(user.user_id())
         context = {
             'page_title' : '管理者ユーザとカウンタの作成',
-            'namespace' : c.BOARD_NAMESPACE,
+            'ns' : c.BOARD_NAMESPACE,
             'user' : myuser,
         }
         html = tengine.render(':sysadmin/init', context, layout=':sysadmin/base')

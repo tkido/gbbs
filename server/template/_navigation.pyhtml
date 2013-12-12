@@ -1,10 +1,10 @@
 <div class="navigation">
   <ul>
-    <li><a href="/#{ namespace }/">トップに戻る</a></li>
-    <li><a href="/#{ namespace }/stored/">過去ログ</a></li>
+    <li><a href="/#{ ns }/">トップに戻る</a></li>
+    <li><a href="/#{ ns }/stored/">過去ログ</a></li>
 <?py if user: ?>
-    <li><a href="/#{ namespace }/mypage/">マイページ</a></li>
-    <li><a href="/#{ namespace }/new/">新スレ作成</a></li>
+    <li><a href="/#{ ns }/mypage/">マイページ</a></li>
+    <li><a href="/#{ ns }/new/">新スレ作成</a></li>
     <li><a href="${ logout_url }">ログアウト</a></li>
 <?py else: ?>
     <li><a href="${ login_url }">ログイン</a></li>

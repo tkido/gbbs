@@ -4,7 +4,7 @@
 <?py for thread in threads: ?>
 <?py i += 1 ?>
     <li>
-      <a href="/#{ namespace }/#{ thread.key.id() }/">
+      <a href="/#{ ns }/#{ thread.key.id() }/">
         #{ i }: ${ thread.title } (#{ thread.response_count })
       </a>
     </li>

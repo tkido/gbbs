@@ -400,16 +400,16 @@ class LoginHandler(webapp2.RequestHandler):
 class AgreementHandler(webapp2.RequestHandler):
     @deco.board()
     def get(self, context):
-        namespace = context['namespace']
+        ns = context['ns']
         user = users.get_current_user()
-        login_url = '/%s/_agree' % namespace
+        login_url = '/%s/_agree' % ns
         if self.request.get('continue'):
             login_url += '?continue=%s' % self.request.get('continue')
         context.update({
             'page_title': '利用規約',
             'user': user,
             'login_url': login_url,
-            'logout_url': users.create_logout_url('/%s/' % namespace),
+            'logout_url': users.create_logout_url('/%s/' % ns),
         })
         self.response.out.write(tengine.render(':agreement', context))
 

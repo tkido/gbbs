@@ -19,11 +19,11 @@ def page(org, context, error):
     if isinstance(error, BoardNotFound):
         org.response.out.write(tengine.render(':error', context, layout=':default/base'))
     else:
-        namespace = context['namespace']
+        ns = context['ns']
         context.update({
             'user' : users.get_current_user(),
-            'login_url': users.create_login_url('/%s/' % namespace),
-            'logout_url': users.create_logout_url('/%s/' % namespace),
+            'login_url': users.create_login_url('/%s/' % ns),
+            'logout_url': users.create_logout_url('/%s/' % ns),
         })
         org.response.out.write(tengine.render(':error', context))
 
