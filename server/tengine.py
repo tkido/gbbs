@@ -16,7 +16,7 @@ import conf
 tenjin.gae.init()
 #logging.basicConfig(level=logging.DEBUG)
 #tenjin.logger = logging
-tengine = tenjin.Engine(path=['template'], postfix='.pyhtml', layout=':base')
+tengine = tenjin.Engine(path=['view'], postfix='.pyhtml', layout=':base')
 
 GBBS_URL_HEAD = 'http://%s/' % conf.HTTP_HOST
 ANCHOR_PAT = re.compile('&gt;&gt;(1000|0|[1-9][0-9]{0,2})(-?)((1000|0|[1-9][0-9]{0,2})?)')
