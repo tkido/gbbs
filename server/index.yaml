@@ -13,5 +13,5 @@ indexes:
 - kind: Thread
   properties:
   - name: status
-  - name: updated_at
+  - name: updated
     direction: desc

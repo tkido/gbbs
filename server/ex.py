@@ -82,7 +82,7 @@ class AuthorityRequired(AppError):
     self.report = ''
     self.help = '/authority'
 
-class ThemeNotWritable(AppError):
+class TemplateNotWritable(AppError):
   def __init__(self):
     self.title = 'テンプレートの編集はできません'
     self.message = 'スレがすでに倉庫に送りになっているか、書き込み禁止されています。'
@@ -95,18 +95,18 @@ class ThreadNotWritable(AppError):
 class InvalidTitle(AppError):
   def __init__(self, board):
     self.title = 'タイトルが不正です'
-    self.message = '空ではなく、%d字以内である必要があります。' % board.max_chars_title
+    self.message = '空ではなく、%d字以内である必要があります。' % board.max[c.CHARS_TITLE]
     self.message += '2つ以上の『%d』を含むことはできません。'
         
 class InvalidContent(AppError):
   def __init__(self, board):
     self.title = '内容が不正です'
-    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows, board.max_chars)
+    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max[c.ROWS], board.max[c.CHARS])
 
 class InvalidTemplate(AppError):
   def __init__(self, board):
     self.title = '内容が不正です'
-    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max_rows_template, board.max_chars_template)
+    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max[c.ROWS_TEMPLATE], board.max[c.CHARS_TEMPLATE])
 
 # ndb error
 class UserNotFound(SysError):
@@ -144,7 +144,7 @@ class ThreadCouldNotPut(SysError):
     self.title = 'スレッドの保存に失敗しました'
     self.message = '再送信を行うと今度は成功する可能性がありますが、続いて失敗した場合はそれ以上繰り返さずに、あとでもう一度書き込んで下さい。フォームの入力内容はブラウザの戻るボタンで戻ることによって取り戻せる可能性があります。'
 
-class ResponseCouldNotPut(SysError):
+class ResCouldNotPut(SysError):
   def __init__(self):
     self.title = 'レスの保存に失敗しました'
     self.message = '再送信を行うと今度は成功する可能性がありますが、続いて失敗した場合はそれ以上繰り返さずに、あとでもう一度書き込んで下さい。フォームの入力内容はブラウザの戻るボタンで戻ることによって取り戻せる可能性があります。'

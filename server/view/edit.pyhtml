@@ -11,20 +11,20 @@
 <p>
 <form method="post" action="/#{ ns }/_edit/#{ thread.key.id() }">
     <strong>次スレッドのタイトル：</strong><br />
-    <input name="title_template" type="text" value="${ theme.title_template }" /><br />
+    <input name="title" type="text" value="${ template.title }" /><br />
     <strong>次スレッドのテンプレート：</strong><br />
-    <textarea name="template" rows="16" cols="80">${ theme.template }</textarea><br />
+    <textarea name="content" rows="16" cols="80">${ template.content }</textarea><br />
     <input type="submit" value="送信する" />
 </form>
 </p>
 
 <h2>参考：現行スレのテンプレート</h2>
-<h1 class="thread-title">${ theme.keeped_title_template }</h1>
+<h1 class="thread-title">${ template.keeped_title }</h1>
 <div class="response">
   <div class="res-content">
     <div class="message-cell">
       <div class="message">
-        #{ decorate(text2html(theme.keeped_template)) }
+        #{ decorate(text2html(template.keeped_content)) }
       </div>
     </div>
   </div>

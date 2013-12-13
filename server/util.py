@@ -12,7 +12,7 @@ import c
 def now():
   return datetime.datetime.now() + datetime.timedelta(hours = conf.TIMEZONE)
 
-def datetime_to_str(dt):
+def dt_to_str(dt):
   return '%04d/%02d/%02d(%s) %02d:%02d:%02d' % (dt.year,
                                                 dt.month,
                                                 dt.day,

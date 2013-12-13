@@ -5,7 +5,7 @@
 <?py i += 1 ?>
     <li>
       <a href="/#{ ns }/#{ thread.key.id() }/">
-        #{ i }: ${ thread.title } (#{ thread.response_count })
+        #{ i }: ${ thread.title } (#{ thread.res_count })
       </a>
     </li>
 <?py #end ?>

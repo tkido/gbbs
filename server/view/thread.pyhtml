@@ -4,7 +4,7 @@
   <div class="res-header">
     <a href="/#{ ns }/#{ thread_id }/"><span class="res-number">0</span></a>
     <span class="char-name">テンプレート</span>
-    <span class="datetime">#{ thread.datetime_str }</span>
+    <span class="datetime">#{ thread.dt_str }</span>
     <span class="hash">ID:#{ thread.hashed_id }</span>
   </div>
   <div class="res-content">
@@ -13,11 +13,11 @@
         #{ decorate(text2html(thread.content)) }
         <div class="navigation">
           <ul>
-<?py if thread.prev_thread_title: ?>
-            <li><a href="/#{ ns }/#{ thread.prev_thread_id }/" title="${ thread.prev_thread_title }">前スレ</a></li>
+<?py if thread.prev_title: ?>
+            <li><a href="/#{ ns }/#{ thread.prev_id }/" title="${ thread.prev_title }">前スレ</a></li>
 <?py #end ?>
-<?py if thread.next_thread_title: ?>
-            <li><a href="/#{ ns }/#{ thread.next_thread_id }/" title="${ thread.next_thread_title }">次スレ</a></li>
+<?py if thread.next_title: ?>
+            <li><a href="/#{ ns }/#{ thread.next_id }/" title="${ thread.next_title }">次スレ</a></li>
 <?py #end ?>
             <li><a href="/#{ ns }/related/#{ thread_id }/">関連スレ一覧</a></li>
 <?py if thread.writable: ?>
@@ -36,7 +36,7 @@
   <div class="res-header">
     <a href="/#{ ns }/#{ thread_id }/#{ res.number }"><span class="res-number">#{ res.number }</span></a>
     <span class="char-name">${ res.char_name }</span>
-    <span class="datetime">#{ res.datetime_str }</span>
+    <span class="datetime">#{ res.dt_str }</span>
     <span class="hash">ID:#{ res.hashed_id }</span>
   </div>
   <div class="res-content">
@@ -93,11 +93,11 @@
         このスレは終了しました。
         <div class="navigation">
           <ul>
-<?py if thread.prev_thread_title: ?>
-            <li><a href="/#{ ns }/#{ thread.prev_thread_id }/" title="${ thread.prev_thread_title }">前スレ</a></li>
+<?py if thread.prev_title: ?>
+            <li><a href="/#{ ns }/#{ thread.prev_id }/" title="${ thread.prev_title }">前スレ</a></li>
 <?py #end ?>
-<?py if thread.next_thread_title: ?>
-            <li><a href="/#{ ns }/#{ thread.next_thread_id }/" title="${ thread.next_thread_title }">次スレ</a></li>
+<?py if thread.next_title: ?>
+            <li><a href="/#{ ns }/#{ thread.next_id }/" title="${ thread.next_title }">次スレ</a></li>
 <?py #end ?>
             <li><a href="/#{ ns }/related/#{ thread_id }/">関連スレ一覧</a></li>
           </ul>

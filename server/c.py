@@ -37,14 +37,23 @@ DINIED        =-1
 BANNED        =-2
 DELETED       =-3
 
-#for status of Board, Thread, Response
+#for status of Board, Thread, Res
 NORMAL        = 0
 STORED        =-1
 BANNED        =-2
 DELETED       =-3
 
 #for boards
-BOARD_NAMESPACE = 'default'
+BOARD_NAMESPACE = 'b'
+
+# m.Board.max[_]
+THREADS        = 0
+RESES          = 1
+CHARS          = 2
+CHARS_TITLE    = 3
+CHARS_TEMPLATE = 4
+ROWS           = 5
+ROWS_TEMPLATE  = 6
 
 #const
 K  =  1000

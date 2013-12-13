@@ -71,7 +71,7 @@ class CreateBoardHandler(webapp2.RequestHandler):
                         updater_id = myuser.myuser_id,
                         
                         status = c.NORMAL,
-                        updated_at = now,
+                        updated = now,
                         since = now,
                         
                         title = '%s BBS' % ns,
@@ -85,19 +85,14 @@ class CreateBoardHandler(webapp2.RequestHandler):
                         allow_index = True,
                         allow_robots = True,
                         
-                        max_reses = 1000,
-                        max_threads = 1000,
-                        max_chars = 4096,
-                        max_chars_title = 32,
-                        max_chars_template = 4096 * 2,
-                        max_rows = 80,
-                        max_rows_template = 80,
+                        max = [3, 3, 4096, 32, 8192, 80, 160],
+                        ad = []
                        )
         namespace_manager.set_namespace(ns)
         myuser_counter = m.Counter(id = 'MyUser', count = 0)
-        theme_counter = m.Counter(id = 'Theme', count = 0)
+        template_counter = m.Counter(id = 'Template', count = 0)
         thread_counter = m.Counter(id = 'Thread', count = 0)
-        ndb.put_multi([board_counter, board, myuser_counter, thread_counter, theme_counter])
+        ndb.put_multi([board_counter, board, myuser_counter, thread_counter, template_counter])
         
         self.redirect('/s/')
 
@@ -134,7 +129,7 @@ class InitializeHandler(webapp2.RequestHandler):
                           status = c.SYSTEM_ADMIN,
                           
                           ban_count = 0,
-                          updated_at = now,
+                          updated = now,
                           since = now,
                          )
         myuser_counter = m.Counter(id = 'MyUser', count = 1)
