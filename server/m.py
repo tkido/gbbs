@@ -137,27 +137,27 @@ class Template(ndb.Model):
     
 class Thread(ndb.Model):
     #id = Counter("Thread").count
-    template_id = ndb.IntegerProperty(required=True)
-    author_id = ndb.IntegerProperty(required=True, indexed=False)
-    updater_id = ndb.IntegerProperty(required=True, indexed=False)
+    template_id = ndb.IntegerProperty( required=True               )
+    author_id   = ndb.IntegerProperty( required=True, indexed=False)
+    updater_id  = ndb.IntegerProperty( required=True, indexed=False)
     
-    status = ndb.IntegerProperty(required=True)
-    updated = ndb.DateTimeProperty(required=True)
-    since = ndb.DateTimeProperty(required=True, indexed=False)
+    status      = ndb.IntegerProperty( required=True               )
+    updated     = ndb.DateTimeProperty(required=True               )
+    since       = ndb.DateTimeProperty(required=True, indexed=False)
     
-    title = ndb.StringProperty(required=True, indexed=False)
-    dt_str = ndb.StringProperty(required=True, indexed=False)
-    hashed_id = ndb.StringProperty(required=True, indexed=False)
-    content = ndb.TextProperty(required=True)
+    title       = ndb.StringProperty(  required=True, indexed=False)
+    dt_str      = ndb.StringProperty(  required=True, indexed=False)
+    hashed_id   = ndb.StringProperty(  required=True, indexed=False)
+    content     = ndb.TextProperty(    required=True               )
     
-    number = ndb.IntegerProperty(required=True, indexed=False)
-    res_count = ndb.IntegerProperty(required=True, indexed=False)
-    resed = ndb.DateTimeProperty(required=True, indexed=False)
+    number      = ndb.IntegerProperty( required=True, indexed=False)
+    res_count   = ndb.IntegerProperty( required=True, indexed=False)
+    resed       = ndb.DateTimeProperty(required=True, indexed=False)
     
-    prev_id = ndb.IntegerProperty(indexed=False)
-    prev_title = ndb.StringProperty(indexed=False)
-    next_id = ndb.IntegerProperty(indexed=False)
-    next_title = ndb.StringProperty(indexed=False)
+    prev_id     = ndb.IntegerProperty(                indexed=False)
+    prev_title  = ndb.StringProperty(                 indexed=False)
+    next_id     = ndb.IntegerProperty(                indexed=False)
+    next_title  = ndb.StringProperty(                 indexed=False)
     
     def readable(self):
         return self.status != c.DELETED
@@ -174,21 +174,21 @@ class Thread(ndb.Model):
 
 class Res(ndb.Model):
     #id = thread.id * c.TT + number
-    author_id = ndb.IntegerProperty(required=True, indexed=False)
-    updater_id = ndb.IntegerProperty(required=True, indexed=False)
+    author_id    = ndb.IntegerProperty( required=True, indexed=False)
+    updater_id   = ndb.IntegerProperty( required=True, indexed=False)
     
-    status = ndb.IntegerProperty(required=True, indexed=False)
-    updated = ndb.DateTimeProperty(required=True, indexed=False)
-    since = ndb.DateTimeProperty(required=True, indexed=False)
+    status       = ndb.IntegerProperty( required=True, indexed=False)
+    updated      = ndb.DateTimeProperty(required=True, indexed=False)
+    since        = ndb.DateTimeProperty(required=True, indexed=False)
     
-    number = ndb.IntegerProperty(required=True, indexed=False)
-    dt_str = ndb.StringProperty(required=True, indexed=False)
-    hashed_id = ndb.StringProperty(required=True, indexed=False)
-    content = ndb.TextProperty(required=True)
+    number       = ndb.IntegerProperty( required=True, indexed=False)
+    dt_str       = ndb.StringProperty(  required=True, indexed=False)
+    hashed_id    = ndb.StringProperty(  required=True, indexed=False)
+    content      = ndb.TextProperty(    required=True               )
     
-    char_name = ndb.StringProperty(indexed=False)
-    char_id = ndb.StringProperty(indexed=False)
-    char_emotion = ndb.StringProperty(indexed=False)
+    char_name    = ndb.StringProperty(                 indexed=False)
+    char_id      = ndb.StringProperty(                 indexed=False)
+    char_emotion = ndb.StringProperty(                 indexed=False)
     
     @classmethod
     def query_normal(cls, thread_id, first):
