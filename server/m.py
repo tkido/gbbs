@@ -170,6 +170,12 @@ class Thread(ndb.Model):
     def readable(self):
         return self.status != c.DELETED
     
+    @ndb.transactional()
+    def store(self):
+        thread = self.key.get()
+        thread.status = c.STORED
+        thread.put()
+    
     @classmethod
     def query_normal(cls):
         return cls.query(cls.status == c.NORMAL).order(-cls.updated)
@@ -179,6 +185,19 @@ class Thread(ndb.Model):
     @classmethod
     def query_template(cls, template_id):
         return cls.query(cls.template_id == template_id)
+    @classmethod
+    def clean(cls, board):
+        query = cls.query_normal()
+        keys = query.fetch(board.max[c.THREADS]+3, keys_only=True)
+        needs = len(keys) - board.max[c.THREADS]
+        @ndb.transactional()
+        def store(key):
+            thread = key.get()
+            thread.status = c.STORED
+            thread.put()
+        for i in range(needs):
+            store(keys[-i-1])
+
 
 class Res(ndb.Model):
     #id = thread.id * c.TT + number

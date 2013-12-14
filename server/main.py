@@ -81,21 +81,6 @@ def create_next(thread_key, board):
                 if thread.put(): return thread
         return set_next_title()
 
-def store(thread_key):
-    @ndb.transactional()
-    def store_thread():
-        thread = thread_key.get()
-        thread.status = c.STORED
-        thread.put()
-    store_thread()
-
-def clean_old_threads(board):
-    query = m.Thread.query_normal()
-    keys = query.fetch(board.max[c.THREADS]+3, keys_only=True)
-    needs = len(keys) - board.max[c.THREADS]
-    for i in range(needs):
-        store(keys[-i-1])
-
 class TopPageHandler(webapp2.RequestHandler):
     @deco.catch()
     @deco.cache(3)
@@ -178,7 +163,7 @@ class ThreadHandler(webapp2.RequestHandler):
             thread = create_next(thread_key, board)
             flag = True
         if thread.status == c.NORMAL and thread.next_title != '':
-            thread = store(thread_key)
+            thread.store()
             flag = True
         if flag: raise ex.RedirectOrg
         
@@ -252,6 +237,8 @@ class WriteHandler(webapp2.RequestHandler):
         
         new_id = m.Res.latest_num_of(thread_id) + 1
         new_number = new_id % c.TT
+        if new_number > board.max[c.RESES]: raise ex.ThreadNotWritable()
+        
         res = m.Res(id = new_id,
               author_id = myuser.myuser_id,
               updater_id = myuser.myuser_id,
@@ -500,7 +487,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         thread_key = thread.put()
         if not thread_key: raise ex.NewThreadCouldNotCreate()
         if conf.LOCAL_SDK: time.sleep(0.5)
-        clean_old_threads(board)
+        m.Thread.clean(board)
         raise ex.Redirect('/%d/' % thread_id)
 
 app = webapp2.WSGIApplication([('/', TopPageHandler),
