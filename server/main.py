@@ -127,9 +127,7 @@ class TopPageHandler(webapp2.RequestHandler):
             'page_title' : 'トップページ',
             'boards': boards,
         })
-        html = tengine.render(':default/index', context, layout=':default/base')
-        self.response.out.write(html)
-        return html
+        return tengine.render(':default/index', context, layout=':default/base')
 
 class IndexHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -142,9 +140,7 @@ class IndexHandler(webapp2.RequestHandler):
             'page_title' : '',
             'threads': threads,
         })
-        html = tengine.render(':index', context)
-        self.response.out.write(html)
-        return html
+        return tengine.render(':index', context)
 
 class ThreadHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -195,7 +191,6 @@ class ThreadHandler(webapp2.RequestHandler):
             thread.put()
         
         html = tengine.render(':thread', context)
-        self.response.out.write(html)
         
         if thread.next_id == 0 and last_number >= board.max[c.RESES]:
             thread = prepare_next_(thread_key, board)
@@ -218,9 +213,7 @@ class LinkHandler(webapp2.RequestHandler):
             'page_title' : '外部ページへのリンク',
             'href': href,
         })
-        html = tengine.render(':link', context)
-        self.response.out.write(html)
-        return html
+        return tengine.render(':link', context)
 
 class StoredHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -248,9 +241,7 @@ class StoredHandler(webapp2.RequestHandler):
             'page_title' : '%sの過去ログ' % page_title,
             'threads': threads,
         })
-        html = tengine.render(':stored', context)
-        self.response.out.write(html)
-        return html
+        return tengine.render(':stored', context)
 
 class WriteHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -330,9 +321,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
             'thread': thread,
             'threads': threads,
         })
-        html = tengine.render(':related', context)
-        self.response.out.write(html)
-        return html
+        return tengine.render(':related', context)
 
 class EditTemplateHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -350,7 +339,7 @@ class EditTemplateHandler(webapp2.RequestHandler):
             'thread': thread,
             'template': template,
         })
-        self.response.out.write(tengine.render(':edit', context))
+        return tengine.render(':edit', context)
 
 class UpdateTemplateHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -436,7 +425,7 @@ class AgreementHandler(webapp2.RequestHandler):
             'login_url': login_url,
             'logout_url': users.create_logout_url('/%s/' % ns),
         })
-        self.response.out.write(tengine.render(':agreement', context))
+        return tengine.render(':agreement', context)
 
 class AgreeHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -464,7 +453,7 @@ class MyPageHandler(webapp2.RequestHandler):
             'page_title' : 'ユーザー情報',
             'status_str' : c.AUTHORITIES[context['user'].status],
         })
-        self.response.out.write(tengine.render(':mypage', context))
+        return tengine.render(':mypage', context)
 
 class NewThreadHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -472,7 +461,7 @@ class NewThreadHandler(webapp2.RequestHandler):
     @deco.myuser(c.WRITER)
     def get(self, context):
         context.update({'page_title' : '新しいスレッドの作成'})
-        self.response.out.write(tengine.render(':new', context))
+        return tengine.render(':new', context)
         
 class CreateNewThreadHandler(webapp2.RequestHandler):
     @deco.catch()
