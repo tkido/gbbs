@@ -23,14 +23,7 @@ if not conf.LOCAL_SDK:
     ereporter.register_logger()
 
 def prepare_next(thread_key, board):
-    tc_key = ndb.Key('Counter', 'Thread')
-    @ndb.transactional()
-    def increment_tc():
-        tc = tc_key.get()
-        tc.count += 1
-        if tc.put(): return tc.count
-    next_id = increment_tc()
-    
+    next_id = m.Counter.incr('Thread')
     @ndb.transactional()
     def set_next_id():
         thread = thread_key.get()
@@ -192,6 +185,7 @@ class ThreadHandler(webapp2.RequestHandler):
             thread = store(thread_key)
             flag = True
         if flag: raise ex.RedirectOrg
+        
         return html
 
 class LinkHandler(webapp2.RequestHandler):
@@ -379,14 +373,7 @@ class LoginHandler(webapp2.RequestHandler):
                 raise ex.RedirectAgreement()
             else:
                 raise ex.RedirectContinue()
-        uc_key = ndb.Key('Counter', 'MyUser')
-        @ndb.transactional()
-        def increment_uc():
-            uc = uc_key.get()
-            uc.count += 1
-            uc.put()
-            return uc.count
-        myuser_id = increment_uc()
+        myuser_id = m.Counter.incr('MyUser')
         if not myuser_id: raise ex.NewUserIdCouldNotGet()
         now = board.now()
         myuser = m.MyUser(id = user.user_id(),
@@ -468,13 +455,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         title = board.validate_title(self.request.get('title'))
         content = board.validate_template(self.request.get('content'))
         
-        @ndb.transactional()
-        def increment_tc():
-            tc = tc_key.get()
-            tc.count += 1
-            if tc.put(): return tc.count
-        tc_key = ndb.Key('Counter', 'Template')
-        template_id = increment_tc()
+        template_id = m.Counter.incr('Template')
         if not template_id: raise ex.NewTemplateIdCouldNotGet()
         
         myuser = context['user']
@@ -495,8 +476,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         template_key = template.put()
         if not template_key: raise ex.NewTemplateCouldNotCreate()
         
-        tc_key = ndb.Key('Counter', 'Thread')
-        thread_id = increment_tc()
+        thread_id = m.Counter.incr('Thread')
         if not thread_id: raise ex.NewThreadIdCouldNotGet()
         thread = m.Thread(id = thread_id,
                           template_id = template_id,

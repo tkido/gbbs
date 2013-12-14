@@ -63,8 +63,8 @@ class CreateBoardHandler(webapp2.RequestHandler):
         board = m.Board.get_by_id(ns)
         if board:
             raise ex.SameId()
-        board_counter = m.Counter.get_by_id('Board')
-        board_counter.count += 1
+        m.Counter.incr('Board')
+        
         now = util.now()
         board = m.Board(id = ns,
                         author_id = myuser.myuser_id,
@@ -92,7 +92,7 @@ class CreateBoardHandler(webapp2.RequestHandler):
         myuser_counter = m.Counter(id = 'MyUser', count = 0)
         template_counter = m.Counter(id = 'Template', count = 0)
         thread_counter = m.Counter(id = 'Thread', count = 0)
-        ndb.put_multi([board_counter, board, myuser_counter, thread_counter, template_counter])
+        ndb.put_multi([board, myuser_counter, thread_counter, template_counter])
         
         self.redirect('/s/')
 

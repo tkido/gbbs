@@ -18,6 +18,14 @@ class Counter(ndb.Model):
     #id = "Board", "MyUser", "Thread", "Template", "Log"
     count = ndb.IntegerProperty(required=True, indexed=False)
 
+    @classmethod
+    @ndb.transactional()
+    def incr(cls, id):
+        counter = cls.get_by_id(id)
+        counter.count += 1
+        if counter.put():
+            return counter.count
+
 class Log(ndb.Model):
     #id = Counter("Log").count
     log = ndb.TextProperty(required=True, indexed=False)
