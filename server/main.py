@@ -18,70 +18,6 @@ import m
 import tengine
 import util
 
-"""
-def prepare_next(thread_key, board):
-    next_id = m.Counter.incr('Thread')
-    @ndb.transactional()
-    def set_next_id():
-        thread = thread_key.get()
-        if thread.next_id == 0:
-            thread.next_id = next_id
-            if thread.put(): return thread
-    return set_next_id()
-"""
-def create_next(thread_key, board):
-    thread = thread_key.get()
-    now = board.now()
-    dt_str = util.dt_to_str(now)
-    myuser_id = 0
-    hashed_id = board.hash(myuser_id)
-    
-    template = ndb.Key('Template', thread.template_id).get()
-    next_number = thread.number + 1
-    new_title = template.title % next_number
-    
-    next_key = ndb.Key('Thread', thread.next_id)
-    @ndb.transactional()
-    def get_or_insert():
-        next = next_key.get()
-        if next:
-            return next
-        else:
-            next = m.Thread(id = thread.next_id,
-                            template_id = thread.template_id,
-                            author_id = myuser_id,
-                            updater_id = myuser_id,
-
-                            status = c.NORMAL,
-                            updated = now,
-                            since = now,
-
-                            title = new_title,
-                            dt_str = dt_str,
-                            hashed_id = hashed_id,
-                            content = template.content,
-
-                            number = next_number,
-                            res_count = 0,
-                            resed = now,
-
-                            prev_id = thread.key.id(),
-                            prev_title = thread.title,
-                            next_id = 0,
-                            next_title = '',
-                           )
-            if next.put(): return next
-    next = get_or_insert()
-    if next:
-        util.flush_page('/related/%d/' % thread.template_id)
-        @ndb.transactional()
-        def set_next_title():
-            thread = thread_key.get()
-            if thread.next_title == '':
-                thread.next_title = next.title
-                if thread.put(): return thread
-        return set_next_title()
-
 class TopPageHandler(webapp2.RequestHandler):
     @deco.catch()
     @deco.cache(3)
@@ -158,10 +94,10 @@ class ThreadHandler(webapp2.RequestHandler):
         
         flag = False
         if thread.next_id == 0 and last_number >= board.max[c.RESES]:
-            thread = thread.prepare_next()
+            thread.prepare_next()
             flag = True
         if thread.next_id > 0 and thread.next_title == '':
-            thread = create_next(thread_key, board)
+            thread.create_next(board)
             flag = True
         if thread.status == c.NORMAL and thread.next_title != '':
             thread.store()
