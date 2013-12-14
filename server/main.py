@@ -18,6 +18,7 @@ import m
 import tengine
 import util
 
+"""
 def prepare_next(thread_key, board):
     next_id = m.Counter.incr('Thread')
     @ndb.transactional()
@@ -27,7 +28,7 @@ def prepare_next(thread_key, board):
             thread.next_id = next_id
             if thread.put(): return thread
     return set_next_id()
-    
+"""
 def create_next(thread_key, board):
     thread = thread_key.get()
     now = board.now()
@@ -157,7 +158,7 @@ class ThreadHandler(webapp2.RequestHandler):
         
         flag = False
         if thread.next_id == 0 and last_number >= board.max[c.RESES]:
-            thread = prepare_next(thread_key, board)
+            thread = thread.prepare_next()
             flag = True
         if thread.next_id > 0 and thread.next_title == '':
             thread = create_next(thread_key, board)

@@ -170,6 +170,18 @@ class Thread(ndb.Model):
     def readable(self):
         return self.status != c.DELETED
     
+    def prepare_next(self):
+        next_id = Counter.incr('Thread')
+        thread_key = self.key
+        @ndb.transactional()
+        def set_next_id():
+            thread = thread_key.get()
+            if thread.next_id == 0:
+                thread.next_id = next_id
+                if thread.put():
+                    return thread
+        return set_next_id()
+    
     @ndb.transactional()
     def store(self):
         thread = self.key.get()
