@@ -15,3 +15,7 @@ MAX_FETCH = 1000
 import os
 LOCAL_SDK = (os.environ.get("SERVER_SOFTWARE") == "Development/2.0")
 HTTP_HOST = os.environ.get("HTTP_HOST")
+
+if not LOCAL_SDK:
+    from google.appengine.ext import ereporter
+    ereporter.register_logger()
