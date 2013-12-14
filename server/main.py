@@ -22,14 +22,13 @@ if not conf.LOCAL_SDK:
     from google.appengine.ext import ereporter
     ereporter.register_logger()
 
-def prepare_next_(thread_key, board):
+def prepare_next(thread_key, board):
     tc_key = ndb.Key('Counter', 'Thread')
     @ndb.transactional()
     def increment_tc():
         tc = tc_key.get()
         tc.count += 1
-        tc.put()
-        return tc.count
+        if tc.put(): return tc.count
     next_id = increment_tc()
     
     @ndb.transactional()
@@ -37,11 +36,10 @@ def prepare_next_(thread_key, board):
         thread = thread_key.get()
         if thread.next_id == 0:
             thread.next_id = next_id
-            thread.put()
-            return thread
+            if thread.put(): return thread
     return set_next_id()
     
-def create_next_(thread_key, board):
+def create_next(thread_key, board):
     thread = thread_key.get()
     now = board.now()
     dt_str = util.dt_to_str(now)
@@ -55,53 +53,44 @@ def create_next_(thread_key, board):
     next_key = ndb.Key('Thread', thread.next_id)
     @ndb.transactional()
     def get_or_insert():
-        next_ = next_key.get()
-        if next_:
-            return next_
+        next = next_key.get()
+        if next:
+            return next
         else:
-            next_ = m.Thread(id = thread.next_id,
-                                   template_id = thread.template_id,
-                                   author_id = myuser_id,
-                                   updater_id = myuser_id,
+            next = m.Thread(id = thread.next_id,
+                            template_id = thread.template_id,
+                            author_id = myuser_id,
+                            updater_id = myuser_id,
 
-                                   status = c.NORMAL,
-                                   updated = now,
-                                   since = now,
+                            status = c.NORMAL,
+                            updated = now,
+                            since = now,
 
-                                   title = new_title,
-                                   dt_str = dt_str,
-                                   hashed_id = hashed_id,
-                                   content = template.content,
+                            title = new_title,
+                            dt_str = dt_str,
+                            hashed_id = hashed_id,
+                            content = template.content,
 
-                                   number = next_number,
-                                   res_count = 0,
-                                   resed = now,
+                            number = next_number,
+                            res_count = 0,
+                            resed = now,
 
-                                   prev_id = thread.key.id(),
-                                   prev_title = thread.title,
-                                   next_id = 0,
-                                   next_title = '',
-                                  )
-            if next_.put():
-                return next_
-            else:
-                return None
-
-    next_ = get_or_insert()
-    if next_:
+                            prev_id = thread.key.id(),
+                            prev_title = thread.title,
+                            next_id = 0,
+                            next_title = '',
+                           )
+            if next.put(): return next
+    next = get_or_insert()
+    if next:
         util.flush_page('/related/%d/' % thread.template_id)
         @ndb.transactional()
         def set_next_title():
             thread = thread_key.get()
             if thread.next_title == '':
-                thread.next_title = next_.title
-                if thread.put():
-                    return thread
-                else:
-                    return None
+                thread.next_title = next.title
+                if thread.put(): return thread
         return set_next_title()
-    else:
-        return None
 
 def store(thread_key):
     @ndb.transactional()
@@ -192,15 +181,17 @@ class ThreadHandler(webapp2.RequestHandler):
         
         html = tengine.render(':thread', context)
         
+        flag = False
         if thread.next_id == 0 and last_number >= board.max[c.RESES]:
-            thread = prepare_next_(thread_key, board)
-            html = None
+            thread = prepare_next(thread_key, board)
+            flag = True
         if thread.next_id > 0 and thread.next_title == '':
-            thread = create_next_(thread_key, board)
-            html = None
+            thread = create_next(thread_key, board)
+            flag = True
         if thread.status == c.NORMAL and thread.next_title != '':
             thread = store(thread_key)
-            html = None
+            flag = True
+        if flag: raise ex.RedirectOrg
         return html
 
 class LinkHandler(webapp2.RequestHandler):
@@ -481,8 +472,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         def increment_tc():
             tc = tc_key.get()
             tc.count += 1
-            tc.put()
-            return tc.count
+            if tc.put(): return tc.count
         tc_key = ndb.Key('Counter', 'Template')
         template_id = increment_tc()
         if not template_id: raise ex.NewTemplateIdCouldNotGet()

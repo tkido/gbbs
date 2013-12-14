@@ -33,6 +33,8 @@ def catch():
                 org.redirect(str(users.create_login_url(to)))
             except ex.RedirectContinue:
                 org.redirect(str(org.request.get('continue') or '/%s/' % ns))
+            except ex.RedirectOrg:
+                org.redirect(str(org.request.uri))
             except ex.Redirect as red:
                 org.redirect(str('/%s%s' % (ns, red.to)))
             # Catch Error

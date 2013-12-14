@@ -39,6 +39,8 @@ class RedirectContinue(Redirect):
     pass
 class RedirectLogin(Redirect):
     pass
+class RedirectOrg(Redirect):
+    pass
     
 class SameId(Throwable):
     pass
