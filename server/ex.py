@@ -7,7 +7,7 @@ import c
 from google.appengine.api import namespace_manager
 from google.appengine.api import users
 
-import tengine
+import te
 
 def page(org, context, error):
     org.error(500)
@@ -17,7 +17,7 @@ def page(org, context, error):
         'org' : org,
     })
     if isinstance(error, BoardNotFound):
-        org.response.out.write(tengine.render(':error', context, layout=':default/base'))
+        org.response.out.write(te.render(':error', context, layout=':default/base'))
     else:
         ns = context['ns']
         context.update({
@@ -25,7 +25,7 @@ def page(org, context, error):
             'login_url': users.create_login_url('/%s/' % ns),
             'logout_url': users.create_logout_url('/%s/' % ns),
         })
-        org.response.out.write(tengine.render(':error', context))
+        org.response.out.write(te.render(':error', context))
 
 class Throwable(Exception):
     pass

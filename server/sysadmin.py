@@ -14,7 +14,7 @@ import conf
 import c
 import ex
 import m
-import tengine
+import te
 import util
 
 class IndexHandler(webapp2.RequestHandler):
@@ -33,7 +33,7 @@ class IndexHandler(webapp2.RequestHandler):
             'total_user': myuser_counter.count,
             'total_board': board_counter.count,
         }
-        html = tengine.render(':sysadmin/index', context, layout=':sysadmin/base')
+        html = te.render(':sysadmin/index', context, layout=':sysadmin/base')
         self.response.out.write(html)
 
 class EnvironmentHandler(webapp2.RequestHandler):
@@ -102,7 +102,7 @@ class InitHandler(webapp2.RequestHandler):
             'ns' : c.BOARD_NAMESPACE,
             'user' : myuser,
         }
-        html = tengine.render(':sysadmin/init', context, layout=':sysadmin/base')
+        html = te.render(':sysadmin/init', context, layout=':sysadmin/base')
         self.response.out.write(html)
         
 class InitializeHandler(webapp2.RequestHandler):
