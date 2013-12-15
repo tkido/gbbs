@@ -177,22 +177,22 @@ class WriteHandler(webapp2.RequestHandler):
         if new_number > board.max[c.RESES]: raise ex.ThreadNotWritable()
         
         res = m.Res(id = new_id,
-              author_id = myuser.myuser_id,
-              updater_id = myuser.myuser_id,
-              
-              status = c.NORMAL,
-              updated = now,
-              since = now,
-              
-              number = new_number,
-              dt_str = dt_str,
-              hashed_id = hashed_id,
-              content = content,
-              
-              char_name = char_name,
-              char_id = char_id,
-              char_emotion = char_emotion,
-             )
+                    author_id = myuser.myuser_id,
+                    updater_id = myuser.myuser_id,
+                    
+                    status = c.NORMAL,
+                    updated = now,
+                    since = now,
+                    
+                    number = new_number,
+                    dt_str = dt_str,
+                    hashed_id = hashed_id,
+                    content = content,
+                    
+                    char_name = char_name,
+                    char_id = char_id,
+                    char_emotion = char_emotion,
+                   )
         @ndb.transactional()
         def write_unique():
             if m.Res.get_by_id(new_id):
