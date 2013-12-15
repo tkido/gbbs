@@ -1,3 +1,5 @@
+$.namespace = '/toho/'
+
 $.characters = {
   none : { name : '名無し',  fullname : '名無しの村人さん', emotions : { normal : '　',}, },
   reimu : { name : '霊夢',  fullname : '博麗霊夢', emotions : { normal : '　', smile : 'ほほえむ',  }, },
