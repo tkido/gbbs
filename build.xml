@@ -26,6 +26,10 @@
         <include name="sysadmin.py" />
     </replace>
     
+    <copy file="server/view/_analytics-production.pyhtml"
+        tofile="server/view/_analytics.pyhtml"
+    />
+    
     <echo message="Exec below, if you want deploy."/>
     <echo message="appcfg.py --email=${mail} update server"/>
   </target>
