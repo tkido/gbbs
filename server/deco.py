@@ -73,16 +73,13 @@ def cache(second = conf.CACHED_DEFAULT):
             user = users.get_current_user()
             key = org.request.uri + ('!login' if user else '')
             html = memcache.get(key)
-            if html:
-                org.response.out.write(html)
-                return
-            else:
+            if not html:
                 context.update({ 'user': user })
                 html = original_func(org, context, *args, **kwargs)
                 if html:
                     html += """<!-- memcached with "%s" at "%s" -->""" % (key, util.now())
                     memcache.add(key, html, second)
-                return html
+            return html
         return decorated_func
     return wrapper_func
 
