@@ -391,7 +391,6 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
                               keeped_content = content,
                              )
         template_key = template.put()
-        if not template_key: raise ex.NewTemplateCouldNotCreate()
         
         thread_id = m.Counter.incr('Thread')
         thread = m.Thread(id = thread_id,
@@ -418,7 +417,6 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
                           next_title = '',
                          )
         thread_key = thread.put()
-        if not thread_key: raise ex.NewThreadCouldNotCreate()
         if conf.LOCAL_SDK: time.sleep(0.5)
         m.Thread.clean(board)
         raise ex.Redirect('/%d/' % thread_id)
