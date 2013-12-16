@@ -276,7 +276,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
             template.content = content
             template.updated = board.now()
             template.updater_id = myuser.myuser_id
-            template.put()
+            return template.put()
         if not update_template(): raise ex.TemplateNotWritable()
         raise ex.Redirect('/edit/%d/' % thread_id)
 
