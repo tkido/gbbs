@@ -222,7 +222,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
         thread_id = int(thread_id)
         thread = ndb.Key('Thread', thread_id).get()
         if not thread or not thread.readable(): raise ex.ThreadNotFound()
-        threads = m.Thread.query_template(thread.template_id).fetch()
+        threads = m.Thread.query_related(thread.template_id).fetch()
         context.update({
             'page_title': '関連スレ一覧',
             'thread': thread,

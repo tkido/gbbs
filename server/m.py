@@ -85,13 +85,6 @@ class Board(ndb.Model):
       rst = rst[:8]
       return rst
       
-    def validate_content(self, content):
-        if not content or \
-           len(content) > self.max[c.CHARS] or \
-           len(re.findall('\n', content)) >= self.max[c.ROWS]:
-            raise ex.InvalidContent(self)
-        return content
-    
     def validate_title(self, title):
         d_count = len(re.findall('%d', title))
         if not title or \
@@ -101,6 +94,13 @@ class Board(ndb.Model):
         if d_count == 0:
             title += u' その%d'
         return title
+    
+    def validate_content(self, content):
+        if not content or \
+           len(content) > self.max[c.CHARS] or \
+           len(re.findall('\n', content)) >= self.max[c.ROWS]:
+            raise ex.InvalidContent(self)
+        return content
     
     def validate_template(self, template):
         if not template or \
@@ -251,7 +251,7 @@ class Thread(ndb.Model):
     def query_stored(cls, update_from, update_to):
         return cls.query(cls.status == c.STORED).filter(cls.updated >= update_from).filter(cls.updated < update_to).order(-cls.updated)
     @classmethod
-    def query_template(cls, template_id):
+    def query_related(cls, template_id):
         return cls.query(cls.template_id == template_id)
     @classmethod
     def clean(cls, board):
