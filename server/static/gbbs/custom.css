@@ -1,0 +1,648 @@
+@charset "UTF-8";
+
+body {
+  background-image: url("old_map.png");
+  background-repeat: repeat;
+}
+
+.char-icon {
+  width: 100px;
+  height: 100px;
+  background-image: url("characters.jpg");
+  background-position: 0px 100px;
+}
+
+.char-icon.yorihime {
+  background-position: 0px -12100px;
+}
+.char-icon.yorihime.battle {
+  background-position: 0px -12200px;
+}
+
+.shou.char-icon {
+  background-position: 0px -7900px;
+}
+
+.shou.panic.char-icon {
+  background-position: 0px -8000px;
+}
+
+.meiling.char-icon {
+  background-position: 0px -5300px;
+}
+
+.hatate.char-icon {
+  background-position: 0px -16900px;
+}
+
+.yuyuko.char-icon {
+  background-position: 0px -2700px;
+}
+
+.yuyuko.cry.char-icon {
+  background-position: 0px -2600px;
+}
+
+.elis.char-icon {
+  background-position: 0px -16400px;
+}
+
+.genjii.char-icon {
+  background-position: 0px -16000px;
+}
+
+.merlin.char-icon {
+  background-position: 0px -12900px;
+}
+
+.unzan.char-icon {
+  background-position: 0px -13300px;
+}
+
+.rika.char-icon {
+  background-position: 0px -15900px;
+}
+
+.rika.ex.char-icon {
+  background-position: 0px -15800px;
+}
+
+.maeriberie.char-icon {
+  background-position: 0px -12400px;
+}
+
+.kikuri.char-icon {
+  background-position: 0px -15500px;
+}
+
+.rikako.char-icon {
+  background-position: 0px -15300px;
+}
+
+.kongara.char-icon {
+  background-position: 0px -15700px;
+}
+
+.hina.char-icon {
+  background-position: 0px -6600px;
+}
+
+.lunasa.char-icon {
+  background-position: 0px -10000px;
+}
+
+.orange.char-icon {
+  background-position: 0px -16100px;
+}
+
+.renko.char-icon {
+  background-position: 0px -10200px;
+}
+
+.cirno.char-icon {
+  background-position: 0px -5800px;
+}
+
+.mugetsu.char-icon {
+  background-position: 0px -15200px;
+}
+
+.sunny.char-icon {
+  background-position: 0px -13000px;
+}
+
+.yagokoro.char-icon {
+  background-position: 0px -17100px;
+}
+
+.yuuka.char-icon {
+  background-position: 0px -1900px;
+}
+
+.yuuka.despise.char-icon {
+  background-position: 0px -1500px;
+}
+
+.yuuka.nightie.char-icon {
+  background-position: 0px -1800px;
+}
+
+.yuuka.threaten.char-icon {
+  background-position: 0px -1700px;
+}
+
+.yuuka.yawn.char-icon {
+  background-position: 0px -1600px;
+}
+
+.alice.char-icon {
+  background-position: 0px -1400px;
+}
+
+.alice.old.char-icon {
+  background-position: 0px -1300px;
+}
+
+.alice.shy.char-icon {
+  background-position: 0px -1200px;
+}
+
+.sanae.char-icon {
+  background-position: 0px -200px;
+}
+
+.lyrica.char-icon {
+  background-position: 0px -12500px;
+}
+
+.tei.char-icon {
+  background-position: 0px -10700px;
+}
+
+.yukari.char-icon {
+  background-position: 0px -2900px;
+}
+
+.yukari.threaten.char-icon {
+  background-position: 0px -2800px;
+}
+
+.kana.char-icon {
+  background-position: 0px -14000px;
+}
+
+.kisume.char-icon {
+  background-position: 0px -13100px;
+}
+
+.udonge.char-icon {
+  background-position: 0px -7300px;
+}
+
+.chen.char-icon {
+  background-position: 0px -9500px;
+}
+
+.nue.char-icon {
+  background-position: 0px -8900px;
+}
+
+.nue.smile.char-icon {
+  background-position: 0px -8800px;
+}
+
+.eirin.char-icon {
+  background-position: 0px -9000px;
+}
+
+.shingyoku.char-icon {
+  background-position: 0px -16600px;
+}
+
+.shingyoku.male.char-icon {
+  background-position: 0px -16700px;
+}
+
+.eiki.char-icon {
+  background-position: 0px -6200px;
+}
+
+.reimu_old.char-icon {
+  background-position: 0px -17200px;
+}
+
+.letty.char-icon {
+  background-position: 0px -10600px;
+}
+
+.letty.despise.char-icon {
+  background-position: 0px -10500px;
+}
+
+.wriggle.char-icon {
+  background-position: 0px -11200px;
+}
+
+.wriggle.ex.char-icon {
+  background-position: 0px -11100px;
+}
+
+.remilia.char-icon {
+  background-position: 0px -900px;
+}
+
+.remilia.cry.char-icon {
+  background-position: 0px -1100px;
+}
+
+.remilia.despise.char-icon {
+  background-position: 0px -1000px;
+}
+
+.medicine.char-icon {
+  background-position: 0px -11400px;
+}
+
+.meira.char-icon {
+  background-position: 0px -14800px;
+}
+
+.kurumi.char-icon {
+  background-position: 0px -15100px;
+}
+
+.kurumi.sleep.char-icon {
+  background-position: 0px -15000px;
+}
+
+.iku.char-icon {
+  background-position: 0px -6400px;
+}
+
+.reimu.char-icon {
+  background-position: 0px -100px;
+}
+
+.reimu.smile.char-icon {
+  background-position: 0px -0px;
+}
+
+.rumia.char-icon {
+  background-position: 0px -8300px;
+}
+
+.rumia.ex.char-icon {
+  background-position: 0px -8100px;
+}
+
+.mima.char-icon {
+  background-position: 0px -11000px;
+}
+
+.momiji.char-icon {
+  background-position: 0px -7800px;
+}
+
+.chiyuri.char-icon {
+  background-position: 0px -13800px;
+}
+
+.murasa.char-icon {
+  background-position: 0px -9200px;
+}
+
+.murasa.pride.char-icon {
+  background-position: 0px -9300px;
+}
+
+.suika.char-icon {
+  background-position: 0px -6300px;
+}
+
+.youmu.char-icon {
+  background-position: 0px -3100px;
+}
+
+.youmu.battle.char-icon {
+  background-position: 0px -3600px;
+}
+
+.youmu.confuse.char-icon {
+  background-position: 0px -3800px;
+}
+
+.youmu.laugh.char-icon {
+  background-position: 0px -3500px;
+}
+
+.youmu.mortify.char-icon {
+  background-position: 0px -3200px;
+}
+
+.youmu.smile.char-icon {
+  background-position: 0px -3300px;
+}
+
+.youmu.surprise.char-icon {
+  background-position: 0px -3400px;
+}
+
+.youmu.sweat.char-icon {
+  background-position: 0px -3000px;
+}
+
+.youmu.threaten.char-icon {
+  background-position: 0px -3700px;
+}
+
+.kourin.char-icon {
+  background-position: 0px -9600px;
+}
+
+.utsuho.char-icon {
+  background-position: 0px -4100px;
+}
+
+.utsuho.threaten.char-icon {
+  background-position: 0px -4000px;
+}
+
+.monban.char-icon {
+  background-position: 0px -16800px;
+}
+
+.lilywhite.char-icon {
+  background-position: 0px -12800px;
+}
+
+.lilywhite.sing.char-icon {
+  background-position: 0px -12700px;
+}
+
+.yuugenmagan.char-icon {
+  background-position: 0px -16200px;
+}
+
+.kanako.char-icon {
+  background-position: 0px -7600px;
+}
+
+.shizuha.char-icon {
+  background-position: 0px -9900px;
+}
+
+.shanghai.char-icon {
+  background-position: 0px -12600px;
+}
+
+.aya.char-icon {
+  background-position: 0px -4900px;
+}
+
+.aya.camera.char-icon {
+  background-position: 0px -5000px;
+}
+
+.aya.grin.char-icon {
+  background-position: 0px -4800px;
+}
+
+.aya.surprise.char-icon {
+  background-position: 0px -4700px;
+}
+
+.namazu.char-icon {
+  background-position: 0px -13400px;
+}
+
+.luna.char-icon {
+  background-position: 0px -12300px;
+}
+
+.kotohime.char-icon {
+  background-position: 0px -14900px;
+}
+
+.luize.char-icon {
+  background-position: 0px -16300px;
+}
+
+.ichirin.char-icon {
+  background-position: 0px -11600px;
+}
+
+.ichirin.sweat.char-icon {
+  background-position: 0px -11500px;
+}
+
+.lilyblack.char-icon {
+  background-position: 0px -17000px;
+}
+
+.kogasa.char-icon {
+  background-position: 0px -5500px;
+}
+
+.kogasa.surprise.char-icon {
+  background-position: 0px -5400px;
+}
+
+.satori.char-icon {
+  background-position: 0px -2000px;
+}
+
+.yumeko.char-icon {
+  background-position: 0px -14400px;
+}
+
+.yumeko.sad.char-icon {
+  background-position: 0px -14500px;
+}
+
+.sara.char-icon {
+  background-position: 0px -16500px;
+}
+
+.kaguya.char-icon {
+  background-position: 0px -7400px;
+}
+
+.kaguya.threaten.char-icon {
+  background-position: 0px -7500px;
+}
+
+.akyuu.char-icon {
+  background-position: 0px -11300px;
+}
+
+.marisa.char-icon {
+  background-position: 0px -400px;
+}
+
+.marisa.old.char-icon {
+  background-position: 0px -500px;
+}
+
+.marisa.serious.char-icon {
+  background-position: 0px -300px;
+}
+
+.koakuma.char-icon {
+  background-position: 0px -10900px;
+}
+
+.minoriko.char-icon {
+  background-position: 0px -9700px;
+}
+
+.yuugi.char-icon {
+  background-position: 0px -10100px;
+}
+
+.koishi.char-icon {
+  background-position: 0px -5600px;
+}
+
+.rin.char-icon {
+  background-position: 0px -9800px;
+}
+
+.gengetsu.char-icon {
+  background-position: 0px -13700px;
+}
+
+.ruukoto.char-icon {
+  background-position: 0px -15600px;
+}
+
+.toyohime.char-icon {
+  background-position: 0px -13600px;
+}
+
+.komachi.char-icon {
+  background-position: 0px -8500px;
+}
+
+.mokou.char-icon {
+  background-position: 0px -2100px;
+}
+
+.mokou.battle.char-icon {
+  background-position: 0px -2200px;
+}
+
+.tenshi.char-icon {
+  background-position: 0px -5100px;
+}
+
+.yuki.char-icon {
+  background-position: 0px -14600px;
+}
+
+.keine.char-icon {
+  background-position: 0px -7000px;
+}
+
+.keine.hakutaku.char-icon {
+  background-position: 0px -6800px;
+}
+
+.ran.char-icon {
+  background-position: 0px -7200px;
+}
+
+.mystia.char-icon {
+  background-position: 0px -8600px;
+}
+
+.mystia.sing.char-icon {
+  background-position: 0px -8700px;
+}
+
+.nazurin.char-icon {
+  background-position: 0px -6000px;
+}
+
+.nazurin.despise.char-icon {
+  background-position: 0px -6100px;
+}
+
+.sariel.char-icon {
+  background-position: 0px -14700px;
+}
+
+.parsee.char-icon {
+  background-position: 0px -7700px;
+}
+
+.yumemi.char-icon {
+  background-position: 0px -11900px;
+}
+
+.ellen.char-icon {
+  background-position: 0px -15400px;
+}
+
+.sakuya.char-icon {
+  background-position: 0px -800px;
+}
+
+.sakuya.panic.char-icon {
+  background-position: 0px -600px;
+}
+
+.sakuya.sweat.char-icon {
+  background-position: 0px -700px;
+}
+
+.star.char-icon {
+  background-position: 0px -13500px;
+}
+
+.reisen.char-icon {
+  background-position: 0px -13900px;
+}
+
+.elly.char-icon {
+  background-position: 0px -14200px;
+}
+
+.elly.panic.char-icon {
+  background-position: 0px -14100px;
+}
+
+.hijiri.char-icon {
+  background-position: 0px -4300px;
+}
+
+.hijiri.smile.char-icon {
+  background-position: 0px -4200px;
+}
+
+.daiyousei.char-icon {
+  background-position: 0px -10300px;
+}
+
+.mai.char-icon {
+  background-position: 0px -14300px;
+}
+
+.patchouli.char-icon {
+  background-position: 0px -4500px;
+}
+
+.patchouli.threaten.char-icon {
+  background-position: 0px -4400px;
+}
+
+.suwako.char-icon {
+  background-position: 0px -4600px;
+}
+
+.nitori.char-icon {
+  background-position: 0px -5900px;
+}
+
+.flandre.char-icon {
+  background-position: 0px -2500px;
+}
+
+.flandre.threaten.char-icon {
+  background-position: 0px -2400px;
+}
+
+.tokiko.char-icon {
+  background-position: 0px -13200px;
+}
+
+.yamame.char-icon {
+  background-position: 0px -12000px;
+}
+
+.shinki.char-icon {
+  background-position: 0px -11800px;
+}
+
+.shinki.threaten.char-icon {
+  background-position: 0px -11700px;
+}

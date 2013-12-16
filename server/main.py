@@ -15,108 +15,8 @@ import c
 import deco
 import ex
 import m
-import tengine
+import te
 import util
-
-if not conf.LOCAL_SDK:
-    from google.appengine.ext import ereporter
-    ereporter.register_logger()
-
-def prepare_next_(thread_key, board):
-    tc_key = ndb.Key('Counter', 'Thread')
-    @ndb.transactional()
-    def increment_tc():
-        tc = tc_key.get()
-        tc.count += 1
-        tc.put()
-        return tc.count
-    next_id = increment_tc()
-    
-    @ndb.transactional()
-    def set_next_id():
-        thread = thread_key.get()
-        if thread.next_id == 0:
-            thread.next_id = next_id
-            thread.put()
-            return thread
-    return set_next_id()
-    
-def create_next_(thread_key, board):
-    thread = thread_key.get()
-    now = board.now()
-    dt_str = util.dt_to_str(now)
-    myuser_id = 0
-    hashed_id = board.hash(myuser_id)
-    
-    template = ndb.Key('Template', thread.template_id).get()
-    next_number = thread.number + 1
-    new_title = template.title % next_number
-    
-    next_key = ndb.Key('Thread', thread.next_id)
-    @ndb.transactional()
-    def get_or_insert():
-        next_ = next_key.get()
-        if next_:
-            return next_
-        else:
-            next_ = m.Thread(id = thread.next_id,
-                                   template_id = thread.template_id,
-                                   author_id = myuser_id,
-                                   updater_id = myuser_id,
-
-                                   status = c.NORMAL,
-                                   updated = now,
-                                   since = now,
-
-                                   title = new_title,
-                                   dt_str = dt_str,
-                                   hashed_id = hashed_id,
-                                   content = template.content,
-
-                                   number = next_number,
-                                   res_count = 0,
-                                   resed = now,
-
-                                   prev_id = thread.key.id(),
-                                   prev_title = thread.title,
-                                   next_id = 0,
-                                   next_title = '',
-                                  )
-            if next_.put():
-                return next_
-            else:
-                return None
-
-    next_ = get_or_insert()
-    if next_:
-        util.flush_page('/related/%d/' % thread.template_id)
-        @ndb.transactional()
-        def set_next_title():
-            thread = thread_key.get()
-            if thread.next_title == '':
-                thread.next_title = next_.title
-                if thread.put():
-                    return thread
-                else:
-                    return None
-        return set_next_title()
-    else:
-        return None
-
-def store(thread_key):
-    @ndb.transactional()
-    def store_thread():
-        thread = thread_key.get()
-        thread.status = c.STORED
-        thread.put()
-    store_thread()
-
-def clean_old_threads(board):
-    query = m.Thread.query_normal()
-    keys = query.fetch(board.max[c.THREADS]+3, keys_only=True)
-    needs = len(keys) - board.max[c.THREADS]
-    for i in range(needs):
-        store(keys[-i-1])
 
 class TopPageHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -127,9 +27,7 @@ class TopPageHandler(webapp2.RequestHandler):
             'page_title' : 'トップページ',
             'boards': boards,
         })
-        html = tengine.render(':default/index', context, layout=':default/base')
-        self.response.out.write(html)
-        return html
+        return te.render(':default/index', context, layout=':default/base')
 
 class IndexHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -142,9 +40,7 @@ class IndexHandler(webapp2.RequestHandler):
             'page_title' : '',
             'threads': threads,
         })
-        html = tengine.render(':index', context)
-        self.response.out.write(html)
-        return html
+        return te.render(':index', context)
 
 class ThreadHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -194,18 +90,20 @@ class ThreadHandler(webapp2.RequestHandler):
             thread.res_count = last_number
             thread.put()
         
-        html = tengine.render(':thread', context)
-        self.response.out.write(html)
+        html = te.render(':thread', context)
         
+        flag = False
         if thread.next_id == 0 and last_number >= board.max[c.RESES]:
-            thread = prepare_next_(thread_key, board)
-            html = None
+            thread.prepare_next()
+            flag = True
         if thread.next_id > 0 and thread.next_title == '':
-            thread = create_next_(thread_key, board)
-            html = None
+            thread.create_next(board)
+            flag = True
         if thread.status == c.NORMAL and thread.next_title != '':
-            thread = store(thread_key)
-            html = None
+            thread.store()
+            flag = True
+        if flag: raise ex.RedirectOrg
+        
         return html
 
 class LinkHandler(webapp2.RequestHandler):
@@ -218,9 +116,7 @@ class LinkHandler(webapp2.RequestHandler):
             'page_title' : '外部ページへのリンク',
             'href': href,
         })
-        html = tengine.render(':link', context)
-        self.response.out.write(html)
-        return html
+        return te.render(':link', context)
 
 class StoredHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -248,9 +144,7 @@ class StoredHandler(webapp2.RequestHandler):
             'page_title' : '%sの過去ログ' % page_title,
             'threads': threads,
         })
-        html = tengine.render(':stored', context)
-        self.response.out.write(html)
-        return html
+        return te.render(':stored', context)
 
 class WriteHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -280,23 +174,25 @@ class WriteHandler(webapp2.RequestHandler):
         
         new_id = m.Res.latest_num_of(thread_id) + 1
         new_number = new_id % c.TT
+        if new_number > board.max[c.RESES]: raise ex.ThreadNotWritable()
+        
         res = m.Res(id = new_id,
-              author_id = myuser.myuser_id,
-              updater_id = myuser.myuser_id,
-              
-              status = c.NORMAL,
-              updated = now,
-              since = now,
-              
-              number = new_number,
-              dt_str = dt_str,
-              hashed_id = hashed_id,
-              content = content,
-              
-              char_name = char_name,
-              char_id = char_id,
-              char_emotion = char_emotion,
-             )
+                    author_id = myuser.myuser_id,
+                    updater_id = myuser.myuser_id,
+                    
+                    status = c.NORMAL,
+                    updated = now,
+                    since = now,
+                    
+                    number = new_number,
+                    dt_str = dt_str,
+                    hashed_id = hashed_id,
+                    content = content,
+                    
+                    char_name = char_name,
+                    char_id = char_id,
+                    char_emotion = char_emotion,
+                   )
         @ndb.transactional()
         def write_unique():
             if m.Res.get_by_id(new_id):
@@ -330,9 +226,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
             'thread': thread,
             'threads': threads,
         })
-        html = tengine.render(':related', context)
-        self.response.out.write(html)
-        return html
+        return te.render(':related', context)
 
 class EditTemplateHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -350,7 +244,7 @@ class EditTemplateHandler(webapp2.RequestHandler):
             'thread': thread,
             'template': template,
         })
-        self.response.out.write(tengine.render(':edit', context))
+        return te.render(':edit', context)
 
 class UpdateTemplateHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -399,14 +293,7 @@ class LoginHandler(webapp2.RequestHandler):
                 raise ex.RedirectAgreement()
             else:
                 raise ex.RedirectContinue()
-        uc_key = ndb.Key('Counter', 'MyUser')
-        @ndb.transactional()
-        def increment_uc():
-            uc = uc_key.get()
-            uc.count += 1
-            uc.put()
-            return uc.count
-        myuser_id = increment_uc()
+        myuser_id = m.Counter.incr('MyUser')
         if not myuser_id: raise ex.NewUserIdCouldNotGet()
         now = board.now()
         myuser = m.MyUser(id = user.user_id(),
@@ -436,7 +323,7 @@ class AgreementHandler(webapp2.RequestHandler):
             'login_url': login_url,
             'logout_url': users.create_logout_url('/%s/' % ns),
         })
-        self.response.out.write(tengine.render(':agreement', context))
+        return te.render(':agreement', context)
 
 class AgreeHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -464,7 +351,7 @@ class MyPageHandler(webapp2.RequestHandler):
             'page_title' : 'ユーザー情報',
             'status_str' : c.AUTHORITIES[context['user'].status],
         })
-        self.response.out.write(tengine.render(':mypage', context))
+        return te.render(':mypage', context)
 
 class NewThreadHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -472,7 +359,7 @@ class NewThreadHandler(webapp2.RequestHandler):
     @deco.myuser(c.WRITER)
     def get(self, context):
         context.update({'page_title' : '新しいスレッドの作成'})
-        self.response.out.write(tengine.render(':new', context))
+        return te.render(':new', context)
         
 class CreateNewThreadHandler(webapp2.RequestHandler):
     @deco.catch()
@@ -488,14 +375,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         title = board.validate_title(self.request.get('title'))
         content = board.validate_template(self.request.get('content'))
         
-        @ndb.transactional()
-        def increment_tc():
-            tc = tc_key.get()
-            tc.count += 1
-            tc.put()
-            return tc.count
-        tc_key = ndb.Key('Counter', 'Template')
-        template_id = increment_tc()
+        template_id = m.Counter.incr('Template')
         if not template_id: raise ex.NewTemplateIdCouldNotGet()
         
         myuser = context['user']
@@ -516,8 +396,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         template_key = template.put()
         if not template_key: raise ex.NewTemplateCouldNotCreate()
         
-        tc_key = ndb.Key('Counter', 'Thread')
-        thread_id = increment_tc()
+        thread_id = m.Counter.incr('Thread')
         if not thread_id: raise ex.NewThreadIdCouldNotGet()
         thread = m.Thread(id = thread_id,
                           template_id = template_id,
@@ -545,7 +424,7 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         thread_key = thread.put()
         if not thread_key: raise ex.NewThreadCouldNotCreate()
         if conf.LOCAL_SDK: time.sleep(0.5)
-        clean_old_threads(board)
+        m.Thread.clean(board)
         raise ex.Redirect('/%d/' % thread_id)
 
 app = webapp2.WSGIApplication([('/', TopPageHandler),

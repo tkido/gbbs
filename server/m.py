@@ -13,10 +13,19 @@ from google.appengine.ext import ndb
 import c
 import conf
 import ex
+import util
 
 class Counter(ndb.Model):
     #id = "Board", "MyUser", "Thread", "Template", "Log"
     count = ndb.IntegerProperty(required=True, indexed=False)
+
+    @classmethod
+    @ndb.transactional()
+    def incr(cls, id):
+        counter = cls.get_by_id(id)
+        counter.count += 1
+        if counter.put():
+            return counter.count
 
 class Log(ndb.Model):
     #id = Counter("Log").count
@@ -162,6 +171,79 @@ class Thread(ndb.Model):
     def readable(self):
         return self.status != c.DELETED
     
+    @ndb.transactional()
+    def store(self):
+        thread = self.key.get()
+        thread.status = c.STORED
+        thread.put()
+    
+    def prepare_next(self):
+        next_id = Counter.incr('Thread')
+        thread_key = self.key
+        @ndb.transactional()
+        def set_next_id():
+            thread = thread_key.get()
+            if thread.next_id == 0:
+                thread.next_id = next_id
+                if thread.put():
+                    return thread
+        self = set_next_id()
+
+    def create_next(self, board):
+        thread = self.key.get()
+        now = board.now()
+        dt_str = util.dt_to_str(now)
+        myuser_id = 0
+        hashed_id = board.hash(myuser_id)
+        
+        template = Template.get_by_id(thread.template_id)
+        next_number = thread.number + 1
+        new_title = template.title % next_number
+        
+        next_key = ndb.Key('Thread', thread.next_id)
+        @ndb.transactional()
+        def get_or_insert():
+            next = next_key.get()
+            if next:
+                return next
+            else:
+                next = Thread(id = thread.next_id,
+                              template_id = thread.template_id,
+                              author_id = myuser_id,
+                              updater_id = myuser_id,
+
+                              status = c.NORMAL,
+                              updated = now,
+                              since = now,
+
+                              title = new_title,
+                              dt_str = dt_str,
+                              hashed_id = hashed_id,
+                              content = template.content,
+
+                              number = next_number,
+                              res_count = 0,
+                              resed = now,
+
+                              prev_id = thread.key.id(),
+                              prev_title = thread.title,
+                              next_id = 0,
+                              next_title = '',
+                             )
+                if next.put():
+                    return next
+        next = get_or_insert()
+        if next:
+            util.flush_page('/related/%d/' % thread.template_id)
+            @ndb.transactional()
+            def set_next_title():
+                thread = self.key.get()
+                if thread.next_title == '':
+                    thread.next_title = next.title
+                    if thread.put():
+                        return thread
+            self = set_next_title()
+    
     @classmethod
     def query_normal(cls):
         return cls.query(cls.status == c.NORMAL).order(-cls.updated)
@@ -171,6 +253,19 @@ class Thread(ndb.Model):
     @classmethod
     def query_template(cls, template_id):
         return cls.query(cls.template_id == template_id)
+    @classmethod
+    def clean(cls, board):
+        query = cls.query_normal()
+        keys = query.fetch(board.max[c.THREADS]+3, keys_only=True)
+        needs = len(keys) - board.max[c.THREADS]
+        @ndb.transactional()
+        def store(key):
+            thread = key.get()
+            thread.status = c.STORED
+            thread.put()
+        for i in range(needs):
+            store(keys[-i-1])
+
 
 class Res(ndb.Model):
     #id = thread.id * c.TT + number

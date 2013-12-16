@@ -19,7 +19,9 @@ def catch():
         def decorated_func(org, ns = '', *args, **kwargs):
             try:
                 context = { 'ns' : ns }
-                original_func(org, context, *args, **kwargs)
+                html = original_func(org, context, *args, **kwargs)
+                if html:
+                    org.response.out.write(html)
             # Catch Redirect
             except ex.RedirectAgreement:
                 to = '/%s/agreement/' % ns
@@ -31,6 +33,8 @@ def catch():
                 org.redirect(str(users.create_login_url(to)))
             except ex.RedirectContinue:
                 org.redirect(str(org.request.get('continue') or '/%s/' % ns))
+            except ex.RedirectOrg:
+                org.redirect(str(org.request.uri))
             except ex.Redirect as red:
                 org.redirect(str('/%s%s' % (ns, red.to)))
             # Catch Error
@@ -59,7 +63,7 @@ def board():
                 'login_url': '/%s/_login?continue=%s' % (ns, org.request.uri),
                 'logout_url': users.create_logout_url(org.request.uri),
             })
-            original_func(org, context, *args, **kwargs)
+            return original_func(org, context, *args, **kwargs)
         return decorated_func
     return wrapper_func
 
@@ -69,15 +73,13 @@ def cache(second = conf.CACHED_DEFAULT):
             user = users.get_current_user()
             key = org.request.uri + ('!login' if user else '')
             html = memcache.get(key)
-            if html:
-                org.response.out.write(html)
-                return
-            else:
+            if not html:
                 context.update({ 'user': user })
                 html = original_func(org, context, *args, **kwargs)
                 if html:
                     html += """<!-- memcached with "%s" at "%s" -->""" % (key, util.now())
                     memcache.add(key, html, second)
+            return html
         return decorated_func
     return wrapper_func
 
@@ -90,13 +92,13 @@ def myuser(required_auth = c.BANNED):
             if not myuser:
                 myuser = m.MyUser.get_by_id(user.user_id())
                 memcache.add(user.user_id(), myuser, conf.CACHED_MYUSER)
-            if not myuser or not myuser.readable(): raise ex.Redirect(context['login_url'])
+            if not myuser or not myuser.readable(): raise ex.Redirect('/_login?continue=%s' % org.request.uri)
             context.update({
                 'user': myuser,
                 'logout_url': users.create_logout_url('/%s/' % context['ns']),
             })
             if myuser.status < required_auth: raise ex.AuthorityRequired(required_auth, myuser.status)
-            original_func(org, context, *args, **kwargs)
+            return original_func(org, context, *args, **kwargs)
         return decorated_func
     return wrapper_func
 

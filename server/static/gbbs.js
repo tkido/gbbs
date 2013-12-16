@@ -120,7 +120,7 @@ $(document).ready(function(){
     $('form').disableOnSubmit();
     
     /* クッキー設定 */
-    var cookie_options = { path: '/', expires: 14 };
+    var cookie_options = { path: $.namespace, expires: 14 };
     
     /* 共通関数 */
     //character変更時、characterとemotion欄更新、emotionリセット。
