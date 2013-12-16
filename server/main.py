@@ -208,6 +208,8 @@ class WriteHandler(webapp2.RequestHandler):
                 if new_number > board.max[c.RESES]: raise ex.ThreadNotWritable()
                 res.key = ndb.Key('Res', new_id)
                 res.number = new_number
+            except Exception as err:
+                raise err
         util.flush_page('/%d/' % thread_id)
         if conf.LOCAL_SDK: time.sleep(0.5)
         raise ex.Redirect('/%d/#%d' % (thread_id, new_number))
@@ -256,8 +258,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
     @deco.board()
     @deco.myuser(c.WRITER)
     def post(self, context, thread_id):
-        thread_id = int(thread_id)
-        thread = ndb.Key('Thread', thread_id).get()
+        thread = m.Thead.get_by_id(int(thread_id))
         if not thread or not thread.readable(): raise ex.ThreadNotFound()
         if thread.status != c.NORMAL: raise ex.TemplateNotWritable()
         template_key = ndb.Key('Template', thread.template_id)
@@ -276,8 +277,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
             template.content = content
             template.updated = board.now()
             template.updater_id = myuser.myuser_id
-            return template.put()
-        if not update_template(): raise ex.TemplateNotWritable()
+            template.put()
         raise ex.Redirect('/edit/%d/' % thread_id)
 
 class LoginHandler(webapp2.RequestHandler):
@@ -294,7 +294,6 @@ class LoginHandler(webapp2.RequestHandler):
             else:
                 raise ex.RedirectContinue()
         myuser_id = m.Counter.incr('MyUser')
-        if not myuser_id: raise ex.NewUserIdCouldNotGet()
         now = board.now()
         myuser = m.MyUser(id = user.user_id(),
                           user = user,
@@ -305,7 +304,7 @@ class LoginHandler(webapp2.RequestHandler):
                           updated = now,
                           since = now,
                          )
-        if not myuser.put(): raise ex.NewUserCouldNotPut()
+        myuser.put()
         raise ex.RedirectAgreement()
 
 class AgreementHandler(webapp2.RequestHandler):
@@ -376,8 +375,6 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         content = board.validate_template(self.request.get('content'))
         
         template_id = m.Counter.incr('Template')
-        if not template_id: raise ex.NewTemplateIdCouldNotGet()
-        
         myuser = context['user']
         now = board.now()
         template = m.Template(id = template_id,
@@ -397,7 +394,6 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         if not template_key: raise ex.NewTemplateCouldNotCreate()
         
         thread_id = m.Counter.incr('Thread')
-        if not thread_id: raise ex.NewThreadIdCouldNotGet()
         thread = m.Thread(id = thread_id,
                           template_id = template_id,
                           author_id = myuser.myuser_id,
