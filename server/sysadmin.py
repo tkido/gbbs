@@ -140,6 +140,6 @@ app = webapp2.WSGIApplication([('/s/', IndexHandler),
                                (r'/s/_create/', CreateBoardHandler),
                                ('/s/init/', InitHandler),
                                ('/s/_init/', InitializeHandler),
-                               ],
-                               debug=True
-                              )
+                              ],
+                              debug=conf.LOCAL_SDK
+                             )

@@ -437,5 +437,5 @@ app = webapp2.WSGIApplication([('/', TopPageHandler),
                                (r'/([0-9a-z_-]{2,16})/new/', NewThreadHandler),
                                (r'/([0-9a-z_-]{2,16})/_new', CreateNewThreadHandler),
                               ],
-                              debug=True
+                              debug=conf.LOCAL_SDK
                              )
