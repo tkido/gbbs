@@ -172,9 +172,21 @@ class Thread(ndb.Model):
         return self.status != c.DELETED
     
     @ndb.transactional()
+    def reopen(self):
+        thread = self.key.get()
+        thread.status = c.NORMAL
+        thread.put()
+    
+    @ndb.transactional()
     def store(self):
         thread = self.key.get()
         thread.status = c.STORED
+        thread.put()
+    
+    @ndb.transactional()
+    def delete(self):
+        thread = self.key.get()
+        thread.status = c.DELETED
         thread.put()
     
     def prepare_next(self):

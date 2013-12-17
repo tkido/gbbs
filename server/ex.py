@@ -110,6 +110,12 @@ class InvalidTemplate(AppError):
     self.title = '内容が不正です'
     self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max[c.ROWS_TEMPLATE], board.max[c.CHARS_TEMPLATE])
 
+class InvalidOperation(AppError):
+  def __init__(self):
+    self.title = '実行する内容を選択して下さい'
+    self.message = '誤った操作を防止するため必ず選択する必要があります。'
+
+
 # ndb error
 class UserNotFound(SysError):
   def __init__(self):

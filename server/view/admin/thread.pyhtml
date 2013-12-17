@@ -28,38 +28,87 @@
 </div>
 
 <div id="form">
+  <form method="post" action="/a/#{ ns }/_edit/#{ thread_id }">
 
 <?py for res in reses: ?>
-<?py     if res.status == -3: ?>
-<?py         deleted = ' deleted' ?>
-<?py     else: ?>
-<?py         deleted = '' ?>
-<?py     #end ?>
+<?py deleted = ' deleted' if res.status == -3 else '' ?>
 <a name="#{ res.number }"></a>
-<input type="checkbox" name="#{ res.number }" value="#{ res.number }"></input>
 <div class="response#{ deleted }">
   <div class="res-header">
-    <a href="/#{ ns }/#{ thread_id }/#{ res.number }"><span class="res-number">#{ res.number }</span></a>
-    <span class="char-name">${ res.char_name }</span>
-    <span class="datetime">#{ res.dt_str }</span>
-    <span class="hash">ID:#{ res.author_id }</span>
+    <input type="checkbox" name="#{ res.number }" value="#{ res.number }" id="#{ res.number }"></input>
+    <label for="#{ res.number }">
+      <span class="res-number">#{ res.number }</span>
+      <span class="char-name">${ res.char_name }</span>
+      <span class="datetime">#{ res.dt_str }</span>
+    </label>
+<?py if user.status >= 5: ?>
+    <a href="/#{ ns }/admin/user/#{ res.author_id }/">
+      <span class="hash">ユーザ:#{ res.author_id }</span>
+    </a>
+<?py else: ?>
+    <span class="hash">ID:#{ res.hashed_id }</span>
+<?py #endif ?>
   </div>
-  <div class="res-content">
-    <div class="char-icon-cell">
-      <div class="char-icon ${ res.char_id } ${ res.char_emotion }"></div>
-    </div>
-    <div class="balloon-cell">
-      <div class="balloon-frame">
-        <div class="balloon"></div>
+  <label for="#{ res.number }">
+    <div class="res-content">
+      <div class="char-icon-cell">
+        <div class="char-icon ${ res.char_id } ${ res.char_emotion }"></div>
+      </div>
+      <div class="balloon-cell">
+        <div class="balloon-frame">
+          <div class="balloon"></div>
+        </div>
+      </div>
+      <div class="message-cell">
+        <div class="message">
+          #{ decorate(text2html(res.content)) }
+        </div>
       </div>
     </div>
+  </label>
+</div>
+<?py #endfor ?>
+
+<div class="template">
+  <div class="res-content">
     <div class="message-cell">
       <div class="message">
-        #{ decorate(text2html(res.content)) }
+        選択したレスを
+        <select name="operation" class="operation">
+          <option value="">　</option>
+          <option value="delete">削除する</option>
+          <option value="restore">復帰させる</option>
+        </select>
+        <input type="submit" value="送信する" />
       </div>
     </div>
   </div>
 </div>
-<?py #end ?>
 
+  </form>
 </div><!-- form -->
+
+<form method="post" action="/#{ ns }/admin/_edit/thread/#{ thread_id }/">
+<div class="template">
+  <div class="res-content">
+    <div class="message-cell">
+      <div class="message">
+        このスレを
+        <select name="operation" class="operation">
+          <option value="">　</option>
+<?py if thread.status != 0 and thread.res_count < board.max[1] : ?>
+          <option value="reopen">再開させる</option>
+<?py #end ?>
+<?py if thread.status != -1: ?>
+          <option value="store">過去ログにする</option>
+<?py #end ?>
+<?py if thread.status != -3: ?>
+          <option value="delete">削除する</option>
+<?py #end ?>
+        </select>
+        <input type="submit" value="送信する" />
+      </div>
+    </div>
+  </div>
+</div>
+</form>
