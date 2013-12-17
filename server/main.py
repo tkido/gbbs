@@ -140,9 +140,10 @@ class StoredHandler(webapp2.RequestHandler):
                 update_from = datetime.datetime(year, month, 1)
                 update_to = datetime.datetime(year+1, 1, 1) if month == 12 else datetime.datetime(year, month+1, 1)
                 page_title = '%d年%d月' % (year, month)
-        threads = m.Thread.query_stored(update_from, update_to).fetch(conf.MAX_FETCH)
+        #threads = m.Thread.query_stored(update_from, update_to).fetch(conf.MAX_FETCH)
+        threads = m.Thread.query_stored().fetch(conf.MAX_FETCH)
         context.update({
-            'page_title' : '%sの過去ログ' % page_title,
+            'page_title' : '過去ログ'
             'threads': threads,
         })
         return te.render(':stored', context)

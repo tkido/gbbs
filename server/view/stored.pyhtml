@@ -1,8 +1,3 @@
 <h1>${ page_title }</h1>
-<select name="stored-dropdown" onChange='document.location.href=this.options[this.selectedIndex].value;'> 
-  <option value="">月を選択</option> 
-  <option value='/toho/stored/2013/11'>2013年11月</option>
-  <option value='/toho/stored/2013/10'>2013年10月</option>
-  <option value='/toho/stored/2013/9'>2013年9月</option>
-</select>
+
 <?py include(':_thread-list') ?>

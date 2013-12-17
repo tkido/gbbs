@@ -247,9 +247,14 @@ class Thread(ndb.Model):
     @classmethod
     def query_normal(cls):
         return cls.query(cls.status == c.NORMAL).order(-cls.updated)
+    """
     @classmethod
     def query_stored(cls, update_from, update_to):
         return cls.query(cls.status == c.STORED).filter(cls.updated >= update_from).filter(cls.updated < update_to).order(-cls.updated)
+    """
+    @classmethod
+    def query_stored(cls):
+        return cls.query(cls.status == c.STORED).order(-cls.updated)
     @classmethod
     def query_related(cls, template_id):
         return cls.query(cls.template_id == template_id)
