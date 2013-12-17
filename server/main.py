@@ -440,5 +440,5 @@ app = webapp2.WSGIApplication([('/', TopPageHandler),
                                    webapp2.Route('/_new', CreateNewThreadHandler),
                                ]),
                               ],
-                              debug=conf.LOCAL_SDK
+                              debug=conf.DEBUG
                              )
