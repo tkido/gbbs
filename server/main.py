@@ -72,7 +72,7 @@ class ThreadHandler(webapp2.RequestHandler):
                     fetch_count = last - first + 1
             else:
                 raise ex.ThreadArgument('/%d/' % thread_id)
-        query = m.Res.query_normal(thread_id, first)
+        query = m.Res.query_all(thread_id, first)
         reses = query.fetch(fetch_count) if fetch_count else []
         
         last_number = reses[-1].key.id() % c.TT if reses else 0
@@ -143,7 +143,7 @@ class StoredHandler(webapp2.RequestHandler):
         #threads = m.Thread.query_stored(update_from, update_to).fetch(conf.MAX_FETCH)
         threads = m.Thread.query_stored().fetch(conf.MAX_FETCH)
         context.update({
-            'page_title' : '過去ログ'
+            'page_title' : '過去ログ',
             'threads': threads,
         })
         return te.render(':stored', context)
@@ -423,6 +423,27 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         m.Thread.clean(board)
         raise ex.Redirect('/%d/' % thread_id)
 
+class EditThreadHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    @deco.myuser(c.EDITOR)
+    def get(self, context, thread_id):
+        thread_id = int(thread_id)
+        board = context['board']
+        
+        thread = m.Thread.get_by_id(thread_id)
+        if not thread: raise ex.ThreadNotFound()
+        
+        reses = m.Res.query_all(thread_id).fetch(conf.MAX_FETCH)
+        
+        context.update({
+            'page_title': thread.title,
+            'thread_id': thread_id,
+            'thread': thread,
+            'reses': reses,
+        })
+        return te.render(':admin/thread', context)
+
 app = webapp2.WSGIApplication([('/', TopPageHandler),
                                routes.PathPrefixRoute('/<:[0-9a-z_-]{2,16}>', [
                                    webapp2.Route('/', IndexHandler),
@@ -439,6 +460,9 @@ app = webapp2.WSGIApplication([('/', TopPageHandler),
                                    webapp2.Route('/_edit/<:\d+>', UpdateTemplateHandler),
                                    webapp2.Route('/new/', NewThreadHandler),
                                    webapp2.Route('/_new', CreateNewThreadHandler),
+                               ]),
+                               routes.PathPrefixRoute('/a/<:[0-9a-z_-]{2,16}>', [
+                                   webapp2.Route('/edit/<:\d+>/', EditThreadHandler),
                                ]),
                               ],
                               debug=conf.DEBUG

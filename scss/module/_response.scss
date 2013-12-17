@@ -68,3 +68,10 @@
   min-width: 476px;
   max-width: 960px;
 }
+
+.deleted .message {
+  background-color: $color-message-background-deleted;
+}
+.deleted .balloon {
+  border-bottom: 16px solid $color-message-background-deleted;
+}

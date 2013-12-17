@@ -282,6 +282,14 @@ dd {
   max-width: 960px;
 }
 
+.deleted .message {
+  background-color: #949494;
+}
+
+.deleted .balloon {
+  border-bottom: 16px solid #949494;
+}
+
 .gae-banner {
   position: absolute;
   right: 4px;

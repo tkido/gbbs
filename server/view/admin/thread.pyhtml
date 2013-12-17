@@ -1,0 +1,65 @@
+<h1 class="thread-title">${ thread.title }</h1>
+<a name="0"></a>
+<div class="template">
+  <div class="res-header">
+    <a href="/#{ ns }/#{ thread_id }/"><span class="res-number">0</span></a>
+    <span class="char-name">テンプレート</span>
+    <span class="datetime">#{ thread.dt_str }</span>
+    <span class="hash">ID:#{ thread.hashed_id }</span>
+  </div>
+  <div class="res-content">
+    <div class="message-cell">
+      <div class="message">
+        #{ decorate(text2html(thread.content)) }
+        <div class="navigation">
+          <ul>
+<?py if thread.prev_title: ?>
+            <li><a href="/#{ ns }/#{ thread.prev_id }/" title="${ thread.prev_title }">前スレ</a></li>
+<?py #end ?>
+<?py if thread.next_title: ?>
+            <li><a href="/#{ ns }/#{ thread.next_id }/" title="${ thread.next_title }">次スレ</a></li>
+<?py #end ?>
+            <li><a href="/#{ ns }/related/#{ thread_id }/">関連スレ一覧</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="form">
+
+<?py for res in reses: ?>
+<?py     if res.status == -3: ?>
+<?py         deleted = ' deleted' ?>
+<?py     else: ?>
+<?py         deleted = '' ?>
+<?py     #end ?>
+<a name="#{ res.number }"></a>
+<input type="checkbox" name="#{ res.number }" value="#{ res.number }"></input>
+<div class="response#{ deleted }">
+  <div class="res-header">
+    <a href="/#{ ns }/#{ thread_id }/#{ res.number }"><span class="res-number">#{ res.number }</span></a>
+    <span class="char-name">${ res.char_name }</span>
+    <span class="datetime">#{ res.dt_str }</span>
+    <span class="hash">ID:#{ res.author_id }</span>
+  </div>
+  <div class="res-content">
+    <div class="char-icon-cell">
+      <div class="char-icon ${ res.char_id } ${ res.char_emotion }"></div>
+    </div>
+    <div class="balloon-cell">
+      <div class="balloon-frame">
+        <div class="balloon"></div>
+      </div>
+    </div>
+    <div class="message-cell">
+      <div class="message">
+        #{ decorate(text2html(res.content)) }
+      </div>
+    </div>
+  </div>
+</div>
+<?py #end ?>
+
+</div><!-- form -->

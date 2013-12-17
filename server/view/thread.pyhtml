@@ -31,6 +31,7 @@
 </div>
 
 <?py for res in reses: ?>
+    <?py if res.status == 0: ?>
 <a name="#{ res.number }"></a>
 <div class="response">
   <div class="res-header">
@@ -55,6 +56,7 @@
     </div>
   </div>
 </div>
+    <?py #end ?>
 <?py #end ?>
 
 <?py if thread.writable: ?>

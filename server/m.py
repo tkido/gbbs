@@ -247,11 +247,6 @@ class Thread(ndb.Model):
     @classmethod
     def query_normal(cls):
         return cls.query(cls.status == c.NORMAL).order(-cls.updated)
-    """
-    @classmethod
-    def query_stored(cls, update_from, update_to):
-        return cls.query(cls.status == c.STORED).filter(cls.updated >= update_from).filter(cls.updated < update_to).order(-cls.updated)
-    """
     @classmethod
     def query_stored(cls):
         return cls.query(cls.status == c.STORED).order(-cls.updated)
@@ -291,7 +286,7 @@ class Res(ndb.Model):
     char_emotion = ndb.StringProperty(                 indexed=False)
     
     @classmethod
-    def query_normal(cls, thread_id, first):
+    def query_all(cls, thread_id, first = 1):
         first_key = ndb.Key('Res', thread_id * c.TT + first)
         last_key = ndb.Key('Res', thread_id * c.TT + c.K)
         return cls.query(first_key <= cls._key).filter(cls._key <= last_key)
