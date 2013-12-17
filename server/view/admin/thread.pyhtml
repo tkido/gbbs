@@ -29,7 +29,7 @@
 <a name="#{ res.number }"></a>
 <div class="response#{ deleted }">
   <div class="res-header">
-    <input type="checkbox" name="#{ res.number }" value="#{ res.number }" id="#{ res.number }"></input>
+    <input type="checkbox" name="check" value="#{ res.number }" id="#{ res.number }"></input>
     <label for="#{ res.number }">
       <span class="res-number">#{ res.number }</span>
       <span class="char-name">${ res.char_name }</span>

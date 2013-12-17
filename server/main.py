@@ -453,15 +453,7 @@ class UpdateThreadHandler(webapp2.RequestHandler):
         thread = m.Thread.get_by_id(thread_id)
         if not thread: raise ex.ThreadNotFound()
         
-        operation = self.request.get('operation')
-        if operation == 'reopen':
-            thread.reopen()
-        elif operation == 'store':
-            thread.store()
-        elif operation == 'delete':
-            thread.delete()
-        else:
-            raise ex.InvalidOperation()
+        thread.operate(self.request.get('operation'))
         raise ex.Redirect('/admin/%d/' % thread_id)
 
 class UpdateResesHandler(webapp2.RequestHandler):
@@ -473,22 +465,13 @@ class UpdateResesHandler(webapp2.RequestHandler):
         thread = m.Thread.get_by_id(thread_id)
         if not thread: raise ex.ThreadNotFound()
         
-        operation = self.request.get('operation')
-        status_to = 0
-        if operation == 'reopen':
-            status_to = c.NORMAL
-        elif operation == 'delete':
-            status_to = c.DELETED
-        else:
-            raise ex.InvalidOperation()
+        status_to = m.Res.validate_operation(self.request.get('operation'))
         
         myuser = context['user']
         board = context['board']
         now = board.now()
-        list = range(1, board.max[c.RESES]+1)
-        list = [self.request.get(str(i)) for i in list]
-        list = [int(x) for x in list if x != '']
-        list = [ndb.Key('Res', thread_id * c.TT + x) for x in list]
+        list = self.request.POST.getall('check')
+        list = [ndb.Key('Res', thread_id * c.TT + int(n)) for n in list]
         list = ndb.get_multi(list)
         for res in list:
             res.status = status_to
