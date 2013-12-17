@@ -5,6 +5,7 @@ import datetime
 import logging
 import time
 import webapp2
+from webapp2_extras import routes
 
 from google.appengine.api import memcache
 from google.appengine.api import users
@@ -122,7 +123,7 @@ class StoredHandler(webapp2.RequestHandler):
     @deco.catch()
     @deco.board()
     @deco.cache()
-    def get(self, context, year, month):
+    def get(self, context, year, slash, month, slash2):
         board = context['board']
         if ((not year) and (not month)):
             update_to = board.now()
@@ -422,20 +423,22 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         raise ex.Redirect('/%d/' % thread_id)
 
 app = webapp2.WSGIApplication([('/', TopPageHandler),
-                               (r'/([0-9a-z_-]{2,16})/', IndexHandler),
-                               (r'/([0-9a-z_-]{2,16})/(\d+)/(\d*)(-?)(\d*)', ThreadHandler),
-                               (r'/([0-9a-z_-]{2,16})/link', LinkHandler),
-                               (r'/([0-9a-z_-]{2,16})/related/(\d+)/', RelatedThreadHandler),
-                               (r'/([0-9a-z_-]{2,16})/stored/(\d{4})?/?(\d{1,2})?/?', StoredHandler),
-                               (r'/([0-9a-z_-]{2,16})/_login', LoginHandler),
-                               (r'/([0-9a-z_-]{2,16})/_write/(\d+)', WriteHandler),
-                               (r'/([0-9a-z_-]{2,16})/mypage/', MyPageHandler),
-                               (r'/([0-9a-z_-]{2,16})/agreement/', AgreementHandler),
-                               (r'/([0-9a-z_-]{2,16})/_agree', AgreeHandler),
-                               (r'/([0-9a-z_-]{2,16})/edit/(\d+)/', EditTemplateHandler),
-                               (r'/([0-9a-z_-]{2,16})/_edit/(\d+)', UpdateTemplateHandler),
-                               (r'/([0-9a-z_-]{2,16})/new/', NewThreadHandler),
-                               (r'/([0-9a-z_-]{2,16})/_new', CreateNewThreadHandler),
+                               routes.PathPrefixRoute('/<:[0-9a-z_-]{2,16}>', [
+                                   webapp2.Route('/', IndexHandler),
+                                   webapp2.Route('/<:\d+>/<:\d*><:-?><:\d*>', ThreadHandler),
+                                   webapp2.Route('/link', LinkHandler),
+                                   webapp2.Route('/stored/<:(\d{4})?><:/?><:(\d{1,2})?><:/?>', StoredHandler),
+                                   webapp2.Route('/related/<:\d+>/', RelatedThreadHandler),
+                                   webapp2.Route('/_login', LoginHandler),
+                                   webapp2.Route('/_write/<:\d+>', WriteHandler),
+                                   webapp2.Route('/mypage/', MyPageHandler),
+                                   webapp2.Route('/agreement/', AgreementHandler),
+                                   webapp2.Route('/_agree', AgreeHandler),
+                                   webapp2.Route('/edit/<:\d+>/', EditTemplateHandler),
+                                   webapp2.Route('/_edit/<:\d+>', UpdateTemplateHandler),
+                                   webapp2.Route('/new/', NewThreadHandler),
+                                   webapp2.Route('/_new', CreateNewThreadHandler),
+                               ]),
                               ],
                               debug=conf.LOCAL_SDK
                              )
