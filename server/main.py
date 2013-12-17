@@ -469,8 +469,6 @@ class UpdateResesHandler(webapp2.RequestHandler):
     @deco.board()
     @deco.myuser(c.EDITOR)
     def post(self, context, thread_id):
-        board = context['board']
-        
         thread_id = int(thread_id)
         thread = m.Thread.get_by_id(thread_id)
         if not thread: raise ex.ThreadNotFound()
@@ -484,6 +482,9 @@ class UpdateResesHandler(webapp2.RequestHandler):
         else:
             raise ex.InvalidOperation()
         
+        myuser = context['user']
+        board = context['board']
+        now = board.now()
         list = range(1, board.max[c.RESES]+1)
         list = [self.request.get(str(i)) for i in list]
         list = [int(x) for x in list if x != '']
@@ -491,6 +492,8 @@ class UpdateResesHandler(webapp2.RequestHandler):
         list = ndb.get_multi(list)
         for res in list:
             res.status = status_to
+            res.updater_id = myuser.myuser_id
+            res.updated = now
         ndb.put_multi(list)
         
         util.flush_page('/%d/' % thread_id)
