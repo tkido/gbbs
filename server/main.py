@@ -492,6 +492,7 @@ class UpdateResesHandler(webapp2.RequestHandler):
         for res in list:
             res.status = status_to
         ndb.put_multi(list)
+        
         util.flush_page('/%d/' % thread_id)
         if conf.LOCAL_SDK: time.sleep(0.5)
         raise ex.Redirect('/admin/%d/' % thread_id)
