@@ -14,7 +14,7 @@ import ex
 import m
 import util
 
-def catch():
+def default():
     def wrapper_func(original_func):
         def decorated_func(org, ns = '', *args, **kwargs):
             try:
