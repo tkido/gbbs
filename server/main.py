@@ -171,9 +171,10 @@ class WriteHandler(webapp2.RequestHandler):
         myuser = context['user']
         hashed_id = board.hash(myuser.myuser_id)
         
-        char_name = self.request.get('char_name') or '名無しの村人さん'
+        handle = self.request.get('handle') or '名無しさん'
         char_id = self.request.get('character') or 'none'
-        char_emotion = self.request.get('emotion') or 'normal'
+        emotion = self.request.get('emotion') or 'normal'
+        trip = '' #placeholder
         
         new_id = m.Res.latest_num_of(thread_id) + 1
         new_number = new_id % c.TT
@@ -182,6 +183,8 @@ class WriteHandler(webapp2.RequestHandler):
         res = m.Res(id = new_id,
                     author_id = myuser.myuser_id,
                     updater_id = myuser.myuser_id,
+                    author_auth = myuser.status,
+                    remote_host = self.request.remote_addr,
                     
                     status = c.NORMAL,
                     updated = now,
@@ -192,9 +195,10 @@ class WriteHandler(webapp2.RequestHandler):
                     hashed_id = hashed_id,
                     content = content,
                     
-                    char_name = char_name,
+                    handle = handle,
                     char_id = char_id,
-                    char_emotion = char_emotion,
+                    emotion = emotion,
+                    trip = trip,
                    )
         @ndb.transactional()
         def write_unique():
@@ -341,6 +345,7 @@ class AgreeHandler(webapp2.RequestHandler):
                 myuser.status = c.WRITER
                 myuser.flush()
                 myuser.put()
+            rise_to_writer()
         raise ex.RedirectContinue()
 
 class MyPageHandler(webapp2.RequestHandler):

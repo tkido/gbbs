@@ -17,7 +17,7 @@ import util
 
 class Counter(ndb.Model):
     #id = "Board", "MyUser", "Thread", "Template", "Log"
-    count = ndb.IntegerProperty(required=True, indexed=False)
+    count = ndb.IntegerProperty('c', required=True, indexed=False)
 
     @classmethod
     @ndb.transactional()
@@ -29,31 +29,31 @@ class Counter(ndb.Model):
 
 class Log(ndb.Model):
     #id = Counter("Log").count
-    log = ndb.TextProperty(required=True, indexed=False)
+    log = ndb.TextProperty('l', required=True, indexed=False)
 
 class Board(ndb.Model):
     #id = ns, or 'b'(default)
-    author_id          = ndb.IntegerProperty( required=True, indexed=False)
-    updater_id         = ndb.IntegerProperty( required=True, indexed=False)
+    author_id          = ndb.IntegerProperty ('ai', required=True, indexed=False)
+    updater_id         = ndb.IntegerProperty ('ui', required=True, indexed=False)
     
-    status             = ndb.IntegerProperty( required=True               )
-    updated            = ndb.DateTimeProperty(required=True, indexed=False)
-    since              = ndb.DateTimeProperty(required=True, indexed=False)
+    status             = ndb.IntegerProperty ('s',  required=True               )
+    updated            = ndb.DateTimeProperty('u',  required=True, indexed=False)
+    since              = ndb.DateTimeProperty('si', required=True, indexed=False)
     
-    title              = ndb.StringProperty(  required=True, indexed=False)
-    description        = ndb.StringProperty(                 indexed=False)
-    keywords           = ndb.StringProperty(                 indexed=False)
-    template           = ndb.TextProperty(                   indexed=False)
+    title              = ndb.StringProperty  ('t',  required=True, indexed=False)
+    description        = ndb.StringProperty  ('d',                 indexed=False)
+    keywords           = ndb.StringProperty  ('k',                 indexed=False)
+    template           = ndb.TextProperty    ('te',                indexed=False)
     
-    hash_cycle         = ndb.IntegerProperty( required=True, indexed=False)  #0:ever(no change) 1:year 2:month 3:day
-    salt               = ndb.StringProperty(  required=True, indexed=False)
-    timezone           = ndb.IntegerProperty( required=True, indexed=False)
+    hash_cycle         = ndb.IntegerProperty ('h',  required=True, indexed=False)  #0:ever(no change) 1:year 2:month 3:day
+    salt               = ndb.StringProperty  ('sa', required=True, indexed=False)
+    timezone           = ndb.IntegerProperty ('tz', required=True, indexed=False)
     
-    allow_index        = ndb.BooleanProperty( required=True, indexed=False)
-    allow_robots       = ndb.BooleanProperty( required=True, indexed=False)
+    allow_index        = ndb.BooleanProperty ('i',  required=True, indexed=False)
+    allow_robots       = ndb.BooleanProperty ('r',  required=True, indexed=False)
     
-    max                = ndb.IntegerProperty(                indexed=False, repeated=True)
-    ad                 = ndb.TextProperty(                   indexed=False, repeated=True)
+    max                = ndb.IntegerProperty ('m',                 indexed=False, repeated=True)
+    ad                 = ndb.TextProperty    ('a',                 indexed=False, repeated=True)
     
     @classmethod
     def query_normal(cls):
@@ -111,14 +111,14 @@ class Board(ndb.Model):
     
 class MyUser(ndb.Model):
     #id = user.user_id()
-    user      = ndb.UserProperty(    required=True               )
+    user      = ndb.UserProperty    ('u',  required=True               )
     
-    myuser_id = ndb.IntegerProperty (required=True               )
-    ban_count = ndb.IntegerProperty (required=True, indexed=False)
+    myuser_id = ndb.IntegerProperty ('i',  required=True               )
+    ban_count = ndb.IntegerProperty ('b',  required=True, indexed=False)
     
-    status    = ndb.IntegerProperty (required=True               )
-    updated   = ndb.DateTimeProperty(required=True, indexed=False)
-    since     = ndb.DateTimeProperty(required=True, indexed=False)
+    status    = ndb.IntegerProperty ('s',  required=True               )
+    updated   = ndb.DateTimeProperty('u',  required=True, indexed=False)
+    since     = ndb.DateTimeProperty('si', required=True, indexed=False)
     
     def readable(self):
         return self.status != c.DELETED
@@ -127,17 +127,17 @@ class MyUser(ndb.Model):
     
 class Template(ndb.Model):
     #id = Counter("Template").count
-    author_id       = ndb.IntegerProperty( required=True, indexed=False)
-    updater_id      = ndb.IntegerProperty( required=True, indexed=False)
+    author_id       = ndb.IntegerProperty ('ai', required=True, indexed=False)
+    updater_id      = ndb.IntegerProperty ('ui', required=True, indexed=False)
     
-    status          = ndb.IntegerProperty( required=True, indexed=False)
-    updated         = ndb.DateTimeProperty(required=True, indexed=False)
-    since           = ndb.DateTimeProperty(required=True, indexed=False)
+    status          = ndb.IntegerProperty ('s',  required=True, indexed=False)
+    updated         = ndb.DateTimeProperty('u',  required=True, indexed=False)
+    since           = ndb.DateTimeProperty('si', required=True, indexed=False)
     
-    title           = ndb.StringProperty(  required=True, indexed=False)
-    content         = ndb.TextProperty(    required=True               )
-    keeped_title    = ndb.StringProperty(  required=True, indexed=False)
-    keeped_content  = ndb.TextProperty(    required=True               )
+    title           = ndb.StringProperty  ('t',  required=True, indexed=False)
+    content         = ndb.TextProperty    ('c',  required=True, indexed=False)
+    keeped_title    = ndb.StringProperty  ('kt', required=True, indexed=False)
+    keeped_content  = ndb.TextProperty    ('kc', required=True, indexed=False)
     
     def readable(self):
         return self.status != c.DELETED
@@ -146,27 +146,27 @@ class Template(ndb.Model):
     
 class Thread(ndb.Model):
     #id = Counter("Thread").count
-    template_id = ndb.IntegerProperty( required=True               )
-    author_id   = ndb.IntegerProperty( required=True, indexed=False)
-    updater_id  = ndb.IntegerProperty( required=True, indexed=False)
+    author_id   = ndb.IntegerProperty ('au', required=True, indexed=False)
+    updater_id  = ndb.IntegerProperty ('ui', required=True, indexed=False)
+    template_id = ndb.IntegerProperty ('ti', required=True               )
     
-    status      = ndb.IntegerProperty( required=True               )
-    updated     = ndb.DateTimeProperty(required=True               )
-    since       = ndb.DateTimeProperty(required=True, indexed=False)
+    status      = ndb.IntegerProperty ('s',  required=True               )
+    updated     = ndb.DateTimeProperty('u',  required=True               )
+    since       = ndb.DateTimeProperty('si', required=True, indexed=False)
     
-    title       = ndb.StringProperty(  required=True, indexed=False)
-    dt_str      = ndb.StringProperty(  required=True, indexed=False)
-    hashed_id   = ndb.StringProperty(  required=True, indexed=False)
-    content     = ndb.TextProperty(    required=True               )
+    title       = ndb.StringProperty  ('t',  required=True, indexed=False)
+    dt_str      = ndb.StringProperty  ('d',  required=True, indexed=False)
+    hashed_id   = ndb.StringProperty  ('hi', required=True, indexed=False)
+    content     = ndb.TextProperty    ('c',  required=True, indexed=False)
     
-    number      = ndb.IntegerProperty( required=True, indexed=False)
-    res_count   = ndb.IntegerProperty( required=True, indexed=False)
-    resed       = ndb.DateTimeProperty(required=True, indexed=False)
+    number      = ndb.IntegerProperty ('n',  required=True, indexed=False)
+    res_count   = ndb.IntegerProperty ('rc', required=True, indexed=False)
+    resed       = ndb.DateTimeProperty('r',  required=True, indexed=False)
     
-    prev_id     = ndb.IntegerProperty(                indexed=False)
-    prev_title  = ndb.StringProperty(                 indexed=False)
-    next_id     = ndb.IntegerProperty(                indexed=False)
-    next_title  = ndb.StringProperty(                 indexed=False)
+    prev_id     = ndb.IntegerProperty ('pi',                indexed=False)
+    prev_title  = ndb.StringProperty  ('pt',                indexed=False)
+    next_id     = ndb.IntegerProperty ('ni',                indexed=False)
+    next_title  = ndb.StringProperty  ('nt',                indexed=False)
     
     def readable(self):
         return self.status != c.DELETED
@@ -281,21 +281,24 @@ class Thread(ndb.Model):
 
 class Res(ndb.Model):
     #id = thread.id * c.TT + number
-    author_id    = ndb.IntegerProperty( required=True, indexed=False)
-    updater_id   = ndb.IntegerProperty( required=True, indexed=False)
+    author_id    = ndb.IntegerProperty ('ai', required=True, indexed=False)
+    updater_id   = ndb.IntegerProperty ('ui', required=True, indexed=False)
+    author_auth  = ndb.IntegerProperty ('aa',                indexed=False)
+    remote_host  = ndb.StringProperty  ('r',                 indexed=False)
     
-    status       = ndb.IntegerProperty( required=True, indexed=False)
-    updated      = ndb.DateTimeProperty(required=True, indexed=False)
-    since        = ndb.DateTimeProperty(required=True, indexed=False)
+    status       = ndb.IntegerProperty ('s',  required=True, indexed=False)
+    updated      = ndb.DateTimeProperty('u',  required=True, indexed=False)
+    since        = ndb.DateTimeProperty('si', required=True, indexed=False)
     
-    number       = ndb.IntegerProperty( required=True, indexed=False)
-    dt_str       = ndb.StringProperty(  required=True, indexed=False)
-    hashed_id    = ndb.StringProperty(  required=True, indexed=False)
-    content      = ndb.TextProperty(    required=True               )
+    number       = ndb.IntegerProperty ('n',  required=True, indexed=False)
+    dt_str       = ndb.StringProperty  ('d',  required=True, indexed=False)
+    hashed_id    = ndb.StringProperty  ('hi', required=True, indexed=False)
+    content      = ndb.TextProperty    ('c',  required=True, indexed=False)
     
-    handle       = ndb.StringProperty(                 indexed=False)
-    icon_id      = ndb.StringProperty(                 indexed=False)
-    emotion      = ndb.StringProperty(                 indexed=False)
+    handle       = ndb.StringProperty  ('h',                 indexed=False)
+    char_id      = ndb.StringProperty  ('ci',                indexed=False)
+    emotion      = ndb.StringProperty  ('e',                 indexed=False)
+    trip         = ndb.StringProperty  ('t',                 indexed=False)
     
     @classmethod
     def query_all(cls, thread_id, first = 1):

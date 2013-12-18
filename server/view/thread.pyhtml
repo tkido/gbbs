@@ -3,7 +3,7 @@
 <div class="template">
   <div class="res-header">
     <a href="/#{ ns }/#{ thread_id }/"><span class="res-number">0</span></a>
-    <span class="char-name">テンプレート</span>
+    <span class="handle">テンプレート</span>
     <span class="datetime">#{ thread.dt_str }</span>
     <span class="hash">ID:#{ thread.hashed_id }</span>
   </div>
@@ -37,13 +37,13 @@
 <div class="response">
   <div class="res-header">
     <a href="/#{ ns }/#{ thread_id }/#{ res.number }"><span class="res-number">#{ res.number }</span></a>
-    <span class="char-name">${ res.char_name }</span>
+    <span class="handle">${ res.handle }</span>
     <span class="datetime">#{ res.dt_str }</span>
     <span class="hash">ID:#{ res.hashed_id }</span>
   </div>
   <div class="res-content">
     <div class="char-icon-cell">
-      <div class="char-icon ${ res.char_id } ${ res.char_emotion }"></div>
+      <div class="char-icon ${ res.char_id } ${ res.emotion }"></div>
     </div>
     <div class="balloon-cell">
       <div class="balloon-frame">
@@ -82,7 +82,7 @@
           <input type="checkbox" name="sage" value="sage" class="sage">sage</input>
           <input type="submit" value="送信する" /><br />
           <textarea name="content" rows="4" cols="40"></textarea>
-          <input type="hidden" name="char_name" value="名無しの村人" />
+          <input type="hidden" name="handle" value="名無しの村人" />
         </form>
       </div>
     </div>

@@ -3,7 +3,7 @@
 <div class="template">
   <div class="res-header">
     <a href="/#{ ns }/#{ thread_id }/"><span class="res-number">0</span></a>
-    <span class="char-name">テンプレート</span>
+    <span class="handle">テンプレート</span>
     <span class="datetime">#{ thread.dt_str }</span>
     <span class="hash">ID:#{ thread.hashed_id }</span>
   </div>
@@ -32,7 +32,7 @@
     <input type="checkbox" name="check" value="#{ res.number }" id="#{ res.number }"></input>
     <label for="#{ res.number }">
       <span class="res-number">#{ res.number }</span>
-      <span class="char-name">${ res.char_name }</span>
+      <span class="handle">${ res.handle }</span>
       <span class="datetime">#{ res.dt_str }</span>
     </label>
 <?py if user.status >= 8: ?>
@@ -46,7 +46,7 @@
   <label for="#{ res.number }">
     <div class="res-content">
       <div class="char-icon-cell">
-        <div class="char-icon ${ res.char_id } ${ res.char_emotion }"></div>
+        <div class="char-icon ${ res.char_id } ${ res.emotion }"></div>
       </div>
       <div class="balloon-cell">
         <div class="balloon-frame">
