@@ -340,8 +340,7 @@ class AgreeHandler(webapp2.RequestHandler):
                 myuser = myuser_key.get()
                 myuser.status = c.WRITER
                 myuser.flush()
-                return myuser.put()
-            if not rise_to_writer(): raise ex.UserCouldNotUpdate()
+                myuser.put()
         raise ex.RedirectContinue()
 
 class MyPageHandler(webapp2.RequestHandler):

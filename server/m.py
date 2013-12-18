@@ -293,9 +293,9 @@ class Res(ndb.Model):
     hashed_id    = ndb.StringProperty(  required=True, indexed=False)
     content      = ndb.TextProperty(    required=True               )
     
-    char_name    = ndb.StringProperty(                 indexed=False)
-    char_id      = ndb.StringProperty(                 indexed=False)
-    char_emotion = ndb.StringProperty(                 indexed=False)
+    handle       = ndb.StringProperty(                 indexed=False)
+    icon_id      = ndb.StringProperty(                 indexed=False)
+    emotion      = ndb.StringProperty(                 indexed=False)
     
     @classmethod
     def query_all(cls, thread_id, first = 1):

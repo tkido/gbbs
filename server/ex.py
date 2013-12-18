@@ -81,8 +81,6 @@ class AuthorityRequired(AppError):
   def __init__(self, required_auth, your_auth):
     self.title = '権限が足りません'
     self.message = '指定された動作には『%s』以上の権限が必要ですが、現在の権限は『%s』です。権限についてはヘルプをご覧下さい。' % (c.AUTHORITIES[required_auth], c.AUTHORITIES[your_auth])
-    self.report = ''
-    self.help = '/authority'
 
 class TemplateNotWritable(AppError):
   def __init__(self):
@@ -113,10 +111,11 @@ class InvalidTemplate(AppError):
 class InvalidOperation(AppError):
   def __init__(self):
     self.title = '実行する内容を選択して下さい'
-    self.message = '誤った操作を防止するため必ず選択する必要があります。'
+    self.message = '操作ミスを防止するため必ず選択する必要があります。'
 
 
 # ndb error
+"""
 class UserNotFound(SysError):
   def __init__(self):
     self.title = 'ユーザーデータの取得に失敗しました'
@@ -156,3 +155,4 @@ class ResCouldNotPut(SysError):
   def __init__(self):
     self.title = 'レスの保存に失敗しました'
     self.message = '再送信を行うと今度は成功する可能性がありますが、続いて失敗した場合はそれ以上繰り返さずに、あとでもう一度書き込んで下さい。フォームの入力内容はブラウザの戻るボタンで戻ることによって取り戻せる可能性があります。'
+"""
