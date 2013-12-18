@@ -1,6 +1,7 @@
 <h1 class="error-title">${ error.title }</h1>
 <div class="error">
   ${ error.message }
+<?py if hasattr(error, "continue_uri") or hasattr(error, "retry_uri"): ?>
   <div class="navigation">
     <ul>
 <?py if hasattr(error, "continue_uri"): ?>
@@ -11,4 +12,5 @@
 <?py #end ?>
     </ul>
   </div>
+<?py #end ?>
 </div>
