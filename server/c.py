@@ -2,10 +2,14 @@
 # -*- coding:utf-8 -*-
 
 #day of the week in Japanese
-WEEKDAYS = ['月', '火', '水', '木', '金', '土', '日']
+WEEKDAYS_JP = ['月', '火', '水', '木', '金', '土', '日']
 
 #auth names in Japanese
-AUTHORITIES = ['訪問者',
+AUTHORITIES = [
+               '削除済み',
+               '投稿禁止',
+               '一時停止',
+               '一般人',
                '読者',
                '投稿者',
                '協力者',
@@ -15,38 +19,29 @@ AUTHORITIES = ['訪問者',
                '管理人',
                'システム協力者',
                'システム管理者',
-               
-               '削除済み',
-               '投稿禁止',
-               '一時停止',
               ]
 
-#auth table
-SYSTEM_ADMIN  = 9
-SYSTEM_HELPER = 8
-ADMINISTRATOR = 7
-SUB_ADMIN     = 6
-SUPERVISOR    = 5
-EDITOR        = 4
-SUPPORTER     = 3
-WRITER        = 2
-READER        = 1
-VISITOR       = 0
+#for status of MyUser
+SYSTEM_ADMIN  = 12
+SYSTEM_HELPER = 11
+ADMINISTRATOR = 10
+SUB_ADMIN     = 9
+SUPERVISOR    = 8
+EDITOR        = 7
+SUPPORTER     = 6
+WRITER        = 5
+READER        = 4
 
-DINIED        =-1
-BANNED        =-2
-DELETED       =-3
-
-#for status of Board, Thread, Res
-NORMAL        = 0
-STORED        =-1
-BANNED        =-2
-DELETED       =-3
+#for status of MyUser, Board, Thread, Res
+NORMAL        = 3
+STORED        = 2
+BANNED        = 1
+DELETED       = 0
 
 #for boards
 BOARD_NAMESPACE = 'b'
 
-# m.Board.max[_]
+#for m.Board.max[n]
 THREADS        = 0
 RESES          = 1
 CHARS          = 2

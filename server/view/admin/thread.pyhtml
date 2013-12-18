@@ -25,7 +25,7 @@
   <form method="post" action="/#{ ns }/admin/_edit/#{ thread_id }/">
 
 <?py for res in reses: ?>
-<?py deleted = ' deleted' if res.status == -3 else '' ?>
+<?py deleted = ' deleted' if res.status == 0 else '' ?>
 <a name="#{ res.number }"></a>
 <div class="response#{ deleted }">
   <div class="res-header">
@@ -35,7 +35,7 @@
       <span class="char-name">${ res.char_name }</span>
       <span class="datetime">#{ res.dt_str }</span>
     </label>
-<?py if user.status >= 5: ?>
+<?py if user.status >= 8: ?>
     <a href="/#{ ns }/admin/user/#{ res.author_id }/">
       <span class="hash">ユーザ:#{ res.author_id }</span>
     </a>
@@ -90,13 +90,13 @@
         このスレを
         <select name="operation" class="operation">
           <option value="">　</option>
-<?py if thread.status != 0 and thread.res_count < board.max[1] : ?>
+<?py if thread._can_reopen : ?>
           <option value="reopen">再開させる</option>
 <?py #end ?>
-<?py if thread.status != -1: ?>
+<?py if thread._can_store: ?>
           <option value="store">過去ログにする</option>
 <?py #end ?>
-<?py if thread.status != -3: ?>
+<?py if thread._can_delete: ?>
           <option value="delete">削除する</option>
 <?py #end ?>
         </select>

@@ -16,7 +16,7 @@ def dt_to_str(dt):
   return '%04d/%02d/%02d(%s) %02d:%02d:%02d' % (dt.year,
                                                 dt.month,
                                                 dt.day,
-                                                c.WEEKDAYS[dt.weekday()],
+                                                c.WEEKDAYS_JP[dt.weekday()],
                                                 dt.hour,
                                                 dt.minute,
                                                 dt.second,

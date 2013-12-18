@@ -83,7 +83,7 @@ def cache(second = conf.CACHED_DEFAULT):
         return decorated_func
     return wrapper_func
 
-def myuser(required_auth = c.BANNED):
+def myuser(required_auth = c.DELETED):
     def wrapper_func(original_func):
         def decorated_func(org, context, *args, **kwargs):
             user = users.get_current_user()

@@ -32,7 +32,7 @@
 </div>
 
 <?py for res in reses: ?>
-    <?py if res.status == 0: ?>
+    <?py if res.status == NORMAL: ?>
 <a name="#{ res.number }"></a>
 <div class="response">
   <div class="res-header">

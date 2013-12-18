@@ -83,6 +83,7 @@ class ThreadHandler(webapp2.RequestHandler):
             'thread_id': thread_id,
             'thread': thread,
             'reses': reses,
+            'NORMAL': c.NORMAL,
         })
         
         now = board.now()
@@ -291,7 +292,7 @@ class LoginHandler(webapp2.RequestHandler):
         if not user: raise ex.RedirectLogin()
         myuser = m.MyUser.get_by_id(user.user_id())
         if myuser:
-            if (myuser.status == c.READER) or (myuser.status == c.DELETED):
+            if myuser.status == c.READER:
                 raise ex.RedirectAgreement()
             else:
                 raise ex.RedirectContinue()
@@ -332,7 +333,7 @@ class AgreeHandler(webapp2.RequestHandler):
     @deco.myuser(c.DELETED)
     def get(self, context):
         myuser = context['user']
-        if (myuser.status == c.READER) or (myuser.status == c.DELETED):
+        if myuser.status == c.READER:
             myuser_key = myuser.key
             @ndb.transactional()
             def rise_to_writer():
@@ -436,6 +437,10 @@ class EditThreadHandler(webapp2.RequestHandler):
         
         reses = m.Res.query_all(thread_id).fetch(conf.MAX_FETCH)
         
+        thread._can_reopen = (thread.status != c.NORMAL) and (thread.res_count < board.max[c.RESES])
+        thread._can_store = (thread.status != c.STORED)
+        thread._can_delete = (thread.status != c.DELETED)
+        
         context.update({
             'page_title': thread.title,
             'thread_id': thread_id,
@@ -453,7 +458,21 @@ class UpdateThreadHandler(webapp2.RequestHandler):
         thread = m.Thread.get_by_id(thread_id)
         if not thread: raise ex.ThreadNotFound()
         
-        thread.operate(self.request.get('operation'))
+        operation = self.request.get('operation')
+        if operation == 'reopen' and \
+           thread.status != c.NORMAL and \
+           thread.res_count < board.max[c.RESES]:
+            thread.reopen()
+        elif operation == 'store' and \
+             thread.status != c.STORED:
+            thread.store()
+        elif operation == 'delete' and \
+             thread.status != c.DELETED:
+            thread.delete()
+        else:
+            raise ex.InvalidOperation()
+        
+        util.flush_page('/%d/' % thread_id)
         raise ex.Redirect('/admin/%d/' % thread_id)
 
 class UpdateResesHandler(webapp2.RequestHandler):
