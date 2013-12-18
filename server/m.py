@@ -172,10 +172,36 @@ class Thread(ndb.Model):
         return self.status != c.DELETED
     
     @ndb.transactional()
+    def reopen(self):
+        thread = self.key.get()
+        thread.status = c.NORMAL
+        thread.put()
+    
+    @ndb.transactional()
     def store(self):
         thread = self.key.get()
         thread.status = c.STORED
         thread.put()
+    
+    @ndb.transactional()
+    def delete(self):
+        thread = self.key.get()
+        thread.status = c.DELETED
+        thread.put()
+    
+    def operate(self, operation):
+        if operation == 'reopen' and \
+           self.status != c.NORMAL and \
+           self.res_count < board.max[c.RESES]:
+            self.reopen()
+        elif operation == 'store' and \
+             self.status != c.STORED:
+            self.store()
+        elif operation == 'delete' and \
+             self.status != c.DELETED:
+            self.delete()
+        else:
+            raise ex.InvalidOperation()
     
     def prepare_next(self):
         next_id = Counter.incr('Thread')
@@ -301,3 +327,12 @@ class Res(ndb.Model):
             return first_id
         id = keys[-1].id()
         return first_id if id < first_id else id
+
+    @classmethod
+    def validate_operation(cls, operation):
+        if operation == 'reopen':
+            return c.NORMAL
+        elif operation == 'delete':
+            return c.DELETED
+        else:
+            raise ex.InvalidOperation()

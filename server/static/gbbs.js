@@ -151,30 +151,31 @@ $(document).ready(function(){
         icon.addClass(emotion_to);
         $.cookie('emotion', emotion_to, cookie_options);
     }
-
+    
     /* 起動時の処理 */
-    $('#form select.character').empty();
-    $.each($.characters, function(id, character) {
-        $('#form select.character').append(
-            $('<option></option>').val(id).html(character['name'])
-        );
-    });
-    
-    if ($.cookie('character')){
-        var selecter = '#form select.character option[value="' + $.cookie('character') + '"]'
-        $(selecter).attr("selected","selected");
+    if($('#form select.character').size()){
+        $('#form select.character').empty();
+        $.each($.characters, function(id, character) {
+            $('#form select.character').append(
+                $('<option></option>').val(id).html(character['name'])
+            );
+        });
+        
+        if ($.cookie('character')){
+            var selecter = '#form select.character option[value="' + $.cookie('character') + '"]'
+            $(selecter).attr("selected","selected");
+        }
+        character_changed();
+        if ($.cookie('emotion')){
+            var selecter = '#form select.emotion option[value="' + $.cookie('emotion') + '"]'
+            $(selecter).attr("selected","selected");
+        }
+        emotion_changed();
+        
+        if ($.cookie('sage') == 'true'){
+            $('#form input[name=sage]').attr('checked', 'checked');
+        }
     }
-    character_changed();
-    if ($.cookie('emotion')){
-        var selecter = '#form select.emotion option[value="' + $.cookie('emotion') + '"]'
-        $(selecter).attr("selected","selected");
-    }
-    emotion_changed();
-    
-    if ($.cookie('sage') == 'true'){
-        $('#form input[name=sage]').attr('checked', 'checked');
-    }
-
     //初期化終了
     $('#form').toggle();
     

@@ -23,6 +23,7 @@
 <?py if thread.writable: ?>
             <li><a href="/#{ ns }/edit/#{ thread_id }/">テンプレ編集</a></li>
 <?py #end ?>
+            <li><a href="/#{ ns }/admin/#{ thread_id }/">管理</a></li>
           </ul>
         </div>
       </div>
@@ -102,6 +103,7 @@
             <li><a href="/#{ ns }/#{ thread.next_id }/" title="${ thread.next_title }">次スレ</a></li>
 <?py #end ?>
             <li><a href="/#{ ns }/related/#{ thread_id }/">関連スレ一覧</a></li>
+            <li><a href="/#{ ns }/admin/#{ thread_id }/">管理</a></li>
           </ul>
         </div>
       </div>

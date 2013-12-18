@@ -444,6 +444,46 @@ class EditThreadHandler(webapp2.RequestHandler):
         })
         return te.render(':admin/thread', context)
 
+class UpdateThreadHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    @deco.myuser(c.EDITOR)
+    def post(self, context, thread_id):
+        thread_id = int(thread_id)
+        thread = m.Thread.get_by_id(thread_id)
+        if not thread: raise ex.ThreadNotFound()
+        
+        thread.operate(self.request.get('operation'))
+        raise ex.Redirect('/admin/%d/' % thread_id)
+
+class UpdateResesHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    @deco.myuser(c.EDITOR)
+    def post(self, context, thread_id):
+        thread_id = int(thread_id)
+        thread = m.Thread.get_by_id(thread_id)
+        if not thread: raise ex.ThreadNotFound()
+        
+        status_to = m.Res.validate_operation(self.request.get('operation'))
+        
+        myuser = context['user']
+        board = context['board']
+        now = board.now()
+        list = self.request.POST.getall('check')
+        list = [ndb.Key('Res', thread_id * c.TT + int(n)) for n in list]
+        list = ndb.get_multi(list)
+        for res in list:
+            res.status = status_to
+            res.updater_id = myuser.myuser_id
+            res.updated = now
+        ndb.put_multi(list)
+        
+        util.flush_page('/%d/' % thread_id)
+        if conf.LOCAL_SDK: time.sleep(0.5)
+        raise ex.Redirect('/admin/%d/' % thread_id)
+
+
 app = webapp2.WSGIApplication([('/', TopPageHandler),
                                routes.PathPrefixRoute('/<:[0-9a-z_-]{2,16}>', [
                                    webapp2.Route('/', IndexHandler),
@@ -460,9 +500,14 @@ app = webapp2.WSGIApplication([('/', TopPageHandler),
                                    webapp2.Route('/_edit/<:\d+>', UpdateTemplateHandler),
                                    webapp2.Route('/new/', NewThreadHandler),
                                    webapp2.Route('/_new', CreateNewThreadHandler),
+                                   
+                                   webapp2.Route('/admin/<:\d+>/', EditThreadHandler),
+                                   webapp2.Route('/admin/_edit/thread/<:\d+>/', UpdateThreadHandler),
+                                   webapp2.Route('/admin/_edit/<:\d+>/', UpdateResesHandler),
                                ]),
                                routes.PathPrefixRoute('/a/<:[0-9a-z_-]{2,16}>', [
-                                   webapp2.Route('/edit/<:\d+>/', EditThreadHandler),
+                                   webapp2.Route('/<:\d+>/', EditThreadHandler),
+                                   webapp2.Route('/_edit/thread/<:\d+>/', UpdateThreadHandler),
                                ]),
                               ],
                               debug=conf.DEBUG
