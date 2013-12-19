@@ -60,7 +60,7 @@
     <?py #end ?>
 <?py #end ?>
 
-<?py if thread.writable: ?>
+<?py if thread._writable: ?>
     <?py if board.allow_anonymous or user: ?>
         <?py handler = '_write'if user else '_write_a' ?>
 <h2>あなたのレス</h2>

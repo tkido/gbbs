@@ -76,7 +76,7 @@ class ThreadHandler(webapp2.RequestHandler):
         reses = query.fetch(fetch_count) if fetch_count else []
         
         last_number = reses[-1].key.id() % c.TT if reses else 0
-        thread.writable = (thread.status == c.NORMAL and last_number < board.max[c.RESES])
+        thread._writable = (thread.status == c.NORMAL and last_number < board.max[c.RESES])
         
         context.update({
             'page_title': thread.title,
