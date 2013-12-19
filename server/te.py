@@ -25,6 +25,7 @@ GRUBER_URLINTEXT_PAT = re.compile(ur'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\
 
 
 def decorate(source):
+    ns = namespace_manager.get_namespace()
     def anchor(source):
         def replaced(match):
             g = match.groups()
@@ -43,7 +44,7 @@ def decorate(source):
             if g.startswith(GBBS_URL_HEAD):
                 return '<a href=\"%s\">%s</a>' % (g, g)
             else:
-                return '<a href=\"/%s/link?to=%s\">%s</a>' % (namespace_manager.get_namespace(), g, g)
+                return '<a href=\"/%s/link?to=%s\">%s</a>' % (ns, g, g)
         return re.sub(GRUBER_URLINTEXT_PAT, replaced, source)
     return anchor(link(source))
 
