@@ -256,7 +256,7 @@ class WriteAnonymousHandler(webapp2.RequestHandler):
         res = m.Res(id = new_id,
                     author_id = 0,
                     updater_id = 0,
-                    author_auth = 0,
+                    author_auth = 3,
                     remote_host = self.request.remote_addr,
                     
                     status = c.NORMAL,
