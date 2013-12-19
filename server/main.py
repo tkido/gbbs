@@ -221,6 +221,79 @@ class WriteHandler(webapp2.RequestHandler):
         if conf.LOCAL_SDK: time.sleep(0.5)
         raise ex.Redirect('/%d/#%d' % (thread_id, new_number))
 
+class WriteAnonymousHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    def get(self, context, thread_id):
+        raise ex.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
+        
+    @deco.default()
+    @deco.board()
+    def post(self, context, thread_id):
+        board = context['board']
+        if not board.allow_anonymous:
+            raise ex.ThreadNotWritable()
+        
+        content = board.validate_content(self.request.get('content'))
+        
+        thread_id = int(thread_id)
+        thread_key = ndb.Key('Thread', thread_id)
+        thread = thread_key.get()
+        
+        now = board.now()
+        dt_str = util.dt_to_str(now)
+        hashed_id = board.hash(0)
+        
+        handle = self.request.get('handle') or '名無しさん'
+        char_id = self.request.get('character') or 'none'
+        emotion = self.request.get('emotion') or 'normal'
+        trip = '' #placeholder
+        
+        new_id = m.Res.latest_num_of(thread_id) + 1
+        new_number = new_id % c.TT
+        if new_number > board.max[c.RESES]: raise ex.ThreadNotWritable()
+        
+        res = m.Res(id = new_id,
+                    author_id = 0,
+                    updater_id = 0,
+                    author_auth = 0,
+                    remote_host = self.request.remote_addr,
+                    
+                    status = c.NORMAL,
+                    updated = now,
+                    since = now,
+                    
+                    number = new_number,
+                    dt_str = dt_str,
+                    hashed_id = hashed_id,
+                    content = content,
+                    
+                    handle = handle,
+                    char_id = char_id,
+                    emotion = emotion,
+                    trip = trip,
+                   )
+        @ndb.transactional()
+        def write_unique():
+            if m.Res.get_by_id(new_id):
+                raise ex.SameId()
+            else:
+                return res.put()
+        while True:
+            try:
+                if write_unique(): break
+            except ex.SameId:
+                new_id += 1
+                new_number = new_id % c.TT
+                if new_number > board.max[c.RESES]: raise ex.ThreadNotWritable()
+                res.key = ndb.Key('Res', new_id)
+                res.number = new_number
+            except Exception as err:
+                raise err
+        util.flush_page('/%d/' % thread_id)
+        if conf.LOCAL_SDK: time.sleep(0.5)
+        raise ex.Redirect('/%d/#%d' % (thread_id, new_number))
+
 class RelatedThreadHandler(webapp2.RequestHandler):
     @deco.default()
     @deco.board()
@@ -516,6 +589,7 @@ app = webapp2.WSGIApplication([('/', TopPageHandler),
                                    webapp2.Route('/related/<:\d+>/', RelatedThreadHandler),
                                    webapp2.Route('/_login', LoginHandler),
                                    webapp2.Route('/_write/<:\d+>', WriteHandler),
+                                   webapp2.Route('/_write_a/<:\d+>', WriteAnonymousHandler),
                                    webapp2.Route('/mypage/', MyPageHandler),
                                    webapp2.Route('/agreement/', AgreementHandler),
                                    webapp2.Route('/_agree', AgreeHandler),

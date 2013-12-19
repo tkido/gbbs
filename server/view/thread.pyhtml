@@ -61,6 +61,8 @@
 <?py #end ?>
 
 <?py if thread.writable: ?>
+    <?py if board.allow_anonymous or user: ?>
+        <?py handler = '_write'if user else '_write_a' ?>
 <h2>あなたのレス</h2>
 <div id="form">
   <div class="res-content">
@@ -74,7 +76,7 @@
     </div>
     <div class="message-cell">
       <div class="message">
-        <form method="post" action="/#{ ns }/_write/#{ thread_id }">
+        <form method="post" action="/#{ ns }/#{ handler }/#{ thread_id }">
           <select name="character" class="character">
             <option value="none">村人</option>
           </select>
@@ -88,6 +90,7 @@
     </div>
   </div>
 </div>
+    <?py #endif ?>
 <?py else: ?>
 <div class="template">
   <div class="res-content">

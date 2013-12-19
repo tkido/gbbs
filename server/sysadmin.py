@@ -76,10 +76,12 @@ class CreateBoardHandler(webapp2.RequestHandler):
                         template = '',
                         
                         hash_cycle = 3, #0:ever(no change) 1:year 2:month 3:day
-                        timezone = 9,
                         salt = str(uuid.uuid4()),
+                        timezone = 9,
+                        
                         allow_index = True,
                         allow_robots = True,
+                        allow_anonymous = True,
                         
                         max = [3, 3, 4096, 32, 8192, 80, 160],
                         ad = []
@@ -122,12 +124,13 @@ class InitializeHandler(webapp2.RequestHandler):
         myuser = m.MyUser(id = user.user_id(),
                           user = user,
                           myuser_id = 1,
-                          status = c.SYSTEM_ADMIN,
-                          
                           ban_count = 0,
+                          
+                          status = c.SYSTEM_ADMIN,
                           updated = now,
                           since = now,
                          )
+        
         myuser_counter = m.Counter(id = 'MyUser', count = 1)
         board_counter = m.Counter(id = 'Board', count = 0)
         

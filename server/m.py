@@ -51,6 +51,7 @@ class Board(ndb.Model):
     
     allow_index        = ndb.BooleanProperty ('i',  required=True, indexed=False)
     allow_robots       = ndb.BooleanProperty ('r',  required=True, indexed=False)
+    allow_anonymous    = ndb.BooleanProperty ('aa', required=True, indexed=False)
     
     max                = ndb.IntegerProperty ('m',                 indexed=False, repeated=True)
     ad                 = ndb.TextProperty    ('a',                 indexed=False, repeated=True)
@@ -111,12 +112,12 @@ class Board(ndb.Model):
     
 class MyUser(ndb.Model):
     #id = user.user_id()
-    user      = ndb.UserProperty    ('u',  required=True               )
+    user      = ndb.UserProperty    ('us',  required=True               )
     
     myuser_id = ndb.IntegerProperty ('i',  required=True               )
     ban_count = ndb.IntegerProperty ('b',  required=True, indexed=False)
-    
     status    = ndb.IntegerProperty ('s',  required=True               )
+    
     updated   = ndb.DateTimeProperty('u',  required=True, indexed=False)
     since     = ndb.DateTimeProperty('si', required=True, indexed=False)
     
