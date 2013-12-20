@@ -1,0 +1,85 @@
+<h1>${ page_title }</h1>
+<?py if template._changed: ?>
+『<strong>${ thread.title }</strong>』の次スレのテンプレート変更案があります。<br>
+<input type="radio" name="changed" value="both" id="both" checked /><label for="both">両方を見る</label><br>
+<input type="radio" name="changed" value="after" id="after" /><label for="after">After（変更後を見る）</label><br>
+<input type="radio" name="changed" value="before" id="before" /><label for="before">Before（変更前を見る）</label><br>
+
+<form method="post" action="/#{ ns }/_vote/#{ thread_id }/">
+<div class="template">
+  <div class="res-content">
+    <div class="message-cell">
+      <div class="message">
+        この変更案に
+        <select name="operation" class="operation">
+          <option value="">　</option>
+          <option value="agree">賛成する</option>
+          <option value="deny">反対する</option>
+        </select>
+        <input type="submit" value="送信する" />
+        賛成：<strong>#{ len(template.agree) }</strong> 反対：<strong>#{ len(template.deny) }</strong><br>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+<ul>
+  <li>反対が賛成より3以上大きくなると、その時点でこの変更案は却下されます。（同時に再提案が可能になります。）</li>
+  <li>現行スレ終了時に、賛成が反対より3以上大きければ、この案が採用されます。</li>
+</ul>
+
+<div id="template-before">
+  <h1 class="thread-title">${ template.keeped_title % (thread.number + 1) }（変更前）</h1>
+  <div class="template">
+    <div class="res-content">
+      <div class="message-cell">
+        <div class="message">
+          #{ decorate(text2html(template.keeped_content)) }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="template-after">
+  <h1 class="thread-title">${ template.title % (thread.number + 1) }（変更後）</h1>
+  <div class="template">
+    <div class="res-content">
+      <div class="message-cell">
+        <div class="message">
+          #{ decorate(text2html(template.content)) }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<?py else: ?>
+<h1 class="thread-title">${ template.title % (thread.number + 1) }</h1>
+<div class="template">
+  <div class="res-content">
+    <div class="message-cell">
+      <div class="message">
+        #{ decorate(text2html(template.content)) }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="template">
+  <div class="res-content">
+    <div class="message-cell">
+      <div class="message">
+        『<strong>${ thread.title }</strong>』の次スレのテンプレート変更予定はありません。
+        <div class="navigation">
+          <ul>
+            <li><a href="/#{ ns }/edit/#{ thread.key.id() }/">変更案を作成する</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<?py #endif ?>

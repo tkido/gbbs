@@ -180,26 +180,27 @@ class WriteHandler(webapp2.RequestHandler):
         new_number = new_id % c.TT
         if new_number > board.max[c.RESES]: raise ex.ThreadNotWritable()
         
-        res = m.Res(id = new_id,
-                    author_id = myuser.myuser_id,
-                    updater_id = myuser.myuser_id,
-                    author_auth = myuser.status,
-                    remote_host = self.request.remote_addr,
-                    
-                    status = c.NORMAL,
-                    updated = now,
-                    since = now,
-                    
-                    number = new_number,
-                    dt_str = dt_str,
-                    hashed_id = hashed_id,
-                    content = content,
-                    
-                    handle = handle,
-                    char_id = char_id,
-                    emotion = emotion,
-                    trip = trip,
-                   )
+        res = m.Res(
+            id = new_id,
+            author_id = myuser.myuser_id,
+            updater_id = myuser.myuser_id,
+            author_auth = myuser.status,
+            remote_host = self.request.remote_addr,
+
+            status = c.NORMAL,
+            updated = now,
+            since = now,
+
+            number = new_number,
+            dt_str = dt_str,
+            hashed_id = hashed_id,
+            content = content,
+
+            handle = handle,
+            char_id = char_id,
+            emotion = emotion,
+            trip = trip,
+            )
         @ndb.transactional()
         def write_unique():
             if m.Res.get_by_id(new_id):
@@ -253,26 +254,27 @@ class WriteAnonymousHandler(webapp2.RequestHandler):
         new_number = new_id % c.TT
         if new_number > board.max[c.RESES]: raise ex.ThreadNotWritable()
         
-        res = m.Res(id = new_id,
-                    author_id = 0,
-                    updater_id = 0,
-                    author_auth = 3,
-                    remote_host = self.request.remote_addr,
-                    
-                    status = c.NORMAL,
-                    updated = now,
-                    since = now,
-                    
-                    number = new_number,
-                    dt_str = dt_str,
-                    hashed_id = hashed_id,
-                    content = content,
-                    
-                    handle = handle,
-                    char_id = char_id,
-                    emotion = emotion,
-                    trip = trip,
-                   )
+        res = m.Res(
+            id = new_id,
+            author_id = 0,
+            updater_id = 0,
+            author_auth = 3,
+            remote_host = self.request.remote_addr,
+
+            status = c.NORMAL,
+            updated = now,
+            since = now,
+
+            number = new_number,
+            dt_str = dt_str,
+            hashed_id = hashed_id,
+            content = content,
+
+            handle = handle,
+            char_id = char_id,
+            emotion = emotion,
+            trip = trip,
+            )
         @ndb.transactional()
         def write_unique():
             if m.Res.get_by_id(new_id):
@@ -310,6 +312,27 @@ class RelatedThreadHandler(webapp2.RequestHandler):
         })
         return te.render(':related', context)
 
+class TemplateHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    @deco.myuser(c.WRITER)
+    def get(self, context, thread_id):
+        thread_id = int(thread_id)
+        thread = ndb.Key('Thread', thread_id).get()
+        if not thread or not thread.readable(): raise ex.ThreadNotFound()
+        if thread.status != c.NORMAL: raise ex.TemplateNotWritable()
+        template = ndb.Key('Template', thread.template_id).get()
+        if not template: raise ex.TemplateNotFound()
+        
+        template._changed = (template.title != template.keeped_title) or (template.content != template.keeped_content)
+        context.update({
+            'page_title': '次スレのテンプレート（予定）',
+            'thread': thread,
+            'thread_id': thread_id,
+            'template': template,
+        })
+        return te.render(':template', context)
+
 class EditTemplateHandler(webapp2.RequestHandler):
     @deco.default()
     @deco.board()
@@ -338,7 +361,8 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
     @deco.board()
     @deco.myuser(c.WRITER)
     def post(self, context, thread_id):
-        thread = m.Thead.get_by_id(int(thread_id))
+        thread_id = int(thread_id)
+        thread = m.Thread.get_by_id(thread_id)
         if not thread or not thread.readable(): raise ex.ThreadNotFound()
         if thread.status != c.NORMAL: raise ex.TemplateNotWritable()
         template_key = ndb.Key('Template', thread.template_id)
@@ -358,6 +382,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
             template.updated = board.now()
             template.updater_id = myuser.myuser_id
             template.put()
+        update_template()
         raise ex.Redirect('/edit/%d/' % thread_id)
 
 class LoginHandler(webapp2.RequestHandler):
@@ -375,15 +400,16 @@ class LoginHandler(webapp2.RequestHandler):
                 raise ex.RedirectContinue()
         myuser_id = m.Counter.incr('MyUser')
         now = board.now()
-        myuser = m.MyUser(id = user.user_id(),
-                          user = user,
-                          myuser_id = myuser_id,
-                          ban_count = 0,
-                          
-                          status = c.READER,
-                          updated = now,
-                          since = now,
-                         )
+        myuser = m.MyUser(
+            id = user.user_id(),
+            user = user,
+            myuser_id = myuser_id,
+            ban_count = 0,
+
+            status = c.READER,
+            updated = now,
+            since = now,
+            )
         myuser.put()
         raise ex.RedirectAgreement()
 
@@ -457,45 +483,50 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
         template_id = m.Counter.incr('Template')
         myuser = context['user']
         now = board.now()
-        template = m.Template(id = template_id,
-                              author_id = myuser.myuser_id,
-                              updater_id = myuser.myuser_id,
-                              
-                              status = c.NORMAL,
-                              updated = now,
-                              since = now,
-                              
-                              title = title,
-                              content = content,
-                              keeped_title = title,
-                              keeped_content = content,
-                             )
+        template = m.Template(
+            id = template_id,
+            author_id = myuser.myuser_id,
+            updater_id = myuser.myuser_id,
+
+            status = c.NORMAL,
+            updated = now,
+            since = now,
+
+            title = title,
+            content = content,
+            keeped_title = title,
+            keeped_content = content,
+
+            agree = [],
+            deny = [],
+            )
         template_key = template.put()
         
         thread_id = m.Counter.incr('Thread')
-        thread = m.Thread(id = thread_id,
-                          template_id = template_id,
-                          author_id = myuser.myuser_id,
-                          updater_id = myuser.myuser_id,
-                          
-                          status = c.NORMAL,
-                          updated = now,
-                          since = now,
-                          
-                          title = title % 1,
-                          dt_str = util.dt_to_str(now),
-                          hashed_id = board.hash(myuser.myuser_id),
-                          content = content,
-                          
-                          number = 1,
-                          res_count = 0,
-                          resed = now,
-                          
-                          prev_id = 0,
-                          prev_title = '',
-                          next_id = 0,
-                          next_title = '',
-                         )
+        thread = m.Thread(
+            id = thread_id,
+            template_id = template_id,
+            author_id = myuser.myuser_id,
+            updater_id = myuser.myuser_id,
+
+            status = c.NORMAL,
+            updated = now,
+            since = now,
+
+            title = title % 1,
+            dt_str = util.dt_to_str(now),
+            hashed_id = board.hash(myuser.myuser_id),
+            content = content,
+
+            number = 1,
+            res_count = 0,
+            resed = now,
+
+            prev_id = 0,
+            prev_title = '',
+            next_id = 0,
+            next_title = '',
+            )
         thread_key = thread.put()
         if conf.LOCAL_SDK: time.sleep(0.5)
         m.Thread.clean(board)
@@ -595,6 +626,7 @@ app = webapp2.WSGIApplication([('/', TopPageHandler),
                                    webapp2.Route('/mypage/', MyPageHandler),
                                    webapp2.Route('/agreement/', AgreementHandler),
                                    webapp2.Route('/_agree', AgreeHandler),
+                                   webapp2.Route('/template/<:\d+>/', TemplateHandler),
                                    webapp2.Route('/edit/<:\d+>/', EditTemplateHandler),
                                    webapp2.Route('/_edit/<:\d+>', UpdateTemplateHandler),
                                    webapp2.Route('/new/', NewThreadHandler),

@@ -140,6 +140,9 @@ class Template(ndb.Model):
     keeped_title    = ndb.StringProperty  ('kt', required=True, indexed=False)
     keeped_content  = ndb.TextProperty    ('kc', required=True, indexed=False)
     
+    agree           = ndb.IntegerProperty ('a',                 indexed=False, repeated=True)
+    deny            = ndb.IntegerProperty ('d',                 indexed=False, repeated=True)
+
     def readable(self):
         return self.status != c.DELETED
     def writable(self):
@@ -220,29 +223,30 @@ class Thread(ndb.Model):
             if next:
                 return next
             else:
-                next = Thread(id = thread.next_id,
-                              template_id = thread.template_id,
-                              author_id = myuser_id,
-                              updater_id = myuser_id,
+                next = Thread(
+                    id = thread.next_id,
+                    template_id = thread.template_id,
+                    author_id = myuser_id,
+                    updater_id = myuser_id,
 
-                              status = c.NORMAL,
-                              updated = now,
-                              since = now,
+                    status = c.NORMAL,
+                    updated = now,
+                    since = now,
 
-                              title = new_title,
-                              dt_str = dt_str,
-                              hashed_id = hashed_id,
-                              content = template.content,
+                    title = new_title,
+                    dt_str = dt_str,
+                    hashed_id = hashed_id,
+                    content = template.content,
 
-                              number = next_number,
-                              res_count = 0,
-                              resed = now,
+                    number = next_number,
+                    res_count = 0,
+                    resed = now,
 
-                              prev_id = thread.key.id(),
-                              prev_title = thread.title,
-                              next_id = 0,
-                              next_title = '',
-                             )
+                    prev_id = thread.key.id(),
+                    prev_title = thread.title,
+                    next_id = 0,
+                    next_title = '',
+                    )
                 if next.put():
                     return next
         next = get_or_insert()
