@@ -20,7 +20,7 @@
             <li><a href="/#{ ns }/#{ thread.next_id }/" title="${ thread.next_title }">次スレ</a></li>
 <?py #end ?>
             <li><a href="/#{ ns }/related/#{ thread_id }/">関連スレ一覧</a></li>
-<?py if thread.writable: ?>
+<?py if thread._writable: ?>
             <li><a href="/#{ ns }/edit/#{ thread_id }/">テンプレ編集</a></li>
 <?py #end ?>
             <li><a href="/#{ ns }/admin/#{ thread_id }/">管理</a></li>
@@ -62,7 +62,7 @@
 
 <?py if thread._writable: ?>
     <?py if board.allow_anonymous or user: ?>
-        <?py handler = '_write'if user else '_write_a' ?>
+        <?py anonymous = '' if user else '_a' ?>
 <h2>あなたのレス</h2>
 <div id="form">
   <div class="res-content">
@@ -76,7 +76,7 @@
     </div>
     <div class="message-cell">
       <div class="message">
-        <form method="post" action="/#{ ns }/#{ handler }/#{ thread_id }">
+        <form method="post" action="/#{ ns }/_write#{ anonymous }/#{ thread_id }">
           <select name="character" class="character">
             <option value="none">村人</option>
           </select>
@@ -99,12 +99,12 @@
         このスレは終了しました。
         <div class="navigation">
           <ul>
-<?py if thread.prev_title: ?>
+    <?py if thread.prev_title: ?>
             <li><a href="/#{ ns }/#{ thread.prev_id }/" title="${ thread.prev_title }">前スレ</a></li>
-<?py #end ?>
-<?py if thread.next_title: ?>
+    <?py #endif ?>
+    <?py if thread.next_title: ?>
             <li><a href="/#{ ns }/#{ thread.next_id }/" title="${ thread.next_title }">次スレ</a></li>
-<?py #end ?>
+    <?py #endif ?>
             <li><a href="/#{ ns }/related/#{ thread_id }/">関連スレ一覧</a></li>
             <li><a href="/#{ ns }/admin/#{ thread_id }/">管理</a></li>
           </ul>
@@ -113,4 +113,4 @@
     </div>
   </div>
 </div>
-<?py #end ?>
+<?py #endif ?>
