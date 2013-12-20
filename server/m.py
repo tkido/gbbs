@@ -137,13 +137,20 @@ class Template(ndb.Model):
     
     title           = ndb.StringProperty  ('t',  required=True, indexed=False)
     content         = ndb.TextProperty    ('c',  required=True, indexed=False)
-    keeped_title    = ndb.StringProperty  ('kt', required=True, indexed=False)
-    keeped_content  = ndb.TextProperty    ('kc', required=True, indexed=False)
+    title_keeped    = ndb.StringProperty  ('tk', required=True, indexed=False)
+    content_keeped  = ndb.TextProperty    ('ck', required=True, indexed=False)
     
+    agree           = ndb.IntegerProperty ('a',                 indexed=False, repeated=True)
+    deny            = ndb.IntegerProperty ('d',                 indexed=False, repeated=True)
+
     def readable(self):
         return self.status != c.DELETED
     def writable(self):
         return self.status == c.NORMAL
+    def changed(self):
+        return (self.title != self.title_keeped) or (self.content != self.content_keeped)
+    
+
     
 class Thread(ndb.Model):
     #id = Counter("Thread").count
@@ -210,6 +217,12 @@ class Thread(ndb.Model):
         hashed_id = board.hash(myuser_id)
         
         template = Template.get_by_id(thread.template_id)
+        if len(template.agree) - len(template.deny) >= conf.VOTE_MARGIN:
+            template.title_keeped = template.title
+            template.content_keeped = template.content
+        else:
+            template.title = template.title_keeped
+            template.content = template.content_keeped
         next_number = thread.number + 1
         new_title = template.title % next_number
         
@@ -220,34 +233,40 @@ class Thread(ndb.Model):
             if next:
                 return next
             else:
-                next = Thread(id = thread.next_id,
-                              template_id = thread.template_id,
-                              author_id = myuser_id,
-                              updater_id = myuser_id,
+                next = Thread(
+                    id = thread.next_id,
+                    template_id = thread.template_id,
+                    author_id = myuser_id,
+                    updater_id = myuser_id,
 
-                              status = c.NORMAL,
-                              updated = now,
-                              since = now,
+                    status = c.NORMAL,
+                    updated = now,
+                    since = now,
 
-                              title = new_title,
-                              dt_str = dt_str,
-                              hashed_id = hashed_id,
-                              content = template.content,
+                    title = new_title,
+                    dt_str = dt_str,
+                    hashed_id = hashed_id,
+                    content = template.content,
 
-                              number = next_number,
-                              res_count = 0,
-                              resed = now,
+                    number = next_number,
+                    res_count = 0,
+                    resed = now,
 
-                              prev_id = thread.key.id(),
-                              prev_title = thread.title,
-                              next_id = 0,
-                              next_title = '',
-                             )
+                    prev_id = thread.key.id(),
+                    prev_title = thread.title,
+                    next_id = 0,
+                    next_title = '',
+                    )
                 if next.put():
                     return next
         next = get_or_insert()
         if next:
             util.flush_page('/related/%d/' % thread.template_id)
+            
+            template.agree = []
+            template.deny = []
+            template.put()
+            
             @ndb.transactional()
             def set_next_title():
                 thread = self.key.get()

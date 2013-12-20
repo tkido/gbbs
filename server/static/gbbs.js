@@ -173,7 +173,11 @@ $(document).ready(function(){
         emotion_changed();
         
         if ($.cookie('sage') == 'true'){
-            $('#form input[name=sage]').attr('checked', 'checked');
+            $('#form input[name=sage]').attr('checked', true);
+        }
+        if ($.cookie('advanced') == 'true'){
+            $('#advanced').attr('checked', true);
+            $('#advanced-settings').show();
         }
     }
     //初期化終了
@@ -187,11 +191,30 @@ $(document).ready(function(){
     $('#form input[name=sage]').click(function(){
         $.cookie('sage', $(this).attr('checked'), cookie_options);
     });
-
-
-
-
-
+    
+    //高度な設定の表示切り替え
+    $('#advanced').click(function(){
+        $.cookie('advanced', this.checked, cookie_options);
+        if(this.checked){
+            $('#advanced-settings').show();
+        }else{
+            $('#advanced-settings').hide();
+        }
+    });
+    
+    //ラジオボタンによるテンプレ変更案表示の切り替え
+    $('input[name="changed"]:radio').change(function(){
+        if($(this).val() == 'both'){
+            $('#template-before').show();
+            $('#template-fater').show();
+        }else if($(this).val() == 'after'){
+            $('#template-before').hide();
+            $('#template-after').show();
+        }else if($(this).val() == 'before'){
+            $('#template-before').show();
+            $('#template-after').hide();
+        }
+    });
 
 
 

@@ -21,7 +21,7 @@
 <?py #end ?>
             <li><a href="/#{ ns }/related/#{ thread_id }/">関連スレ一覧</a></li>
 <?py if thread._writable: ?>
-            <li><a href="/#{ ns }/edit/#{ thread_id }/">テンプレ編集</a></li>
+            <li><a href="/#{ ns }/template/#{ thread_id }/">テンプレ</a></li>
 <?py #end ?>
             <li><a href="/#{ ns }/admin/#{ thread_id }/">管理</a></li>
           </ul>
@@ -78,13 +78,19 @@
       <div class="message">
         <form method="post" action="/#{ ns }/_write#{ anonymous }/#{ thread_id }">
           <select name="character" class="character">
-            <option value="none">村人</option>
+            <option value="none">名無し</option>
           </select>
           <select name="emotion" class="emotion"></select>
-          <input type="checkbox" name="sage" value="sage" class="sage">sage</input>
-          <input type="submit" value="送信する" /><br />
+          <input type="checkbox" name="advanced" value="advanced" id="advanced">高度な設定</input>
+          <input type="submit" value="送信する" /><br>
           <textarea name="content" rows="4" cols="40"></textarea>
-          <input type="hidden" name="handle" value="名無しの村人" />
+          <input type="hidden" name="char-handle" value="名無しさん" /><br>
+          <div id="advanced-settings">
+            <input type="checkbox" name="sage" value="sage" id="sage">sage</input><br>
+            <input type="checkbox" name="auth" value="auth" id="auth">権限表示</input><br>
+            ハンドル：<input name="handle" type="text" /><br>
+            トリップ：<input name="trip" type="text" /><br>
+          </div>
         </form>
       </div>
     </div>

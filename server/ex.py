@@ -85,7 +85,7 @@ class AuthorityRequired(AppError):
 class TemplateNotWritable(AppError):
   def __init__(self):
     self.title = 'テンプレートの編集はできません'
-    self.message = 'スレがすでに倉庫に送りになっているか、書き込み禁止されています。'
+    self.message = 'スレがすでに倉庫に送りになっているか書き込み禁止されている。すでに他のテンプレ変更案が提出されている。'
 
 class ThreadNotWritable(AppError):
   def __init__(self):
@@ -107,6 +107,11 @@ class InvalidTemplate(AppError):
   def __init__(self, board):
     self.title = '内容が不正です'
     self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max[c.ROWS_TEMPLATE], board.max[c.CHARS_TEMPLATE])
+
+class InvalidVote(AppError):
+  def __init__(self):
+    self.title = '二重投票はできません'
+    self.message = '逆の意見で投票し直すことは可能です。'
 
 class InvalidOperation(AppError):
   def __init__(self):

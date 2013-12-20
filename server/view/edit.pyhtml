@@ -1,30 +1,30 @@
 <h1>${ page_title }</h1>
-<ul>
-    <li>自動次スレで使われるタイトルとテンプレートを編集できます。</li>
-    <li>現行スレッドのタイトル・テンプレートは変化しません。</li>
-    <li>前スレ・次スレへのリンクは自動的に挿入されます。ここで記入する必要はありません。</li>
-    <li>実際のタイトルでは『%d』が何スレ目かを表す数字に置きかわります。</li>
-    <li>どこにも『%d』が入っていない場合、末尾に『 その%d』とつきます。</li>
-</ul>
-
-<h2>次スレのテンプレート</h2>
+<p>
+『<strong>${ thread.title }</strong>』の次スレのテンプレート変更案を作成します。
+</p>
 <p>
 <form method="post" action="/#{ ns }/_edit/#{ thread.key.id() }">
-    <strong>次スレッドのタイトル：</strong><br />
-    <input name="title" type="text" value="${ template.title }" /><br />
-    <strong>次スレッドのテンプレート：</strong><br />
-    <textarea name="content" rows="16" cols="80">${ template.content }</textarea><br />
-    <input type="submit" value="送信する" />
+  <strong>タイトル：</strong>
+  <input name="title" type="text" value="${ template.title }" /><br />
+  <textarea name="content" rows="16" cols="80">${ template.content }</textarea><br />
+  <input type="submit" value="送信する" />
 </form>
 </p>
-
-<h2>参考：現行スレのテンプレート</h2>
-<h1 class="thread-title">${ template.keeped_title }</h1>
+<p>
+<ul>
+  <li>現行スレッドのタイトル・テンプレートは変化しません。</li>
+  <li>前スレ・次スレへのリンクは自動的に挿入されます。ここで記入する必要はありません。</li>
+  <li>実際のタイトルでは『%d』が何スレ目かを表す数字に置きかわります。</li>
+  <li>どこにも『%d』が入っていない場合、末尾に『 その%d』とつきます。</li>
+</ul>
+</p>
+<h2>参考：現在のテンプレート</h2>
+<h1 class="thread-title">${ template.title_keeped }</h1>
 <div class="response">
   <div class="res-content">
     <div class="message-cell">
       <div class="message">
-        #{ decorate(text2html(template.keeped_content)) }
+        #{ decorate(text2html(template.content_keeped)) }
       </div>
     </div>
   </div>
