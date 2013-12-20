@@ -569,10 +569,12 @@ class UpdateResesHandler(webapp2.RequestHandler):
         list = self.request.POST.getall('check')
         list = [ndb.Key('Res', thread_id * c.TT + int(n)) for n in list]
         list = ndb.get_multi(list)
-        for res in list:
+        def update(res):
             res.status = status_to
             res.updater_id = myuser.myuser_id
             res.updated = now
+            return res
+        list = [update(res) for res in list if res.status != status_to]
         ndb.put_multi(list)
         
         util.flush_page('/%d/' % thread_id)
