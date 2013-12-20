@@ -324,12 +324,12 @@ class TemplateHandler(webapp2.RequestHandler):
         template = ndb.Key('Template', thread.template_id).get()
         if not template: raise ex.TemplateNotFound()
         
-        template._changed = (template.title != template.keeped_title) or (template.content != template.keeped_content)
         context.update({
             'page_title': '次スレのテンプレート（予定）',
             'thread': thread,
             'thread_id': thread_id,
             'template': template,
+            'VOTE_MARGIN': conf.VOTE_MARGIN,
         })
         return te.render(':template', context)
 
@@ -369,6 +369,9 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
         template = template_key.get()
         if not template: raise ex.TemplateNotFound()
         
+        if template.changed():
+            raise ex.TemplateNotWritable()
+        
         board = context['board']
         title = board.validate_title(self.request.get('title'))
         content = board.validate_template(self.request.get('content'))
@@ -383,7 +386,54 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
             template.updater_id = myuser.myuser_id
             template.put()
         update_template()
-        raise ex.Redirect('/edit/%d/' % thread_id)
+        raise ex.Redirect('/template/%d/' % thread_id)
+
+class VoteHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    def get(self, context, thread_id):
+        raise ex.PostMethodRequired('スレッドに戻る', '/%s/' % thread_id)
+    
+    @deco.default()
+    @deco.board()
+    @deco.myuser(c.WRITER)
+    def post(self, context, thread_id):
+        thread_id = int(thread_id)
+        thread = m.Thread.get_by_id(thread_id)
+        if not thread or not thread.readable(): raise ex.ThreadNotFound()
+        if thread.status != c.NORMAL: raise ex.TemplateNotWritable()
+        template_key = ndb.Key('Template', thread.template_id)
+        template = template_key.get()
+        if not template: raise ex.TemplateNotFound()
+        
+        id = context['user'].myuser_id
+        operation = self.request.get('operation')
+
+        @ndb.transactional()
+        def update_template():
+            template = template_key.get()
+            if operation == 'agree':
+                if id in template.agree: raise ex.InvalidVote()
+                template.agree.append(id)
+                if id in template.deny:
+                    template.deny.remove(id)
+            elif operation == 'deny':
+                if id in template.deny: raise ex.InvalidVote()
+                template.deny.append(id)
+                if id in template.agree:
+                    template.agree.remove(id)
+                if len(template.deny) - len(template.agree) >= conf.VOTE_MARGIN:
+                    template.title = template.title_keeped
+                    template.content = template.content_keeped
+                    template.agree = []
+                    template.deny = []
+            else:
+                raise ex.InvalidOperation()
+            template.put()
+        update_template()
+        
+        raise ex.Redirect('/template/%d/' % thread_id)
+
 
 class LoginHandler(webapp2.RequestHandler):
     @deco.default()
@@ -494,8 +544,8 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
 
             title = title,
             content = content,
-            keeped_title = title,
-            keeped_content = content,
+            title_keeped = title,
+            content_keeped = content,
 
             agree = [],
             deny = [],
@@ -629,6 +679,7 @@ app = webapp2.WSGIApplication([('/', TopPageHandler),
                                    webapp2.Route('/template/<:\d+>/', TemplateHandler),
                                    webapp2.Route('/edit/<:\d+>/', EditTemplateHandler),
                                    webapp2.Route('/_edit/<:\d+>', UpdateTemplateHandler),
+                                   webapp2.Route('/_vote/<:\d+>', VoteHandler),
                                    webapp2.Route('/new/', NewThreadHandler),
                                    webapp2.Route('/_new', CreateNewThreadHandler),
                                    

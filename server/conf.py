@@ -11,6 +11,9 @@ CACHED_MYUSER = 600
 # for ndb
 MAX_FETCH = 1000
 
+# for vote
+VOTE_MARGIN = 3
+
 
 import os
 LOCAL_SDK = os.environ.get("SERVER_SOFTWARE").startswith("Development")
