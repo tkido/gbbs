@@ -345,7 +345,7 @@ class EditTemplateHandler(webapp2.RequestHandler):
         template = ndb.Key('Template', thread.template_id).get()
         if not template: raise ex.TemplateNotFound()
         context.update({
-            'page_title': 'テンプレート編集',
+            'page_title': '次スレのテンプレート変更案を作成する',
             'thread': thread,
             'template': template,
         })
@@ -384,6 +384,7 @@ class UpdateTemplateHandler(webapp2.RequestHandler):
             template.content = content
             template.updated = board.now()
             template.updater_id = myuser.myuser_id
+            template.agree.append(myuser.myuser_id)
             template.put()
         update_template()
         raise ex.Redirect('/template/%d/' % thread_id)
