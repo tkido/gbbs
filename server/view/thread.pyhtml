@@ -78,13 +78,19 @@
       <div class="message">
         <form method="post" action="/#{ ns }/_write#{ anonymous }/#{ thread_id }">
           <select name="character" class="character">
-            <option value="none">村人</option>
+            <option value="none">名無し</option>
           </select>
           <select name="emotion" class="emotion"></select>
-          <input type="checkbox" name="sage" value="sage" class="sage">sage</input>
-          <input type="submit" value="送信する" /><br />
+          <input type="checkbox" name="advanced" value="advanced" id="advanced">高度な設定</input>
+          <input type="submit" value="送信する" /><br>
           <textarea name="content" rows="4" cols="40"></textarea>
-          <input type="hidden" name="handle" value="名無しの村人" />
+          <input type="hidden" name="handle" value="名無しさん" /><br>
+          <div id="advanced-settings">
+            <input type="checkbox" name="sage" value="sage" class="sage">sage</input><br>
+            <input type="checkbox" name="auth" value="auth" class="auth">権限表示</input><br>
+            ハンドル：<input name="fixedhandle" type="text" /><br>
+            トリップ：<input name="trip" type="text" /><br>
+          </div>
         </form>
       </div>
     </div>

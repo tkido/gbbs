@@ -175,6 +175,9 @@ $(document).ready(function(){
         if ($.cookie('sage') == 'true'){
             $('#form input[name=sage]').attr('checked', 'checked');
         }
+        if ($.cookie('advanced') == 'true'){
+            $('#form input[name=advanced]').attr('checked', 'checked');
+        }
     }
     //初期化終了
     $('#form').toggle();
@@ -186,6 +189,15 @@ $(document).ready(function(){
     
     $('#form input[name=sage]').click(function(){
         $.cookie('sage', $(this).attr('checked'), cookie_options);
+    });
+
+    $('#advanced').click(function(){
+        $.cookie('advanced', $(this).attr('checked'), cookie_options);
+        if(this.checked){
+            $('#advanced-settings').show();
+        }else{
+            $('#advanced-settings').hide();
+        }
     });
 
 
