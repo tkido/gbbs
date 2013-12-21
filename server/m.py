@@ -217,7 +217,7 @@ class Thread(ndb.Model):
         hashed_id = board.hash(myuser_id)
         
         template = Template.get_by_id(thread.template_id)
-        if len(template.agree) - len(template.deny) >= conf.VOTE_MARGIN:
+        if len(template.agree) - len(template.deny) >= conf.MARGIN_VOTE:
             template.title_keeped = template.title
             template.content_keeped = template.content
         else:
@@ -288,7 +288,7 @@ class Thread(ndb.Model):
     @classmethod
     def clean(cls, board):
         query = cls.query_normal()
-        keys = query.fetch(board.max[c.THREADS]+3, keys_only=True)
+        keys = query.fetch(board.max[c.THREADS] + conf.MARGIN_CLEAN, keys_only=True)
         needs = len(keys) - board.max[c.THREADS]
         @ndb.transactional()
         def store(key):
