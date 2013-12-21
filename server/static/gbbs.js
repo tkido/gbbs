@@ -137,8 +137,7 @@ $(document).ready(function(){
         var icon = $('#char-icon');
         icon.attr('class', 'char-icon');
         icon.addClass(character_to);
-        var fullname = $('#form input[type=hidden][name=handle]');
-        fullname.val($.characters[character_to]['fullname']);
+        $('#char-name').val($.characters[character_to]['fullname']);
         $.cookie('character', character_to, cookie_options);
     }
     //emotion変更時、emotion更新。

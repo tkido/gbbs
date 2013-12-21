@@ -171,7 +171,7 @@ class WriteHandler(webapp2.RequestHandler):
         myuser = context['user']
         hashed_id = board.hash(myuser.myuser_id)
         
-        handle = self.request.get('handle') or '名無しさん'
+        handle = self.request.get('handle') or self.request.get('char-name') or '名無しさん'
         char_id = self.request.get('character') or 'none'
         emotion = self.request.get('emotion') or 'normal'
         trip = '' #placeholder
