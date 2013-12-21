@@ -12,44 +12,49 @@ import webapp2
 
 import conf
 import c
+import deco
 import ex
 import m
 import te
 import util
 
 class IndexHandler(webapp2.RequestHandler):
-    def get(self):
+    @deco.default()
+    def get(self, context):
         namespace_manager.set_namespace(c.BOARD_NAMESPACE)
         user = users.get_current_user()
         myuser = m.MyUser.get_by_id(user.user_id())
         myuser_counter = m.Counter.get_by_id('MyUser')
         board_counter = m.Counter.get_by_id('Board')
         
-        context = {
+        context.update({
             'page_title' : 'システム管理者専用ページ',
             'ns' : c.BOARD_NAMESPACE,
             'user' : myuser,
             
             'total_user': myuser_counter.count,
             'total_board': board_counter.count,
-        }
+        })
         html = te.render(':sysadmin/index', context, layout=':sysadmin/base')
         self.response.out.write(html)
 
 class EnvironmentHandler(webapp2.RequestHandler):
-    def get(self):
+    @deco.default()
+    def get(self, context):
         for name in os.environ.keys():
             self.response.out.write("%s = %s<br>\n" % (name, os.environ[name]))
 
 class MemcacheHandler(webapp2.RequestHandler):
-    def get(self, ns):
-        namespace_manager.set_namespace(ns)
-        dic = memcache.get_stats()
+    @deco.default()
+    def get(self, context):
+        #namespace_manager.set_namespace(ns)
+        dic = memcache.get_stats(namespace = context['ns'])
         for name in dic.keys():
             self.response.out.write("%s = %s<br>\n" % (name, dic[name]))
 
 class CreateBoardHandler(webapp2.RequestHandler):
-    def post(self):
+    @deco.default()
+    def post(self, context):
         namespace_manager.set_namespace(c.BOARD_NAMESPACE)
         user = users.get_current_user()
         myuser = m.MyUser.get_by_id(user.user_id())
@@ -95,20 +100,22 @@ class CreateBoardHandler(webapp2.RequestHandler):
         self.redirect('/s/')
 
 class InitHandler(webapp2.RequestHandler):
-    def get(self):
+    @deco.default()
+    def get(self, context):
         namespace_manager.set_namespace(c.BOARD_NAMESPACE)
         user = users.get_current_user()
         myuser = m.MyUser.get_by_id(user.user_id())
-        context = {
+        context.update({
             'page_title' : '管理者ユーザとカウンタの作成',
             'ns' : c.BOARD_NAMESPACE,
             'user' : myuser,
-        }
+        })
         html = te.render(':sysadmin/init', context, layout=':sysadmin/base')
         self.response.out.write(html)
         
 class InitializeHandler(webapp2.RequestHandler):
-    def post(self):
+    @deco.default()
+    def post(self, context):
         namespace_manager.set_namespace(c.BOARD_NAMESPACE)
         user = users.get_current_user()
         myuser = m.MyUser.get_by_id(user.user_id())

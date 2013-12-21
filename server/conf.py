@@ -19,6 +19,7 @@ import os
 LOCAL_SDK = os.environ.get("SERVER_SOFTWARE").startswith("Development")
 HTTP_HOST = os.environ.get("HTTP_HOST")
 DEBUG = LOCAL_SDK or (HTTP_HOST == "www.tohobbs.net")
+PRO = (HTTP_HOST == "www.gbbs.jp")
 
 if not LOCAL_SDK:
     from google.appengine.ext import ereporter
