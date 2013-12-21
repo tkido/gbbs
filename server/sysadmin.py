@@ -67,30 +67,31 @@ class CreateBoardHandler(webapp2.RequestHandler):
         m.Counter.incr('Board')
         
         now = util.now()
-        board = m.Board(id = ns,
-                        author_id = myuser.myuser_id,
-                        updater_id = myuser.myuser_id,
-                        
-                        status = c.NORMAL,
-                        updated = now,
-                        since = now,
-                        
-                        title = '%s BBS' % ns,
-                        description = '',
-                        keywords = '',
-                        template = '',
-                        
-                        hash_cycle = 3, #0:ever(no change) 1:year 2:month 3:day
-                        salt = str(uuid.uuid4()),
-                        timezone = 9,
-                        
-                        allow_index = True,
-                        allow_robots = True,
-                        allow_anonymous = True,
-                        
-                        max = [3, 3, 4096, 32, 8192, 80, 160],
-                        ad = []
-                       )
+        board = m.Board(
+            id = ns,
+            author_id = myuser.myuser_id,
+            updater_id = myuser.myuser_id,
+
+            status = c.NORMAL,
+            updated = now,
+            since = now,
+
+            title = '%s BBS' % ns,
+            description = '',
+            keywords = '',
+            template = '',
+
+            hash_cycle = 3, #0:ever(no change) 1:year 2:month 3:day
+            salt = str(uuid.uuid4()),
+            timezone = 9,
+
+            allow_index = True,
+            allow_robots = True,
+            allow_anonymous = True,
+
+            max = [3, 3, 4096, 32, 8192, 80, 160],
+            ad = []
+            )
         namespace_manager.set_namespace(ns)
         myuser_counter = m.Counter(id = 'MyUser', count = 0)
         template_counter = m.Counter(id = 'Template', count = 0)
@@ -128,28 +129,29 @@ class InitializeHandler(webapp2.RequestHandler):
         if board_counter:
             self.redirect('/s/'); return;
         now = util.now()
-        myuser = m.MyUser(id = user.user_id(),
-                          user = user,
-                          myuser_id = 1,
-                          ban_count = 0,
-                          
-                          status = c.SYSTEM_ADMIN,
-                          updated = now,
-                          since = now,
-                         )
-        
+        myuser = m.MyUser(
+            id = user.user_id(),
+            user = user,
+            myuser_id = 1,
+            ban_count = 0,
+            
+            status = c.SYSTEM_ADMIN,
+            updated = now,
+            since = now,
+            )
         myuser_counter = m.Counter(id = 'MyUser', count = 1)
         board_counter = m.Counter(id = 'Board', count = 0)
         
         ndb.put_multi([myuser, myuser_counter, board_counter])
         self.redirect('/s/')
 
-app = webapp2.WSGIApplication([('/s/', IndexHandler),
-                               ('/s/env', EnvironmentHandler),
-                               (r'/s/memcache/([0-9a-z_-]{2,16})', MemcacheHandler),
-                               (r'/s/_create/', CreateBoardHandler),
-                               ('/s/init/', InitHandler),
-                               ('/s/_init/', InitializeHandler),
-                              ],
-                              debug=conf.DEBUG
-                             )
+app = webapp2.WSGIApplication([
+    ('/s/', IndexHandler),
+    ('/s/env', EnvironmentHandler),
+    (r'/s/memcache/([0-9a-z_-]{2,16})', MemcacheHandler),
+    (r'/s/_create/', CreateBoardHandler),
+    ('/s/init/', InitHandler),
+    ('/s/_init/', InitializeHandler),
+    ],
+    debug=conf.DEBUG
+)
