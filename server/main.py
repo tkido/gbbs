@@ -329,7 +329,7 @@ class TemplateHandler(webapp2.RequestHandler):
             'thread': thread,
             'thread_id': thread_id,
             'template': template,
-            'VOTE_MARGIN': conf.VOTE_MARGIN,
+            'MARGIN_VOTE': conf.MARGIN_VOTE,
         })
         return te.render(':template', context)
 
@@ -423,7 +423,7 @@ class VoteHandler(webapp2.RequestHandler):
                 template.deny.append(id)
                 if id in template.agree:
                     template.agree.remove(id)
-                if len(template.deny) - len(template.agree) >= conf.VOTE_MARGIN:
+                if len(template.deny) - len(template.agree) >= conf.MARGIN_VOTE:
                     template.title = template.title_keeped
                     template.content = template.content_keeped
                     template.agree = []
