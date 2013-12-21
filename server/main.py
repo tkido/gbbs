@@ -329,7 +329,7 @@ class TemplateHandler(webapp2.RequestHandler):
             'thread': thread,
             'thread_id': thread_id,
             'template': template,
-            'MARGIN_VOTE': conf.MARGIN_VOTE,
+            'VOTE_MARGIN': conf.VOTE_MARGIN,
         })
         return te.render(':template', context)
 
@@ -423,7 +423,7 @@ class VoteHandler(webapp2.RequestHandler):
                 template.deny.append(id)
                 if id in template.agree:
                     template.agree.remove(id)
-                if len(template.deny) - len(template.agree) >= conf.MARGIN_VOTE:
+                if len(template.deny) - len(template.agree) >= conf.VOTE_MARGIN:
                     template.title = template.title_keeped
                     template.content = template.content_keeped
                     template.agree = []
@@ -664,34 +664,35 @@ class UpdateResesHandler(webapp2.RequestHandler):
         raise ex.Redirect('/admin/%d/' % thread_id)
 
 
-app = webapp2.WSGIApplication([('/', TopPageHandler),
-                               routes.PathPrefixRoute('/<:[0-9a-z_-]{2,16}>', [
-                                   webapp2.Route('/', IndexHandler),
-                                   webapp2.Route('/<:\d+>/<:\d*><:-?><:\d*>', ThreadHandler),
-                                   webapp2.Route('/link', LinkHandler),
-                                   webapp2.Route('/stored/<:(\d{4})?><:/?><:(\d{1,2})?><:/?>', StoredHandler),
-                                   webapp2.Route('/related/<:\d+>/', RelatedThreadHandler),
-                                   webapp2.Route('/_login', LoginHandler),
-                                   webapp2.Route('/_write/<:\d+>', WriteHandler),
-                                   webapp2.Route('/_write_a/<:\d+>', WriteAnonymousHandler),
-                                   webapp2.Route('/mypage/', MyPageHandler),
-                                   webapp2.Route('/agreement/', AgreementHandler),
-                                   webapp2.Route('/_agree', AgreeHandler),
-                                   webapp2.Route('/template/<:\d+>/', TemplateHandler),
-                                   webapp2.Route('/edit/<:\d+>/', EditTemplateHandler),
-                                   webapp2.Route('/_edit/<:\d+>', UpdateTemplateHandler),
-                                   webapp2.Route('/_vote/<:\d+>', VoteHandler),
-                                   webapp2.Route('/new/', NewThreadHandler),
-                                   webapp2.Route('/_new', CreateNewThreadHandler),
-                                   
-                                   webapp2.Route('/admin/<:\d+>/', EditThreadHandler),
-                                   webapp2.Route('/admin/_edit/thread/<:\d+>/', UpdateThreadHandler),
-                                   webapp2.Route('/admin/_edit/<:\d+>/', UpdateResesHandler),
-                               ]),
-                               routes.PathPrefixRoute('/a/<:[0-9a-z_-]{2,16}>', [
-                                   webapp2.Route('/<:\d+>/', EditThreadHandler),
-                                   webapp2.Route('/_edit/thread/<:\d+>/', UpdateThreadHandler),
-                               ]),
-                              ],
-                              debug=conf.DEBUG
-                             )
+app = webapp2.WSGIApplication([
+    ('/', TopPageHandler),
+    routes.PathPrefixRoute('/<:[0-9a-z_-]{2,16}>', [
+        webapp2.Route('/', IndexHandler),
+        webapp2.Route('/<:\d+>/<:\d*><:-?><:\d*>', ThreadHandler),
+        webapp2.Route('/link', LinkHandler),
+        webapp2.Route('/stored/<:(\d{4})?><:/?><:(\d{1,2})?><:/?>', StoredHandler),
+        webapp2.Route('/related/<:\d+>/', RelatedThreadHandler),
+        webapp2.Route('/_login', LoginHandler),
+        webapp2.Route('/_write/<:\d+>', WriteHandler),
+        webapp2.Route('/_write_a/<:\d+>', WriteAnonymousHandler),
+        webapp2.Route('/mypage/', MyPageHandler),
+        webapp2.Route('/agreement/', AgreementHandler),
+        webapp2.Route('/_agree', AgreeHandler),
+        webapp2.Route('/template/<:\d+>/', TemplateHandler),
+        webapp2.Route('/edit/<:\d+>/', EditTemplateHandler),
+        webapp2.Route('/_edit/<:\d+>', UpdateTemplateHandler),
+        webapp2.Route('/_vote/<:\d+>', VoteHandler),
+        webapp2.Route('/new/', NewThreadHandler),
+        webapp2.Route('/_new', CreateNewThreadHandler),
+
+        webapp2.Route('/admin/<:\d+>/', EditThreadHandler),
+        webapp2.Route('/admin/_edit/thread/<:\d+>/', UpdateThreadHandler),
+        webapp2.Route('/admin/_edit/<:\d+>/', UpdateResesHandler),
+    ]),
+    routes.PathPrefixRoute('/a/<:[0-9a-z_-]{2,16}>', [
+        webapp2.Route('/<:\d+>/', EditThreadHandler),
+        webapp2.Route('/_edit/thread/<:\d+>/', UpdateThreadHandler),
+    ]),
+    ],
+    debug=conf.DEBUG
+    )
