@@ -3,9 +3,9 @@
 
 import datetime
 import logging
+from operator import attrgetter
 import time
 import webapp2
-from operator import attrgetter
 from webapp2_extras import routes
 
 from google.appengine.api import memcache

@@ -5,6 +5,7 @@ import base64
 import datetime
 import hashlib
 import logging
+from operator import attrgetter
 import re
 
 from google.appengine.api import memcache
@@ -287,19 +288,15 @@ class Thread(ndb.Model):
     @classmethod
     def query_related(cls, template_id):
         return cls.query(cls.template_id == template_id)
+    
     @classmethod
     def clean(cls, board):
-        query = cls.query_normal()
-        keys = query.fetch(board.max[c.THREADS] + conf.MARGIN_CLEAN, keys_only=True)
-        needs = len(keys) - board.max[c.THREADS]
-        @ndb.transactional()
-        def store(key):
-            thread = key.get()
-            thread.status = c.STORED
-            thread.put()
+        query = cls.query(cls.status == c.NORMAL)
+        threads = query.fetch(board.max[c.THREADS] + conf.MARGIN_CLEAN)
+        threads.sort(key=attrgetter('resed'))
+        needs = len(threads) - board.max[c.THREADS]
         for i in range(needs):
-            store(keys[-i-1])
-
+            threads[i].store()
 
 class Res(ndb.Model):
     #id = thread.id * c.TT + number
