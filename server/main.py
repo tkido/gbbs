@@ -243,9 +243,9 @@ class WriteAnonymousHandler(webapp2.RequestHandler):
         
         now = board.now()
         dt_str = util.dt_to_str(now)
-        hashed_id = board.hash(0)
+        hashed_id = board.hash(self.request.remote_addr)
         
-        handle = self.request.get('handle') or '名無しさん'
+        handle = self.request.get('handle') or self.request.get('char-name') or '名無しさん'
         char_id = self.request.get('character') or 'none'
         emotion = self.request.get('emotion') or 'normal'
         trip = '' #placeholder
@@ -309,6 +309,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
             'page_title': '関連スレ一覧',
             'thread': thread,
             'threads': threads,
+            'DELETED': c.DELETED,
         })
         return te.render(':related', context)
 
@@ -605,6 +606,7 @@ class EditThreadHandler(webapp2.RequestHandler):
             'thread_id': thread_id,
             'thread': thread,
             'reses': reses,
+            'DELETED': c.DELETED,
         })
         return te.render(':admin/thread', context)
 

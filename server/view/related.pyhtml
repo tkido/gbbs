@@ -2,4 +2,20 @@
 <p>
 ${ thread.title } の関連スレ一覧です。
 </p>
-<?py include(':_thread-list') ?>
+<div class="thread-list">
+  <ol>
+<?py i = 0 ?>
+<?py for thread in threads: ?>
+    <?py i += 1 ?>
+    <?py if thread.status == DELETED: ?>
+    <li>#{ i }: 削除されたスレッド</li>
+    <?py else: ?>
+    <li>
+      <a href="/#{ ns }/#{ thread.key.id() }/">
+        #{ i }: ${ thread.title } (#{ thread.res_count })
+      </a>
+    </li>
+    <?py #endif ?>
+<?py #endfor ?>
+  </ol>
+</div>

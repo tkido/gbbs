@@ -57,8 +57,8 @@
     </div>
   </div>
 </div>
-    <?py #end ?>
-<?py #end ?>
+    <?py #endif ?>
+<?py #endfor ?>
 
 <?py if thread._writable: ?>
     <?py if board.allow_anonymous or user: ?>
