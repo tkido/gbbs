@@ -5,6 +5,7 @@ import datetime
 import logging
 import time
 import webapp2
+from operator import attrgetter
 from webapp2_extras import routes
 
 from google.appengine.api import memcache
@@ -37,6 +38,7 @@ class IndexHandler(webapp2.RequestHandler):
     def get(self, context):
         query = m.Thread.query_normal()
         threads = query.fetch(conf.MAX_FETCH)
+        threads.sort(key=attrgetter('uped'), reverse=True)
         context.update({
             'page_title' : '',
             'threads': threads,
@@ -89,8 +91,10 @@ class ThreadHandler(webapp2.RequestHandler):
         
         now = board.now()
         if ((now - thread.resed) > datetime.timedelta(seconds = 10) and thread.res_count < last_number):
-            thread.resed = now
             thread.res_count = last_number
+            thread.resed = now
+            if False in [res.sage for res in reses[thread.res_count - last_number:]]:
+                thread.uped = now
             thread.put()
         
         html = te.render(':thread', context)
@@ -179,6 +183,7 @@ class WriteHandler(webapp2.RequestHandler):
         author_auth = myuser.status if self.request.get('auth') else 0
         remote_host = self.request.remote_addr or ''
         trip = '' #placeholder
+        sage = True if self.request.get('sage') else False
         
         new_id = m.Res.latest_num_of(thread_id) + 1
         new_number = new_id % c.TT
@@ -204,6 +209,7 @@ class WriteHandler(webapp2.RequestHandler):
             char_id = char_id,
             emotion = emotion,
             trip = trip,
+            sage = sage,
             )
         @ndb.transactional()
         def write_unique():
@@ -253,6 +259,7 @@ class WriteAnonymousHandler(webapp2.RequestHandler):
         char_id = self.request.get('character') or 'none'
         emotion = self.request.get('emotion') or 'normal'
         trip = '' #placeholder
+        sage = True if self.request.get('sage') else False
         
         new_id = m.Res.latest_num_of(thread_id) + 1
         new_number = new_id % c.TT
@@ -278,6 +285,7 @@ class WriteAnonymousHandler(webapp2.RequestHandler):
             char_id = char_id,
             emotion = emotion,
             trip = trip,
+            sage = sage,
             )
         @ndb.transactional()
         def write_unique():

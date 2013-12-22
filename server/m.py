@@ -280,7 +280,7 @@ class Thread(ndb.Model):
     
     @classmethod
     def query_normal(cls):
-        return cls.query(cls.status == c.NORMAL).order(-cls.updated)
+        return cls.query(cls.status == c.NORMAL)
     @classmethod
     def query_stored(cls):
         return cls.query(cls.status == c.STORED).order(-cls.updated)
