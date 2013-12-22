@@ -75,3 +75,6 @@
 .deleted .balloon {
   border-bottom: 16px solid $color-message-background-deleted;
 }
+.deleted {
+  opacity:0.5;
+}

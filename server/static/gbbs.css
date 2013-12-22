@@ -290,6 +290,10 @@ dd {
   border-bottom: 16px solid #949494;
 }
 
+.deleted {
+  opacity: 0.5;
+}
+
 .gae-banner {
   position: absolute;
   right: 4px;
