@@ -44,6 +44,9 @@
 <?py else: ?>
     <span class="hash">ID:#{ res.hashed_id }</span>
 <?py #endif ?>
+<?py if res.author_auth: ?>
+    <span class="auth">#{ AUTH_JP[res.author_auth] }</span>
+<?py #endif ?>
   </div>
   <label for="#{ res.number }">
     <div class="res-content">

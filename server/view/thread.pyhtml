@@ -32,7 +32,8 @@
 </div>
 
 <?py for res in reses: ?>
-    <?py if res.status == NORMAL: ?>
+
+<?py if res.status == NORMAL: ?>
 <a name="#{ res.number }"></a>
 <div class="response">
   <div class="res-header">
@@ -40,6 +41,9 @@
     <span class="handle">${ res.handle }</span>
     <span class="datetime">#{ res.dt_str }</span>
     <span class="hash">ID:#{ res.hashed_id }</span>
+<?py if res.author_auth: ?>
+    <span class="auth">#{ AUTH_JP[res.author_auth] }</span>
+<?py #endif ?>
   </div>
   <div class="res-content">
     <div class="char-icon-cell">
@@ -57,7 +61,8 @@
     </div>
   </div>
 </div>
-    <?py #endif ?>
+<?py #endif ?>
+
 <?py #endfor ?>
 
 <?py if thread._writable: ?>
@@ -88,8 +93,8 @@
           <input type="hidden" name="char-name" id="char-name" value="名無しさん" /><br>
           
           <div id="advanced-settings">
-            <input type="checkbox" name="sage" value="sage" id="sage"/><label for="sage">sage</label>
-            <input type="checkbox" name="auth" value="auth" id="auth"/><label for="auth">権限表示</label><br>
+            <input type="checkbox" name="sage" value="True" id="sage"/><label for="sage">sage</label>
+            <input type="checkbox" name="auth" value="True" id="auth"/><label for="auth">権限表示</label><br>
             ハンドル：<input name="handle" type="text" /><br>
             トリップ：<input name="trip" type="text" />
           </div>

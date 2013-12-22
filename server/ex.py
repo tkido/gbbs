@@ -80,7 +80,7 @@ class PostMethodRequired(AppError):
 class AuthorityRequired(AppError):
   def __init__(self, required_auth, your_auth):
     self.title = '権限が足りません'
-    self.message = '指定された動作には『%s』以上の権限が必要ですが、現在の権限は『%s』です。権限についてはヘルプをご覧下さい。' % (c.AUTHORITIES[required_auth], c.AUTHORITIES[your_auth])
+    self.message = '指定された動作には『%s』以上の権限が必要ですが、現在の権限は『%s』です。権限についてはヘルプをご覧下さい。' % (c.AUTH_JP[required_auth], c.AUTH_JP[your_auth])
 
 class TemplateNotWritable(AppError):
   def __init__(self):

@@ -252,6 +252,16 @@ dd {
   font-weight: bold;
 }
 
+.auth {
+  color: #0000ff;
+  font-weight: bold;
+}
+
+.trip {
+  color: #ff0000;
+  font-weight: bold;
+}
+
 .datetime,
 .hash {
   color: black;

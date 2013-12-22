@@ -170,6 +170,7 @@ class Thread(ndb.Model):
     number      = ndb.IntegerProperty ('n',  required=True, indexed=False)
     res_count   = ndb.IntegerProperty ('rc', required=True, indexed=False)
     resed       = ndb.DateTimeProperty('r',  required=True, indexed=False)
+    uped        = ndb.DateTimeProperty('up', required=True, indexed=False)
     
     prev_id     = ndb.IntegerProperty ('pi',                indexed=False)
     prev_title  = ndb.StringProperty  ('pt',                indexed=False)
@@ -251,6 +252,7 @@ class Thread(ndb.Model):
                     number = next_number,
                     res_count = 0,
                     resed = now,
+                    uped = now,
 
                     prev_id = thread.key.id(),
                     prev_title = thread.title,
@@ -319,6 +321,7 @@ class Res(ndb.Model):
     char_id      = ndb.StringProperty  ('ci',                indexed=False)
     emotion      = ndb.StringProperty  ('e',                 indexed=False)
     trip         = ndb.StringProperty  ('t',                 indexed=False)
+    sage         = ndb.BooleanProperty ('sa',                indexed=False)
     
     @classmethod
     def query_all(cls, thread_id, first = 1):

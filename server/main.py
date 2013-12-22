@@ -84,6 +84,7 @@ class ThreadHandler(webapp2.RequestHandler):
             'thread': thread,
             'reses': reses,
             'NORMAL': c.NORMAL,
+            'AUTH_JP': c.AUTH_JP,
         })
         
         now = board.now()
@@ -174,6 +175,9 @@ class WriteHandler(webapp2.RequestHandler):
         handle = self.request.get('handle') or self.request.get('char-name') or '名無しさん'
         char_id = self.request.get('character') or 'none'
         emotion = self.request.get('emotion') or 'normal'
+        
+        author_auth = myuser.status if self.request.get('auth') else 0
+        remote_host = self.request.remote_addr or ''
         trip = '' #placeholder
         
         new_id = m.Res.latest_num_of(thread_id) + 1
@@ -184,8 +188,8 @@ class WriteHandler(webapp2.RequestHandler):
             id = new_id,
             author_id = myuser.myuser_id,
             updater_id = myuser.myuser_id,
-            author_auth = myuser.status,
-            remote_host = self.request.remote_addr,
+            author_auth = author_auth,
+            remote_host = remote_host,
 
             status = c.NORMAL,
             updated = now,
@@ -506,7 +510,7 @@ class MyPageHandler(webapp2.RequestHandler):
     def get(self, context):
         context.update({
             'page_title' : 'ユーザー情報',
-            'status_str' : c.AUTHORITIES[context['user'].status],
+            'status_str' : c.AUTH_JP[context['user'].status],
         })
         return te.render(':mypage', context)
 
@@ -573,7 +577,8 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
             number = 1,
             res_count = 0,
             resed = now,
-
+            uped = now,
+            
             prev_id = 0,
             prev_title = '',
             next_id = 0,
@@ -607,6 +612,7 @@ class EditThreadHandler(webapp2.RequestHandler):
             'thread': thread,
             'reses': reses,
             'DELETED': c.DELETED,
+            'AUTH_JP': c.AUTH_JP,
         })
         return te.render(':admin/thread', context)
 
