@@ -281,8 +281,7 @@ class Thread(ndb.Model):
     
     @classmethod
     def fetch_index(cls):
-        query = cls.query(cls.status == c.NORMAL)        
-        threads = query.fetch(conf.MAX_FETCH)
+        threads = cls.query(cls.status == c.NORMAL).fetch(conf.MAX_FETCH)
         threads.sort(key=attrgetter('uped'), reverse=True)
         return threads
         
