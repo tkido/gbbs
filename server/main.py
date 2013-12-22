@@ -3,7 +3,6 @@
 
 import datetime
 import logging
-from operator import attrgetter
 import time
 import webapp2
 from webapp2_extras import routes
@@ -36,9 +35,7 @@ class IndexHandler(webapp2.RequestHandler):
     @deco.board()
     @deco.cache(5)
     def get(self, context):
-        query = m.Thread.query_normal()
-        threads = query.fetch(conf.MAX_FETCH)
-        threads.sort(key=attrgetter('uped'), reverse=True)
+        threads = m.Thread.fetch_index()
         context.update({
             'page_title' : '',
             'threads': threads,

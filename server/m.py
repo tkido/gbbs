@@ -280,8 +280,12 @@ class Thread(ndb.Model):
             self = set_next_title()
     
     @classmethod
-    def query_normal(cls):
-        return cls.query(cls.status == c.NORMAL)
+    def fetch_index(cls):
+        query = cls.query(cls.status == c.NORMAL)        
+        threads = query.fetch(conf.MAX_FETCH)
+        threads.sort(key=attrgetter('uped'), reverse=True)
+        return threads
+        
     @classmethod
     def query_stored(cls):
         return cls.query(cls.status == c.STORED).order(-cls.updated)
@@ -294,8 +298,8 @@ class Thread(ndb.Model):
         query = cls.query(cls.status == c.NORMAL)
         threads = query.fetch(board.max[c.THREADS] + conf.MARGIN_CLEAN)
         threads.sort(key=attrgetter('resed'))
-        needs = len(threads) - board.max[c.THREADS]
-        for i in range(needs):
+        count = len(threads) - board.max[c.THREADS]
+        for i in range(count):
             threads[i].store()
 
 class Res(ndb.Model):
