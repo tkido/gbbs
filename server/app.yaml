@@ -21,6 +21,13 @@ handlers:
 - url: /.*
   script: main.app
 
+admin_console:
+  pages:
+  - name: System Admin TopPage
+    url: /s/
+  - name: System Admin Init
+    url: /s/init/
+
 libraries:
 - name: webapp2
   version: "2.5.2"
