@@ -82,21 +82,21 @@
     <div class="message-cell">
       <div class="message">
         <form method="post" action="/#{ ns }/_write#{ anonymous }/#{ thread_id }">
-          <select name="character" class="character">
+          <select name="character" class="character" id="character">
             <option value="none">名無し</option>
           </select>
-          <select name="emotion" class="emotion"></select>
+          <select name="emotion" class="emotion" id="emotion"></select>
           <input type="checkbox" name="advanced" value="advanced" id="advanced"/><label for="advanced">追加設定</label>
           <input type="submit" value="送信する" /><br>
           <textarea name="content" rows="4" cols="40"></textarea>
           
           <input type="hidden" name="char-name" id="char-name" value="名無しさん" /><br>
           
-          <div id="advanced-settings">
+          <div class="advanced-settings" id="advanced-settings">
             <input type="checkbox" name="sage" value="True" id="sage"/><label for="sage">sage</label>
             <input type="checkbox" name="auth" value="True" id="auth"/><label for="auth">権限表示</label><br>
-            ハンドル：<input name="handle" type="text" /><br>
-            トリップ：<input name="trip" type="text" />
+            <label for="handle">ハンドル：</label><input name="handle" type="text" id="handle" /><br>
+            <label for="trip">トリップ：</label><input name="trip" type="text" id="trip" />
           </div>
           </div>
         </form>

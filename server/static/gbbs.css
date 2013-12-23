@@ -304,6 +304,10 @@ dd {
   opacity: 0.5;
 }
 
+.advanced-settings {
+  display: none;
+}
+
 .gae-banner {
   position: absolute;
   right: 4px;
