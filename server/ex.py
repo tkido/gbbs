@@ -116,7 +116,7 @@ class InvalidVote(AppError):
 class InvalidOperation(AppError):
   def __init__(self):
     self.title = '実行する内容を選択して下さい'
-    self.message = '操作ミスを防止するため必ず選択する必要があります。'
+    self.message = '操作ミス防止のため、選択肢がひとつしかない場合でも選択する必要があります。'
 
 
 # ndb error
