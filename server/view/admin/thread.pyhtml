@@ -25,7 +25,7 @@
   <form method="post" action="/#{ ns }/admin/_edit/#{ thread_id }/">
 
 <?py for res in reses: ?>
-<?py deleted = ' deleted' if res.status == 0 else '' ?>
+<?py deleted = ' deleted' if res.status == DELETED else '' ?>
 <a name="#{ res.number }"></a>
 <div class="response#{ deleted }">
   <div class="res-header">
@@ -36,11 +36,16 @@
       <span class="datetime">#{ res.dt_str }</span>
     </label>
 <?py if user.status >= 8: ?>
-    <a href="/#{ ns }/admin/user/#{ res.author_id }/">
-      <span class="hash">ユーザ:#{ res.author_id }</span>
-    </a>
+    <a href="/#{ ns }/admin/user/#{ res.author_id }/">USER:#{ res.author_id }</span></a>が投稿
+    <?py if res.since != res.updated: ?>
+    <span class="datetime">#{ res.updated }</span>
+    <a href="/#{ ns }/admin/user/#{ res.updater_id }/">USER:#{ res.updater_id }</span></a>が変更
+    <?py #endif ?>
 <?py else: ?>
     <span class="hash">ID:#{ res.hashed_id }</span>
+<?py #endif ?>
+<?py if res.author_auth: ?>
+    <span class="auth">#{ AUTH_JP[res.author_auth] }</span>
 <?py #endif ?>
   </div>
   <label for="#{ res.number }">

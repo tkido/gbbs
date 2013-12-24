@@ -18,7 +18,10 @@ def default():
     def wrapper_func(original_func):
         def decorated_func(org, ns = '', *args, **kwargs):
             try:
-                context = { 'ns' : ns }
+                context = {
+                    'ns' : ns,
+                    'PRO' : conf.PRO,
+                }
                 html = original_func(org, context, *args, **kwargs)
                 if html:
                     org.response.out.write(html)

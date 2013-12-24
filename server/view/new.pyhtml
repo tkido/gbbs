@@ -1,17 +1,13 @@
 <h1>${ page_title }</h1>
+<p>
+<form method="post" action="/#{ ns }/_new">
+    <strong>タイトル：</strong><input name="title" type="text" /><br>
+    <textarea name="content" rows="16" cols="80"></textarea><br>
+    <input type="submit" value="送信する" />
+</form>
+</p>
 <ul>
     <li>すでに存在するスレの次スレは自動的に立てられます。<br />この画面で立てるのはまったく新しい話題のスレだけです。<br />多くの人はわざわざスレを立てる必要はありません。</li>
     <li>すでに存在するスレの次スレのテンプレートやタイトルの変更は、<br />各スレッドの画面から行えます。この画面からは行えません。</li>
     <li>タイトルの中に『%d』と入れておくと、実際のタイトルでは『%d』が何スレ目かを表す数字に置きかわります。<br />どこにも『%d』が入っていない場合。1スレ目には何もつきません。<br />2スレ目以降は末尾に『その2』『その3』などとつけられます。</li>
 </ul>
-
-<h2>新しいスレッドを作成する</h2>
-<p>
-<form method="post" action="/#{ ns }/_new">
-    <strong>新スレッドのタイトル：</strong><br />
-    <input name="title" type="text" /><br />
-    <strong>新スレッドのテンプレート：</strong><br />
-    <textarea name="content" rows="16" cols="80"></textarea><br />
-    <input type="submit" value="送信する" />
-</form>
-</p>

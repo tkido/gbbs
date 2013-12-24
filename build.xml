@@ -18,11 +18,6 @@
              value="${mail}"
              encoding="UTF-8" />
     
-    <copy file="server/view/_analytics-production.pyhtml"
-        tofile="server/view/_analytics.pyhtml" />
-    <copy file="server/view/_custom_search-production.pyhtml"
-        tofile="server/view/_custom_search.pyhtml" />
-    
     <echo message="Exec below, if you want deploy."/>
     <echo message="appcfg.py --email=${mail} update server"/>
   </target>

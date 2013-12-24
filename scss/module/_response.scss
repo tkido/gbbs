@@ -40,6 +40,14 @@
   color: #00cc00;
   font-weight: bold;
 }
+.auth {
+  color: #0000ff;
+  font-weight: bold;
+}
+.trip {
+  color: #ff0000;
+  font-weight: bold;
+}
 
 .datetime,
 .hash {
@@ -74,4 +82,11 @@
 }
 .deleted .balloon {
   border-bottom: 16px solid $color-message-background-deleted;
+}
+.deleted {
+  opacity: 0.5;
+}
+
+.advanced-settings {
+  display: none;
 }

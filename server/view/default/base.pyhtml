@@ -13,8 +13,6 @@
 
 <?py include(':default/_navigation') ?>
 
-<?py include(':_gae-banner') ?>
-
 <?py include(':_analytics') ?>
 
 </div>

@@ -35,8 +35,7 @@ class IndexHandler(webapp2.RequestHandler):
     @deco.board()
     @deco.cache(5)
     def get(self, context):
-        query = m.Thread.query_normal()
-        threads = query.fetch(conf.MAX_FETCH)
+        threads = m.Thread.fetch_index()
         context.update({
             'page_title' : '',
             'threads': threads,
@@ -84,12 +83,15 @@ class ThreadHandler(webapp2.RequestHandler):
             'thread': thread,
             'reses': reses,
             'NORMAL': c.NORMAL,
+            'AUTH_JP': c.AUTH_JP,
         })
         
         now = board.now()
         if ((now - thread.resed) > datetime.timedelta(seconds = 10) and thread.res_count < last_number):
-            thread.resed = now
             thread.res_count = last_number
+            thread.resed = now
+            if False in [res.sage for res in reses[thread.res_count - last_number:]]:
+                thread.uped = now
             thread.put()
         
         html = te.render(':thread', context)
@@ -171,10 +173,14 @@ class WriteHandler(webapp2.RequestHandler):
         myuser = context['user']
         hashed_id = board.hash(myuser.myuser_id)
         
-        handle = self.request.get('handle') or '名無しさん'
+        handle = self.request.get('handle') or self.request.get('char-name') or '名無しさん'
         char_id = self.request.get('character') or 'none'
         emotion = self.request.get('emotion') or 'normal'
+        
+        author_auth = myuser.status if self.request.get('auth') else 0
+        remote_host = self.request.remote_addr or ''
         trip = '' #placeholder
+        sage = True if self.request.get('sage') else False
         
         new_id = m.Res.latest_num_of(thread_id) + 1
         new_number = new_id % c.TT
@@ -184,8 +190,8 @@ class WriteHandler(webapp2.RequestHandler):
             id = new_id,
             author_id = myuser.myuser_id,
             updater_id = myuser.myuser_id,
-            author_auth = myuser.status,
-            remote_host = self.request.remote_addr,
+            author_auth = author_auth,
+            remote_host = remote_host,
 
             status = c.NORMAL,
             updated = now,
@@ -200,6 +206,7 @@ class WriteHandler(webapp2.RequestHandler):
             char_id = char_id,
             emotion = emotion,
             trip = trip,
+            sage = sage,
             )
         @ndb.transactional()
         def write_unique():
@@ -243,12 +250,13 @@ class WriteAnonymousHandler(webapp2.RequestHandler):
         
         now = board.now()
         dt_str = util.dt_to_str(now)
-        hashed_id = board.hash(0)
+        hashed_id = board.hash(self.request.remote_addr)
         
-        handle = self.request.get('handle') or '名無しさん'
+        handle = self.request.get('handle') or self.request.get('char-name') or '名無しさん'
         char_id = self.request.get('character') or 'none'
         emotion = self.request.get('emotion') or 'normal'
         trip = '' #placeholder
+        sage = True if self.request.get('sage') else False
         
         new_id = m.Res.latest_num_of(thread_id) + 1
         new_number = new_id % c.TT
@@ -274,6 +282,7 @@ class WriteAnonymousHandler(webapp2.RequestHandler):
             char_id = char_id,
             emotion = emotion,
             trip = trip,
+            sage = sage,
             )
         @ndb.transactional()
         def write_unique():
@@ -309,6 +318,7 @@ class RelatedThreadHandler(webapp2.RequestHandler):
             'page_title': '関連スレ一覧',
             'thread': thread,
             'threads': threads,
+            'DELETED': c.DELETED,
         })
         return te.render(':related', context)
 
@@ -329,7 +339,7 @@ class TemplateHandler(webapp2.RequestHandler):
             'thread': thread,
             'thread_id': thread_id,
             'template': template,
-            'VOTE_MARGIN': conf.VOTE_MARGIN,
+            'MARGIN_VOTE': conf.MARGIN_VOTE,
         })
         return te.render(':template', context)
 
@@ -423,7 +433,7 @@ class VoteHandler(webapp2.RequestHandler):
                 template.deny.append(id)
                 if id in template.agree:
                     template.agree.remove(id)
-                if len(template.deny) - len(template.agree) >= conf.VOTE_MARGIN:
+                if len(template.deny) - len(template.agree) >= conf.MARGIN_VOTE:
                     template.title = template.title_keeped
                     template.content = template.content_keeped
                     template.agree = []
@@ -505,7 +515,7 @@ class MyPageHandler(webapp2.RequestHandler):
     def get(self, context):
         context.update({
             'page_title' : 'ユーザー情報',
-            'status_str' : c.AUTHORITIES[context['user'].status],
+            'status_str' : c.AUTH_JP[context['user'].status],
         })
         return te.render(':mypage', context)
 
@@ -572,7 +582,8 @@ class CreateNewThreadHandler(webapp2.RequestHandler):
             number = 1,
             res_count = 0,
             resed = now,
-
+            uped = now,
+            
             prev_id = 0,
             prev_title = '',
             next_id = 0,
@@ -605,6 +616,8 @@ class EditThreadHandler(webapp2.RequestHandler):
             'thread_id': thread_id,
             'thread': thread,
             'reses': reses,
+            'DELETED': c.DELETED,
+            'AUTH_JP': c.AUTH_JP,
         })
         return te.render(':admin/thread', context)
 
@@ -664,34 +677,36 @@ class UpdateResesHandler(webapp2.RequestHandler):
         raise ex.Redirect('/admin/%d/' % thread_id)
 
 
-app = webapp2.WSGIApplication([('/', TopPageHandler),
-                               routes.PathPrefixRoute('/<:[0-9a-z_-]{2,16}>', [
-                                   webapp2.Route('/', IndexHandler),
-                                   webapp2.Route('/<:\d+>/<:\d*><:-?><:\d*>', ThreadHandler),
-                                   webapp2.Route('/link', LinkHandler),
-                                   webapp2.Route('/stored/<:(\d{4})?><:/?><:(\d{1,2})?><:/?>', StoredHandler),
-                                   webapp2.Route('/related/<:\d+>/', RelatedThreadHandler),
-                                   webapp2.Route('/_login', LoginHandler),
-                                   webapp2.Route('/_write/<:\d+>', WriteHandler),
-                                   webapp2.Route('/_write_a/<:\d+>', WriteAnonymousHandler),
-                                   webapp2.Route('/mypage/', MyPageHandler),
-                                   webapp2.Route('/agreement/', AgreementHandler),
-                                   webapp2.Route('/_agree', AgreeHandler),
-                                   webapp2.Route('/template/<:\d+>/', TemplateHandler),
-                                   webapp2.Route('/edit/<:\d+>/', EditTemplateHandler),
-                                   webapp2.Route('/_edit/<:\d+>', UpdateTemplateHandler),
-                                   webapp2.Route('/_vote/<:\d+>', VoteHandler),
-                                   webapp2.Route('/new/', NewThreadHandler),
-                                   webapp2.Route('/_new', CreateNewThreadHandler),
-                                   
-                                   webapp2.Route('/admin/<:\d+>/', EditThreadHandler),
-                                   webapp2.Route('/admin/_edit/thread/<:\d+>/', UpdateThreadHandler),
-                                   webapp2.Route('/admin/_edit/<:\d+>/', UpdateResesHandler),
-                               ]),
-                               routes.PathPrefixRoute('/a/<:[0-9a-z_-]{2,16}>', [
-                                   webapp2.Route('/<:\d+>/', EditThreadHandler),
-                                   webapp2.Route('/_edit/thread/<:\d+>/', UpdateThreadHandler),
-                               ]),
-                              ],
-                              debug=conf.DEBUG
-                             )
+app = webapp2.WSGIApplication(
+    [
+        ('/', TopPageHandler),
+        routes.PathPrefixRoute('/<:[0-9a-z_-]{2,16}>', [
+            webapp2.Route('/', IndexHandler),
+            webapp2.Route('/<:\d+>/<:\d*><:-?><:\d*>', ThreadHandler),
+            webapp2.Route('/link', LinkHandler),
+            webapp2.Route('/stored/<:(\d{4})?><:/?><:(\d{1,2})?><:/?>', StoredHandler),
+            webapp2.Route('/related/<:\d+>/', RelatedThreadHandler),
+            webapp2.Route('/_login', LoginHandler),
+            webapp2.Route('/_write/<:\d+>', WriteHandler),
+            webapp2.Route('/_write_a/<:\d+>', WriteAnonymousHandler),
+            webapp2.Route('/mypage/', MyPageHandler),
+            webapp2.Route('/agreement/', AgreementHandler),
+            webapp2.Route('/_agree', AgreeHandler),
+            webapp2.Route('/template/<:\d+>/', TemplateHandler),
+            webapp2.Route('/edit/<:\d+>/', EditTemplateHandler),
+            webapp2.Route('/_edit/<:\d+>', UpdateTemplateHandler),
+            webapp2.Route('/_vote/<:\d+>', VoteHandler),
+            webapp2.Route('/new/', NewThreadHandler),
+            webapp2.Route('/_new', CreateNewThreadHandler),
+
+            webapp2.Route('/admin/<:\d+>/', EditThreadHandler),
+            webapp2.Route('/admin/_edit/thread/<:\d+>/', UpdateThreadHandler),
+            webapp2.Route('/admin/_edit/<:\d+>/', UpdateResesHandler),
+        ]),
+        routes.PathPrefixRoute('/a/<:[0-9a-z_-]{2,16}>', [
+            webapp2.Route('/<:\d+>/', EditThreadHandler),
+            webapp2.Route('/_edit/thread/<:\d+>/', UpdateThreadHandler),
+        ]),
+    ],
+    debug=conf.DEBUG,
+)

@@ -5,6 +5,7 @@ import base64
 import datetime
 import hashlib
 import logging
+from operator import attrgetter
 import re
 
 from google.appengine.api import memcache
@@ -170,6 +171,7 @@ class Thread(ndb.Model):
     number      = ndb.IntegerProperty ('n',  required=True, indexed=False)
     res_count   = ndb.IntegerProperty ('rc', required=True, indexed=False)
     resed       = ndb.DateTimeProperty('r',  required=True, indexed=False)
+    uped        = ndb.DateTimeProperty('up', required=True, indexed=False)
     
     prev_id     = ndb.IntegerProperty ('pi',                indexed=False)
     prev_title  = ndb.StringProperty  ('pt',                indexed=False)
@@ -217,7 +219,7 @@ class Thread(ndb.Model):
         hashed_id = board.hash(myuser_id)
         
         template = Template.get_by_id(thread.template_id)
-        if len(template.agree) - len(template.deny) >= conf.VOTE_MARGIN:
+        if len(template.agree) - len(template.deny) >= conf.MARGIN_VOTE:
             template.title_keeped = template.title
             template.content_keeped = template.content
         else:
@@ -251,6 +253,7 @@ class Thread(ndb.Model):
                     number = next_number,
                     res_count = 0,
                     resed = now,
+                    uped = now,
 
                     prev_id = thread.key.id(),
                     prev_title = thread.title,
@@ -277,27 +280,26 @@ class Thread(ndb.Model):
             self = set_next_title()
     
     @classmethod
-    def query_normal(cls):
-        return cls.query(cls.status == c.NORMAL).order(-cls.updated)
+    def fetch_index(cls):
+        threads = cls.query(cls.status == c.NORMAL).fetch(conf.MAX_FETCH)
+        threads.sort(key=attrgetter('uped'), reverse=True)
+        return threads
+        
     @classmethod
     def query_stored(cls):
         return cls.query(cls.status == c.STORED).order(-cls.updated)
     @classmethod
     def query_related(cls, template_id):
         return cls.query(cls.template_id == template_id)
+    
     @classmethod
     def clean(cls, board):
-        query = cls.query_normal()
-        keys = query.fetch(board.max[c.THREADS]+3, keys_only=True)
-        needs = len(keys) - board.max[c.THREADS]
-        @ndb.transactional()
-        def store(key):
-            thread = key.get()
-            thread.status = c.STORED
-            thread.put()
-        for i in range(needs):
-            store(keys[-i-1])
-
+        query = cls.query(cls.status == c.NORMAL)
+        threads = query.fetch(board.max[c.THREADS] + conf.MARGIN_CLEAN)
+        threads.sort(key=attrgetter('resed'))
+        count = len(threads) - board.max[c.THREADS]
+        for i in range(count):
+            threads[i].store()
 
 class Res(ndb.Model):
     #id = thread.id * c.TT + number
@@ -319,6 +321,7 @@ class Res(ndb.Model):
     char_id      = ndb.StringProperty  ('ci',                indexed=False)
     emotion      = ndb.StringProperty  ('e',                 indexed=False)
     trip         = ndb.StringProperty  ('t',                 indexed=False)
+    sage         = ndb.BooleanProperty ('sa',                indexed=False)
     
     @classmethod
     def query_all(cls, thread_id, first = 1):

@@ -125,9 +125,9 @@ $(document).ready(function(){
     /* 共通関数 */
     //character変更時、characterとemotion欄更新、emotionリセット。
     function character_changed(){
-        var character_to = $('#form select.character').children("option:selected").val();
+        var character_to = $('#character').children("option:selected").val();
         var emotions = $.characters[character_to]['emotions'];
-        var select = $('#form select.emotion');
+        var select = $('#emotion');
         select.empty();
         $.each(emotions, function(val, text) {
             select.append(
@@ -137,14 +137,13 @@ $(document).ready(function(){
         var icon = $('#char-icon');
         icon.attr('class', 'char-icon');
         icon.addClass(character_to);
-        var fullname = $('#form input[type=hidden][name=handle]');
-        fullname.val($.characters[character_to]['fullname']);
+        $('#char-name').val($.characters[character_to]['fullname']);
         $.cookie('character', character_to, cookie_options);
     }
     //emotion変更時、emotion更新。
     function emotion_changed(){
-        var character_to = $('#form select.character').children("option:selected").val();
-        var emotion_to = $('#form select.emotion').children("option:selected").val();
+        var character_to = $('#character').children("option:selected").val();
+        var emotion_to = $('#emotion').children("option:selected").val();
         var icon = $('#char-icon');
         icon.attr('class', 'char-icon');
         icon.addClass(character_to);
@@ -153,43 +152,57 @@ $(document).ready(function(){
     }
     
     /* 起動時の処理 */
-    if($('#form select.character').size()){
-        $('#form select.character').empty();
+    if($('#character').size()){
+        $('#character').empty();
         $.each($.characters, function(id, character) {
-            $('#form select.character').append(
+            $('#character').append(
                 $('<option></option>').val(id).html(character['name'])
             );
         });
         
         if ($.cookie('character')){
-            var selecter = '#form select.character option[value="' + $.cookie('character') + '"]'
+            var selecter = '#character option[value="' + $.cookie('character') + '"]'
             $(selecter).attr("selected","selected");
         }
         character_changed();
         if ($.cookie('emotion')){
-            var selecter = '#form select.emotion option[value="' + $.cookie('emotion') + '"]'
+            var selecter = '#emotion option[value="' + $.cookie('emotion') + '"]'
             $(selecter).attr("selected","selected");
         }
         emotion_changed();
         
-        if ($.cookie('sage') == 'true'){
-            $('#form input[name=sage]').attr('checked', true);
-        }
         if ($.cookie('advanced') == 'true'){
             $('#advanced').attr('checked', true);
             $('#advanced-settings').show();
         }
+        if ($.cookie('sage') == 'true'){
+            $('#sage').attr('checked', true);
+        }
+        if ($.cookie('auth') == 'true'){
+            $('#auth').attr('checked', true);
+        }
+        $('#handle').val($.cookie('handle'))
+        $('#trip').val($.cookie('trip'))
     }
     //初期化終了
     $('#form').toggle();
     
     /* 起動時以外の処理 */
-    $('#form select.character').change(character_changed);
+    $('#character').change(character_changed);
     
-    $('#form select.emotion').change(emotion_changed);
+    $('#emotion').change(emotion_changed);
     
-    $('#form input[name=sage]').click(function(){
-        $.cookie('sage', $(this).attr('checked'), cookie_options);
+    $('#sage').click(function(){
+        $.cookie('sage', this.checked, cookie_options);
+    });
+    $('#auth').click(function(){
+        $.cookie('auth', this.checked, cookie_options);
+    });
+    $('#handle').change(function(){
+        $.cookie('handle', $(this).val(), cookie_options);
+    });
+    $('#trip').change(function(){
+        $.cookie('trip', $(this).val(), cookie_options);
     });
     
     //高度な設定の表示切り替え
