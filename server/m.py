@@ -86,7 +86,7 @@ class Board(ndb.Model):
       
       rst = sha1.digest()
       rst = base64.urlsafe_b64encode(rst)
-      rst = rst[:8]
+      rst = rst[:conf.LEN_HASH]
       return rst
     
     def trip(self, source):
@@ -96,7 +96,7 @@ class Board(ndb.Model):
       
       rst = sha1.digest()
       rst = base64.urlsafe_b64encode(rst)
-      rst = rst[:16]
+      rst = rst[:conf.LEN_TRIP]
       return rst
       
     def validate_title(self, title):
