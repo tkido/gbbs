@@ -54,6 +54,8 @@ class Board(ndb.Model):
     allow_robots       = ndb.BooleanProperty ('r',  required=True, indexed=False)
     allow_anonymous    = ndb.BooleanProperty ('aa', required=True, indexed=False)
     
+    rights             = ndb.TextProperty    ('ri',                indexed=False)
+    notice             = ndb.TextProperty    ('n',                 indexed=False)
     max                = ndb.IntegerProperty ('m',                 indexed=False, repeated=True)
     ad                 = ndb.TextProperty    ('a',                 indexed=False, repeated=True)
     
@@ -85,6 +87,16 @@ class Board(ndb.Model):
       rst = sha1.digest()
       rst = base64.urlsafe_b64encode(rst)
       rst = rst[:8]
+      return rst
+    
+    def trip(self, source):
+      sha1 = hashlib.sha1()
+      sha1.update(str(source))
+      sha1.update(self.salt)
+      
+      rst = sha1.digest()
+      rst = base64.urlsafe_b64encode(rst)
+      rst = rst[:16]
       return rst
       
     def validate_title(self, title):
