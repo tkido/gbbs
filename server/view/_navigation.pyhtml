@@ -5,7 +5,7 @@
 <?py if user: ?>
     <li><a href="/#{ ns }/mypage/">マイページ</a></li>
     <li><a href="/#{ ns }/new/">新スレ作成</a></li>
-    <li><a href="${ logout_url }">ログアウト</a></li>
+    <li><a href="${ logout_url }" id="logout">ログアウト</a></li>
 <?py else: ?>
     <li><a href="${ login_url }">ログイン</a></li>
 <?py #end ?>

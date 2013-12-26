@@ -228,6 +228,12 @@ $(document).ready(function(){
             $('#template-after').hide();
         }
     });
+    
+    //ログアウト時トリップとハンドルをクッキーから消去
+    $('#logout').click(function(){
+        $.cookie('handle', '', cookie_options);
+        $.cookie('trip', '', cookie_options);
+    });
 
 
 
