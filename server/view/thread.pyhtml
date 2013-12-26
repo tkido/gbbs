@@ -41,6 +41,9 @@
     <span class="handle">${ res.handle }</span>
     <span class="datetime">#{ res.dt_str }</span>
     <span class="hash">ID:#{ res.hashed_id }</span>
+<?py if res.trip: ?>
+    <span class="trip">◆#{ res.trip }</span>
+<?py #endif ?>
 <?py if res.author_auth: ?>
     <span class="auth">#{ AUTH_JP[res.author_auth] }</span>
 <?py #endif ?>

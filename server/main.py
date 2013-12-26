@@ -179,7 +179,7 @@ class WriteHandler(webapp2.RequestHandler):
         
         author_auth = myuser.status if self.request.get('auth') else 0
         remote_host = self.request.remote_addr or ''
-        trip = '' #placeholder
+        trip = context['gbbs'].trip(self.request.get('trip')) if self.request.get('trip') else ''
         sage = True if self.request.get('sage') else False
         
         new_id = m.Res.latest_num_of(thread_id) + 1
@@ -255,7 +255,7 @@ class WriteAnonymousHandler(webapp2.RequestHandler):
         handle = self.request.get('handle') or self.request.get('char-name') or '名無しさん'
         char_id = self.request.get('character') or 'none'
         emotion = self.request.get('emotion') or 'normal'
-        trip = '' #placeholder
+        trip = context['gbbs'].trip(self.request.get('trip')) if self.request.get('trip') else ''
         sage = True if self.request.get('sage') else False
         
         new_id = m.Res.latest_num_of(thread_id) + 1

@@ -77,11 +77,11 @@ class Board(ndb.Model):
       sha1.update(self.salt)
       
       local_now = self.now()
-      if self.hash_cycle >= CYCLE_YEAR:
+      if self.hash_cycle >= c.CYCLE_YEAR:
         sha1.update(str(local_now.year))
-      if self.hash_cycle >= CYCLE_MONTH:
+      if self.hash_cycle >= c.CYCLE_MONTH:
         sha1.update(str(local_now.month))
-      if self.hash_cycle >= CYCLE_DAY:
+      if self.hash_cycle >= c.CYCLE_DAY:
         sha1.update(str(local_now.day))
       
       rst = sha1.digest()
@@ -91,7 +91,7 @@ class Board(ndb.Model):
     
     def trip(self, source):
       sha1 = hashlib.sha1()
-      sha1.update(str(source))
+      sha1.update(str(source.encode('utf-8')))
       sha1.update(self.salt)
       
       rst = sha1.digest()
