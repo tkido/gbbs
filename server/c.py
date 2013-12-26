@@ -39,7 +39,13 @@ BANNED        = 1
 DELETED       = 0
 
 #for boards
-BOARD_NAMESPACE = 'b'
+NAMESPACE_BOARD = 'b'
+
+#for hash cycle
+CYCLE_EVER  = 0
+CYCLE_YEAR  = 1
+CYCLE_MONTH = 2
+CYCLE_DAY   = 3
 
 #for m.Board.max[n]
 THREADS        = 0

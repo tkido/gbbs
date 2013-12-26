@@ -119,6 +119,10 @@ class InvalidOperation(AppError):
     self.message = '操作ミス防止のため、選択肢がひとつしかない場合でも選択する必要があります。'
 
 
+# System Error
+class NotFoundGbbs(SysError):
+    pass
+
 # ndb error
 """
 class UserNotFound(SysError):

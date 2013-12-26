@@ -53,16 +53,22 @@ def default():
 def board():
     def wrapper_func(original_func):
         def decorated_func(org, context, *args, **kwargs):
+            namespace_manager.set_namespace(c.NAMESPACE_BOARD)
             ns = context['ns']
-            namespace_manager.set_namespace(c.BOARD_NAMESPACE)
+            gbbs = memcache.get(c.NAMESPACE_BOARD)
+            if not gbbs:
+                gbbs = m.Board.get_by_id(c.NAMESPACE_BOARD)
+                memcache.add(c.NAMESPACE_BOARD, gbbs, conf.CACHED_GBBS)
+            if not gbbs: raise ex.NotFoundGbbs()
             board = memcache.get(ns)
             if not board:
-                board = ndb.Key('Board', ns).get()
+                board = m.Board.get_by_id(ns)
                 memcache.add(ns, board, conf.CACHED_BOARD)
             if not board or not board.readable(): raise ex.BoardNotFound()
             namespace_manager.set_namespace(ns)
             context.update({
                 'board': board,
+                'gbbs': gbbs,
                 'login_url': '/%s/_login?continue=%s' % (ns, org.request.uri),
                 'logout_url': users.create_logout_url(org.request.uri),
             })

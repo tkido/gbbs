@@ -61,7 +61,7 @@ class Board(ndb.Model):
     
     @classmethod
     def query_normal(cls):
-        return cls.query(cls.status == c.NORMAL, namespace = c.BOARD_NAMESPACE)
+        return cls.query(cls.status == c.NORMAL, namespace = c.NAMESPACE_BOARD)
 
     def readable(self):
         return self.status != c.DELETED
@@ -77,11 +77,11 @@ class Board(ndb.Model):
       sha1.update(self.salt)
       
       local_now = self.now()
-      if self.hash_cycle >= 1:
+      if self.hash_cycle >= CYCLE_YEAR:
         sha1.update(str(local_now.year))
-      if self.hash_cycle >= 2:
+      if self.hash_cycle >= CYCLE_MONTH:
         sha1.update(str(local_now.month))
-      if self.hash_cycle >= 3:
+      if self.hash_cycle >= CYCLE_DAY:
         sha1.update(str(local_now.day))
       
       rst = sha1.digest()
