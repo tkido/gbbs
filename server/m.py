@@ -155,15 +155,13 @@ class Template(ndb.Model):
     
     agree           = ndb.IntegerProperty ('a',                 indexed=False, repeated=True)
     deny            = ndb.IntegerProperty ('d',                 indexed=False, repeated=True)
-
+    
     def readable(self):
         return self.status != c.DELETED
     def writable(self):
         return self.status == c.NORMAL
     def changed(self):
         return (self.title != self.title_keeped) or (self.content != self.content_keeped)
-    
-
     
 class Thread(ndb.Model):
     #id = Counter("Thread").count

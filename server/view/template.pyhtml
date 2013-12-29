@@ -71,8 +71,7 @@
 <?py else: ?>
 <p>
 『<strong>${ thread.title }</strong>』のテンプレート変更予定はありません。<br>
-このまま変更がなければ次スレのテンプレは下のようになります。<br>
-<a href="/#{ ns }/edit/#{ thread.key.id() }/">変更案を作成する。</a>
+このまま変更がなければ次スレのテンプレは下のようになります。
 </p>
 <h1 class="thread-title">${ template.title % (thread.number + 1) }</h1>
 <div class="template">
@@ -83,5 +82,10 @@
       </div>
     </div>
   </div>
+</div>
+<div class="navigation">
+  <ul>
+    <li><a href="/#{ ns }/edit/#{ thread.key.id() }/">変更案を作成する</a></li>
+  </ul>
 </div>
 <?py #endif ?>
