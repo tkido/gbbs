@@ -77,15 +77,6 @@ class ThreadHandler(webapp2.RequestHandler):
         last_number = reses[-1].key.id() % c.TT if reses else 0
         thread._writable = (thread.status == c.NORMAL and last_number < board.max[c.RESES])
         
-        context.update({
-            'page_title': thread.title,
-            'thread_id': thread_id,
-            'thread': thread,
-            'reses': reses,
-            'NORMAL': c.NORMAL,
-            'AUTH_JP': c.AUTH_JP,
-        })
-        
         now = board.now()
         if ((now - thread.resed) > datetime.timedelta(seconds = 10) and thread.res_count < last_number):
             thread.res_count = last_number
@@ -93,8 +84,6 @@ class ThreadHandler(webapp2.RequestHandler):
             if False in [res.sage for res in reses[thread.res_count - last_number:]]:
                 thread.uped = now
             thread.put()
-        
-        html = te.render(':thread', context)
         
         flag = False
         if thread.next_id == 0 and last_number >= board.max[c.RESES]:
@@ -108,7 +97,15 @@ class ThreadHandler(webapp2.RequestHandler):
             flag = True
         if flag: raise ex.RedirectOrg
         
-        return html
+        context.update({
+            'page_title': thread.title,
+            'thread_id': thread_id,
+            'thread': thread,
+            'reses': reses,
+            'NORMAL': c.NORMAL,
+            'AUTH_JP': c.AUTH_JP,
+        })
+        return te.render(':thread', context)
 
 class LinkHandler(webapp2.RequestHandler):
     @deco.default()
