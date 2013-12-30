@@ -456,6 +456,9 @@ class LoginHandler(webapp2.RequestHandler):
                 raise ex.RedirectAgreement()
             else:
                 raise ex.RedirectContinue()
+        
+        board_myuser = m.MyUser.get_by_id(user.user_id(), namespace = c.NAMESPACE_BOARD)
+        
         myuser_id = m.Counter.incr('MyUser')
         now = board.now()
         myuser = m.MyUser(
@@ -464,12 +467,15 @@ class LoginHandler(webapp2.RequestHandler):
             myuser_id = myuser_id,
             ban_count = 0,
 
-            status = c.READER,
+            status = board_myuser.status if board_myuser else c.READER,
             updated = now,
             since = now,
             )
         myuser.put()
-        raise ex.RedirectAgreement()
+        if myuser.status == c.READER:
+            raise ex.RedirectAgreement()
+        else:
+            raise ex.RedirectContinue()
 
 class AgreementHandler(webapp2.RequestHandler):
     @deco.default()
@@ -684,6 +690,19 @@ class UpdateResesHandler(webapp2.RequestHandler):
         raise ex.Redirect('/admin/%d/' % thread_id)
 
 
+class ConfigHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    @deco.myuser(c.SUB_ADMIN)
+    def get(self, context):
+        board = context['board']
+        
+        context.update({
+            'page_title': '掲示板の設定',
+        })
+        return te.render(':admin/config', context)
+        
+
 app = webapp2.WSGIApplication(
     [
         ('/', TopPageHandler),
@@ -709,6 +728,7 @@ app = webapp2.WSGIApplication(
             webapp2.Route('/admin/<:\d+>/', EditThreadHandler),
             webapp2.Route('/admin/_edit/thread/<:\d+>/', UpdateThreadHandler),
             webapp2.Route('/admin/_edit/<:\d+>/', UpdateResesHandler),
+            webapp2.Route('/admin/config/', ConfigHandler),
         ]),
         routes.PathPrefixRoute('/a/<:[0-9a-z_-]{2,16}>', [
             webapp2.Route('/<:\d+>/', EditThreadHandler),
