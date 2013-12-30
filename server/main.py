@@ -621,6 +621,11 @@ class EditThreadHandler(webapp2.RequestHandler):
 class UpdateThreadHandler(webapp2.RequestHandler):
     @deco.default()
     @deco.board()
+    def get(self, context, thread_id):
+        raise ex.PostMethodRequired('スレッド編集画面に戻る', '/admin/%d/' % int(thread_id))
+
+    @deco.default()
+    @deco.board()
     @deco.myuser(c.EDITOR)
     def post(self, context, thread_id):
         thread_id = int(thread_id)
@@ -645,6 +650,11 @@ class UpdateThreadHandler(webapp2.RequestHandler):
         raise ex.Redirect('/admin/%d/' % thread_id)
 
 class UpdateResesHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    def get(self, context, thread_id):
+        raise ex.PostMethodRequired('スレッド編集画面に戻る', '/admin/%d/' % int(thread_id))
+    
     @deco.default()
     @deco.board()
     @deco.myuser(c.EDITOR)
