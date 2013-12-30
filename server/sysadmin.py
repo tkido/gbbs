@@ -80,7 +80,7 @@ class CreateBoardHandler(webapp2.RequestHandler):
             title = '%s BBS' % ns,
             description = '',
             keywords = '',
-            template = '',
+            local_rule = '',
 
             hash_cycle = gbbs.hash_cycle,
             salt = str(uuid.uuid4()),
@@ -152,7 +152,7 @@ class InitializeHandler(webapp2.RequestHandler):
             title = 'GBBS',
             description = '',
             keywords = '',
-            template = '',
+            local_rule = '',
 
             hash_cycle = c.CYCLE_DAY,
             salt = str(uuid.uuid4()),
