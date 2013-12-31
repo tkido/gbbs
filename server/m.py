@@ -123,6 +123,17 @@ class Board(ndb.Model):
             raise ex.InvalidTemplate(self)
         return template
     
+    def flush(self):
+        memcache.delete(self.key.id(), namespace = c.NAMESPACE_BOARD)
+        util.flush_page('/')
+        
+    @classmethod
+    def validate_board_content(cls, content):
+        if len(content) > conf.MAX_CHAR or \
+           len(re.findall('\n', content)) >= conf.MAX_ROW:
+            raise ex.InvalidBoardContent()
+        return content
+    
 class MyUser(ndb.Model):
     #id = user.user_id()
     user      = ndb.UserProperty    ('us',  required=True               )

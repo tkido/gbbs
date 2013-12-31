@@ -108,6 +108,21 @@ class InvalidTemplate(AppError):
     self.title = '内容が不正です'
     self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (board.max[c.ROWS_TEMPLATE], board.max[c.CHARS_TEMPLATE])
 
+class InvalidBoardTitle(AppError):
+  def __init__(self):
+    self.title = '掲示板タイトルが不正です'
+    self.message = '空ではなく、%d字以内である必要があります。' % conf.MAX_TITLE
+
+class InvalidDescription(AppError):
+  def __init__(self):
+    self.title = '説明が不正です'
+    self.message = '空ではなく、%d字以内である必要があります。' % conf.MAX_DESCRIPTION
+
+class InvalidBoardContent(AppError):
+  def __init__(self):
+    self.title = '内容が不正です'
+    self.message = '空ではなく、%d行以内かつ%d字以内である必要があります。' % (conf.MAX_ROW, conf.MAX_CHAR)
+
 class InvalidVote(AppError):
   def __init__(self):
     self.title = '二重投票はできません'

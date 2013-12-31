@@ -3,7 +3,7 @@
 『<strong>${ board.title }</strong>』の設定を変更できます。
 </p>
 
-<form method="post" action="/#{ ns }/_update/config/">
+<form method="post" action="/#{ ns }/admin/_update/config/">
   <p>
     <label for="title">タイトル：</label><input name="title" type="text" id="title" value="${ board.title }" />
   </p>
@@ -19,7 +19,7 @@
     <textarea name="local_rule" id="local_rule" rows="4" cols="40">${ board.local_rule }</textarea>
   </p>
   <p>
-    <label for="rights">権利関係の表示：</label><br>
+    <label for="rights">権利関係の表記：</label><br>
     <textarea name="rights" id="rights" rows="4" cols="40">${ board.rights }</textarea>
   </p>
   <p>

@@ -702,6 +702,39 @@ class ConfigHandler(webapp2.RequestHandler):
         })
         return te.render(':admin/config', context)
         
+class UpdateConfigHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    def get(self, context):
+        raise ex.PostMethodRequired('掲示板の設定画面に戻る', '/admin/config/')
+    
+    @deco.default()
+    @deco.board()
+    @deco.myuser(c.SUB_ADMIN)
+    def post(self, context):
+        board = context['board']
+        
+        title = self.request.get('title')
+        if not title or \
+           len(title) > conf.MAX_TITLE:
+            raise ex.InvalidBoardTitle()
+        
+        description = self.request.get('description')
+        if not description or \
+           len(description) > conf.MAX_DESCRIPTION:
+            raise ex.InvalidDescription()
+        
+        board.notice = m.Board.validate_board_content(self.request.get('notice'))
+        board.local_rule = m.Board.validate_board_content(self.request.get('local_rule'))
+        board.rights = m.Board.validate_board_content(self.request.get('rights'))
+        
+        board.title = title
+        board.description = description
+        
+        board.put()
+        board.flush()
+        raise ex.Redirect('/')
+
 
 app = webapp2.WSGIApplication(
     [
@@ -729,6 +762,7 @@ app = webapp2.WSGIApplication(
             webapp2.Route('/admin/_edit/thread/<:\d+>/', UpdateThreadHandler),
             webapp2.Route('/admin/_edit/<:\d+>/', UpdateResesHandler),
             webapp2.Route('/admin/config/', ConfigHandler),
+            webapp2.Route('/admin/_update/config/', UpdateConfigHandler),
         ]),
         routes.PathPrefixRoute('/a/<:[0-9a-z_-]{2,16}>', [
             webapp2.Route('/<:\d+>/', EditThreadHandler),
