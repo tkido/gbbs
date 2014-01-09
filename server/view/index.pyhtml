@@ -1,5 +1,5 @@
 <h1>${ board.title }</h1>
 <p>
-${ board.template }
+${ board.local_rule }
 </p>
 <?py include(':_thread-list') ?>

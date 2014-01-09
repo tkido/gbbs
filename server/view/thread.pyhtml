@@ -101,7 +101,6 @@
             <label for="handle">ハンドル：</label><input name="handle" type="text" id="handle" /><br>
             <label for="trip">トリップ：</label><input name="trip" type="text" id="trip" />
           </div>
-          </div>
         </form>
       </div>
     </div>

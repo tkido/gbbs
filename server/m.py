@@ -44,7 +44,7 @@ class Board(ndb.Model):
     title              = ndb.StringProperty  ('t',  required=True, indexed=False)
     description        = ndb.StringProperty  ('d',                 indexed=False)
     keywords           = ndb.StringProperty  ('k',                 indexed=False)
-    template           = ndb.TextProperty    ('te',                indexed=False)
+    local_rule         = ndb.TextProperty    ('l',                indexed=False)
     
     hash_cycle         = ndb.IntegerProperty ('h',  required=True, indexed=False)  #0:ever(no change) 1:year 2:month 3:day
     salt               = ndb.StringProperty  ('sa', required=True, indexed=False)
@@ -123,6 +123,17 @@ class Board(ndb.Model):
             raise ex.InvalidTemplate(self)
         return template
     
+    def flush(self):
+        memcache.delete(self.key.id(), namespace = c.NAMESPACE_BOARD)
+        util.flush_page('/')
+        
+    @classmethod
+    def validate_board_content(cls, content):
+        if len(content) > conf.MAX_CHAR or \
+           len(re.findall('\n', content)) >= conf.MAX_ROW:
+            raise ex.InvalidBoardContent()
+        return content
+    
 class MyUser(ndb.Model):
     #id = user.user_id()
     user      = ndb.UserProperty    ('us',  required=True               )
@@ -155,15 +166,13 @@ class Template(ndb.Model):
     
     agree           = ndb.IntegerProperty ('a',                 indexed=False, repeated=True)
     deny            = ndb.IntegerProperty ('d',                 indexed=False, repeated=True)
-
+    
     def readable(self):
         return self.status != c.DELETED
     def writable(self):
         return self.status == c.NORMAL
     def changed(self):
         return (self.title != self.title_keeped) or (self.content != self.content_keeped)
-    
-
     
 class Thread(ndb.Model):
     #id = Counter("Thread").count

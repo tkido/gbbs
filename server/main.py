@@ -77,15 +77,6 @@ class ThreadHandler(webapp2.RequestHandler):
         last_number = reses[-1].key.id() % c.TT if reses else 0
         thread._writable = (thread.status == c.NORMAL and last_number < board.max[c.RESES])
         
-        context.update({
-            'page_title': thread.title,
-            'thread_id': thread_id,
-            'thread': thread,
-            'reses': reses,
-            'NORMAL': c.NORMAL,
-            'AUTH_JP': c.AUTH_JP,
-        })
-        
         now = board.now()
         if ((now - thread.resed) > datetime.timedelta(seconds = 10) and thread.res_count < last_number):
             thread.res_count = last_number
@@ -93,8 +84,6 @@ class ThreadHandler(webapp2.RequestHandler):
             if False in [res.sage for res in reses[thread.res_count - last_number:]]:
                 thread.uped = now
             thread.put()
-        
-        html = te.render(':thread', context)
         
         flag = False
         if thread.next_id == 0 and last_number >= board.max[c.RESES]:
@@ -108,7 +97,15 @@ class ThreadHandler(webapp2.RequestHandler):
             flag = True
         if flag: raise ex.RedirectOrg
         
-        return html
+        context.update({
+            'page_title': thread.title,
+            'thread_id': thread_id,
+            'thread': thread,
+            'reses': reses,
+            'NORMAL': c.NORMAL,
+            'AUTH_JP': c.AUTH_JP,
+        })
+        return te.render(':thread', context)
 
 class LinkHandler(webapp2.RequestHandler):
     @deco.default()
@@ -459,6 +456,9 @@ class LoginHandler(webapp2.RequestHandler):
                 raise ex.RedirectAgreement()
             else:
                 raise ex.RedirectContinue()
+        
+        board_myuser = m.MyUser.get_by_id(user.user_id(), namespace = c.NAMESPACE_BOARD)
+        
         myuser_id = m.Counter.incr('MyUser')
         now = board.now()
         myuser = m.MyUser(
@@ -467,12 +467,15 @@ class LoginHandler(webapp2.RequestHandler):
             myuser_id = myuser_id,
             ban_count = 0,
 
-            status = c.READER,
+            status = board_myuser.status if board_myuser else c.READER,
             updated = now,
             since = now,
             )
         myuser.put()
-        raise ex.RedirectAgreement()
+        if myuser.status == c.READER:
+            raise ex.RedirectAgreement()
+        else:
+            raise ex.RedirectContinue()
 
 class AgreementHandler(webapp2.RequestHandler):
     @deco.default()
@@ -624,6 +627,11 @@ class EditThreadHandler(webapp2.RequestHandler):
 class UpdateThreadHandler(webapp2.RequestHandler):
     @deco.default()
     @deco.board()
+    def get(self, context, thread_id):
+        raise ex.PostMethodRequired('スレッド編集画面に戻る', '/admin/%d/' % int(thread_id))
+
+    @deco.default()
+    @deco.board()
     @deco.myuser(c.EDITOR)
     def post(self, context, thread_id):
         thread_id = int(thread_id)
@@ -648,6 +656,11 @@ class UpdateThreadHandler(webapp2.RequestHandler):
         raise ex.Redirect('/admin/%d/' % thread_id)
 
 class UpdateResesHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    def get(self, context, thread_id):
+        raise ex.PostMethodRequired('スレッド編集画面に戻る', '/admin/%d/' % int(thread_id))
+    
     @deco.default()
     @deco.board()
     @deco.myuser(c.EDITOR)
@@ -677,6 +690,52 @@ class UpdateResesHandler(webapp2.RequestHandler):
         raise ex.Redirect('/admin/%d/' % thread_id)
 
 
+class ConfigHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    @deco.myuser(c.SUB_ADMIN)
+    def get(self, context):
+        board = context['board']
+        
+        context.update({
+            'page_title': '掲示板の設定',
+        })
+        return te.render(':admin/config', context)
+        
+class UpdateConfigHandler(webapp2.RequestHandler):
+    @deco.default()
+    @deco.board()
+    def get(self, context):
+        raise ex.PostMethodRequired('掲示板の設定画面に戻る', '/admin/config/')
+    
+    @deco.default()
+    @deco.board()
+    @deco.myuser(c.SUB_ADMIN)
+    def post(self, context):
+        board = context['board']
+        
+        title = self.request.get('title')
+        if not title or \
+           len(title) > conf.MAX_TITLE:
+            raise ex.InvalidBoardTitle()
+        
+        description = self.request.get('description')
+        if not description or \
+           len(description) > conf.MAX_DESCRIPTION:
+            raise ex.InvalidDescription()
+        
+        board.notice = m.Board.validate_board_content(self.request.get('notice'))
+        board.local_rule = m.Board.validate_board_content(self.request.get('local_rule'))
+        board.rights = m.Board.validate_board_content(self.request.get('rights'))
+        
+        board.title = title
+        board.description = description
+        
+        board.put()
+        board.flush()
+        raise ex.Redirect('/')
+
+
 app = webapp2.WSGIApplication(
     [
         ('/', TopPageHandler),
@@ -702,6 +761,8 @@ app = webapp2.WSGIApplication(
             webapp2.Route('/admin/<:\d+>/', EditThreadHandler),
             webapp2.Route('/admin/_edit/thread/<:\d+>/', UpdateThreadHandler),
             webapp2.Route('/admin/_edit/<:\d+>/', UpdateResesHandler),
+            webapp2.Route('/admin/config/', ConfigHandler),
+            webapp2.Route('/admin/_update/config/', UpdateConfigHandler),
         ]),
         routes.PathPrefixRoute('/a/<:[0-9a-z_-]{2,16}>', [
             webapp2.Route('/<:\d+>/', EditThreadHandler),

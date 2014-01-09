@@ -1,0 +1,28 @@
+<h1>${ page_title }</h1>
+<p>
+『<strong>${ board.title }</strong>』の設定を変更できます。
+</p>
+
+<form method="post" action="/#{ ns }/admin/_update/config/">
+  <p>
+    <label for="title">タイトル：</label><input name="title" type="text" id="title" value="${ board.title }" />
+  </p>
+  <p>
+    <label for="description">説明：</label><input name="description" type="text" id="description" value="${ board.description }" /><br>
+  </p>
+  <p>
+    <label for="notice">お知らせ：</label><br>
+    <textarea name="notice" id="notice" rows="4" cols="40">${ board.notice }</textarea>
+  </p>
+  <p>
+    <label for="local_rule">ローカルルール：</label><br>
+    <textarea name="local_rule" id="local_rule" rows="4" cols="40">${ board.local_rule }</textarea>
+  </p>
+  <p>
+    <label for="rights">権利関係の表記：</label><br>
+    <textarea name="rights" id="rights" rows="4" cols="40">${ board.rights }</textarea>
+  </p>
+  <p>
+    <input type="submit" value="送信する" />
+  </p>
+</form>

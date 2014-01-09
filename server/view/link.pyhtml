@@ -1,5 +1,10 @@
 <h1>${ page_title }</h1>
 <?py include(':promo/_adsense728x90') ?>
-<p>GBBS外部のページへジャンプしようとしています。</p>
+<p>
+GBBS外部のページへジャンプしようとしています。<br>
+よろしければ以下のリンクをクリックしてください。
+</p>
+<p>
 <a href="${ href }">${ href }</a>
+</p>
 <?py include(':promo/_adsense728x90') ?>
