@@ -100,8 +100,10 @@ def myuser(required_auth = c.DELETED):
             myuser = memcache.get(user.user_id())
             if not myuser:
                 myuser = m.MyUser.get_by_id(user.user_id())
-                memcache.add(user.user_id(), myuser, conf.CACHED_MYUSER)
+            if not myuser:
+                myuser = m.MyUser.get_by_id(user.user_id(), namespace=c.NAMESPACE_BOARD)
             if not myuser or not myuser.readable(): raise ex.Redirect('/_login?continue=%s' % org.request.uri)
+            memcache.add(user.user_id(), myuser, conf.CACHED_MYUSER)
             context.update({
                 'user': myuser,
                 'logout_url': users.create_logout_url('/%s/' % context['ns']),
