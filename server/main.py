@@ -456,9 +456,6 @@ class LoginHandler(webapp2.RequestHandler):
                 raise ex.RedirectAgreement()
             else:
                 raise ex.RedirectContinue()
-        
-        board_myuser = m.MyUser.get_by_id(user.user_id(), namespace = c.NAMESPACE_BOARD)
-        
         myuser_id = m.Counter.incr('MyUser')
         now = board.now()
         myuser = m.MyUser(
@@ -467,15 +464,12 @@ class LoginHandler(webapp2.RequestHandler):
             myuser_id = myuser_id,
             ban_count = 0,
 
-            status = board_myuser.status if board_myuser else c.READER,
+            status = c.READER,
             updated = now,
             since = now,
             )
         myuser.put()
-        if myuser.status == c.READER:
-            raise ex.RedirectAgreement()
-        else:
-            raise ex.RedirectContinue()
+        raise ex.RedirectAgreement()
 
 class AgreementHandler(webapp2.RequestHandler):
     @deco.default()
