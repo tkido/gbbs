@@ -133,7 +133,7 @@ class InitializeHandler(webapp2.RequestHandler):
         myuser = m.MyUser(
             id = user.user_id(),
             user = user,
-            myuser_id = 1,
+            myuser_id = -1,
             ban_count = 0,
             
             status = c.SYSTEM_ADMIN,
