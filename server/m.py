@@ -44,7 +44,7 @@ class Board(ndb.Model):
     title              = ndb.StringProperty  ('t',  required=True, indexed=False)
     description        = ndb.StringProperty  ('d',                 indexed=False)
     keywords           = ndb.StringProperty  ('k',                 indexed=False)
-    local_rule         = ndb.TextProperty    ('l',                indexed=False)
+    local_rule         = ndb.TextProperty    ('l',                 indexed=False)
     
     hash_cycle         = ndb.IntegerProperty ('h',  required=True, indexed=False)  #0:ever(no change) 1:year 2:month 3:day
     salt               = ndb.StringProperty  ('sa', required=True, indexed=False)
