@@ -450,7 +450,9 @@ class LoginHandler(webapp2.RequestHandler):
         board = context['board']
         user = users.get_current_user()
         if not user: raise ex.RedirectLogin()
-        myuser = m.MyUser.get_by_id(user.user_id())
+        myuser = m.MyUser.get_by_id(user.user_id(), namespace=c.NAMESPACE_BOARD)
+        if not myuser: 
+            myuser = m.MyUser.get_by_id(user.user_id())
         if myuser:
             if myuser.status == c.READER:
                 raise ex.RedirectAgreement()
