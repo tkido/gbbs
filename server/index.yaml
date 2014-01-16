@@ -15,9 +15,3 @@ indexes:
   - name: s
   - name: u
     direction: desc
-
-- kind: Thread
-  properties:
-  - name: status
-  - name: updated
-    direction: desc
